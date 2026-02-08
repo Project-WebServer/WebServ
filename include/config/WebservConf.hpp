@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/06 12:22:39 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/08 17:21:08 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,14 @@
 class WebservConf
 {
 	private:
-		std::vector<std::shared_ptr<ServersConf>> servers;
+		std::vector<ServerConf> servers;
 
 		public:
-			WebservConf();
-			~WebservConf();
+			WebservConf(){};
+			~WebservConf(){};
 			
-			std::shared_ptr<ServersConf> findServer(std::string& host, int port);
-			//setters
+			std::shared_ptr<ServerConf> findServer(std::string& host, int port);
+			void	pushServer(ServerConf serv);
 };
  
 
