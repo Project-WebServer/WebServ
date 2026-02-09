@@ -2,6 +2,7 @@
 #define LOCATION_HPP
 
 #include "conf_parse.hpp"
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <set>

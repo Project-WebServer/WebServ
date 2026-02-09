@@ -1,6 +1,6 @@
 // #include "../../include/config/WebservConf.hpp"
 #include "../../include/config/conf_parse.hpp"
-#include "conf_parse.hpp"
+
 
 std::string	trim(const std::string& s)
 {
@@ -16,20 +16,32 @@ std::string	trim(const std::string& s)
 	return s.substr(start, last - start + 1);
 }
 
+bool	isDigitOnly(std::string &s)
+{
+	if (!s.empty() && std::all_of(s.begin(), s.end(), ::isdigit))
+		return true;
+	return false;
+}
+
+// bool	isAlphaNum(std::string& s)
+// {
+// 	if (!s.empty() && std::all_of(s.begin(), s.end(),[](unsigned char c) {return ::isalnum(c);}))
+// 		return true;
+// 	return false;
+// }
+
 error_conf isDirectiveValid(TokenLine& tokenLine)
 {
 	std::vector<std::string> &v = tokenLine.second;
 
-	if (v.size() < 2)
+	if (v.size() < 1)
 		return {false, "Error: Invalid directive near " + ConfToken::catTokens(tokenLine)};
-	if (v[0] != "=")
-		return {false, "Error: missing '=' token near " + ConfToken::catTokens(tokenLine)};
-
+	if (v[0] == "=")
+		v.erase(v.begin());
 	std::string &last = v.back();
 	if (last.empty() || last.back() != ';')
 		return {false, "Error: missing ';' token near " + ConfToken::catTokens(tokenLine)};
 	last.pop_back();
-	v.erase(v.begin());
 	return {true, 0};
 } 
 

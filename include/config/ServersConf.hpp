@@ -12,10 +12,10 @@
 class ServerConf
 {
 	private:
-		std::string							server_name;
-		std::map<std::string, std::string>	erro_pages;
-		std::pair<std::string,int>	listen;
+		std::pair<std::string,int>			listen;
+		std::vector<std::string>			server_name;
 		size_t								client_max_body_size;
+		std::map<std::string, std::string>	erro_pages;
 		std::map<std::string, Location> 	locations;
 
 
@@ -26,11 +26,11 @@ class ServerConf
 			const std::string& get_serverName();
 			const std::string& get_errorPage(std::string error_code);
 			
-			void setListen(TokenLine &v);
-			void setClientSize(TokenLine &v);
-			void setServName(TokenLine &v);
-			void setErrorPage(TokenLine &v);
-			void setLocation(TokenLine& tokenLine);
+			void setListen(TokenLine &tokenLine);
+			void setClientSize(TokenLine &tokenLine);
+			void setServName(TokenLine &tokenLine);
+			void setErrorPage(TokenLine &tokenLine);
+			void setLocation(TokenLine &tokenLine);
 			
 };
 
