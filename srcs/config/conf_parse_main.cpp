@@ -7,47 +7,49 @@
 
 //TokenLine getNextToken();
 
-ServerConf setServerConf(ConfToken& confFile, TokenLine& tokenLine)
+error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tokenLine)
 {
 	if (tokenLine.second.size() != 1 || tokenLine.second[0] != "{")
-		throw std::runtime_error("Erro: Invalid syntax in configuration file ");
+		return {false, "Erro: Invalid syntax in configuration file " + confFile.catTokens(tokenLine)};
 
-	ServerConf server;
 	TokenLine  ServTokenLine;
-
 	while (true)
 	{
 		ServTokenLine = confFile.getNextToken();
 		
 		if (ServTokenLine.first == tokenType::ENDOF)
-			//create an error classe or struc
+			return {false, "Erro: Missing '}' close directive block (server)"};
 		if (ServTokenLine.first == tokenType::BLOCK_CLOSE)
 			break;
-		switch (ServTokenLine.first)
+		try
 		{
-		case tokenType::HOST:
-			server.setHost(ServTokenLine.second);
-		case tokenType::PORT:
-			server.setPort(ServTokenLine.second);
-		case tokenType::MAX_CLIENT_SIZE:
-			server.setClientSize(ServTokenLine.second);
-		case tokenType::SERVER_NAME:
-			server.setServName(ServTokenLine.second);
-		case tokenType::ERROR_PAGE:
-			server.setErrorPage(ServTokenLine.second);
-		case tokenType::LOCATION:
-			server.setLocation(ServTokenLine);
-		
-			
+			switch (ServTokenLine.first)
+			{
+			case tokenType::LISTEN:
+				server.setListen(ServTokenLine);
+			case tokenType::MAX_CLIENT_SIZE:
+				server.setClientSize(ServTokenLine);
+			case tokenType::SERVER_NAME:
+				server.setServName(ServTokenLine);
+			case tokenType::ERROR_PAGE:
+				server.setErrorPage(ServTokenLine);
+			case tokenType::LOCATION:
+				server.setLocation(ServTokenLine);
+			//unkhown case
+			}
 		}
+		catch (std::exception &e)
+		{
+			return {false, e.what()};
+		}
+			
 	}
-	
-	
+	return {true, 0};
 }
+	
 
-WebservConf setWebservConf(std::string conf_file) //return an erro than Webserv
+error_conf setWebservConf(WebservConf &webserv, std::string conf_file) //return an erro than Webserv
 {
-	WebservConf webserv;
 	ConfToken	confFile;
 
 	try
@@ -56,8 +58,7 @@ WebservConf setWebservConf(std::string conf_file) //return an erro than Webserv
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
-		exit(1);
+		return {false, e.what()};
 	}
 
 	while (true)
@@ -67,14 +68,13 @@ WebservConf setWebservConf(std::string conf_file) //return an erro than Webserv
 			break;
 		if (tokenLine.first == tokenType::SERVER)
 		{
-			try
-			{
-				webserv.pushServer(setServerConf(confFile, tokenLine));
-			}
-			catch (std::runtime_error &e)
-			{
-				std::cout << e.what() + confFile.catTokens(tokenLine);
-			}
+			ServerConf server;
+			error_conf status;
+
+			status = setServerConf(server, confFile, tokenLine);
+			if (!status.success)
+				return status;
+		
 		}
 		else
 		{
@@ -83,15 +83,6 @@ WebservConf setWebservConf(std::string conf_file) //return an erro than Webserv
 		}
 
 	}
-
-
-	
-	
+	return {true, 0};
 }
 
-
-
-int main(int argc, char** argv)
-{
-
-}
