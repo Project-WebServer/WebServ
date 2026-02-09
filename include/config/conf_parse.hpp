@@ -7,6 +7,8 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <algorithm>
+#include <cctype>
 
 enum struct tokenType
 {
@@ -54,6 +56,8 @@ class ConfToken
 
 std::string	trim(const std::string& s);
 error_conf	isHostValid(std::string &s);
-error_conf isDirectiveValid(TokenLine& tokenLine);
+error_conf	isDirectiveValid(TokenLine& tokenLine);
+bool		isDigitOnly(std::string &s);
+// bool		isAlphaNum(std::string& s);
 
 #endif
