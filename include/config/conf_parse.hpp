@@ -14,10 +14,9 @@ enum struct tokenType
 	BLOCK_CLOSE,
 	LOCATION,
 	ERROR_PAGE,
-	HOST,
-	PORT,
 	MAX_CLIENT_SIZE,
 	ROOT,
+	LISTEN,
 	ALLOWED_METHODS,
 	INDEX,
 	AUTO_INDEX,
@@ -26,6 +25,13 @@ enum struct tokenType
 	UNKNOWN,
 	ENDOF
 };
+
+struct error_conf
+{
+	bool		success;
+	std::string error_msg;
+};
+
 
 using TokenLine = typename std::pair<tokenType, std::vector<std::string>>;
 
@@ -41,11 +47,13 @@ class ConfToken
 
 		void getFile(std::string fileName);
 		TokenLine getNextToken(); //const
-		std::string catTokens(TokenLine& tokenLine); //const
-		std::string _convertTokenType(tokenType type); //const
+
+		static std::string _convertTokenType(tokenType type); //const
+		static std::string catTokens(TokenLine& tokenLine); //const
 };
 
 std::string	trim(const std::string& s);
-bool	isHostValid(std::vector<std::string> &v);
+error_conf	isHostValid(std::string &s);
+error_conf isDirectiveValid(TokenLine& tokenLine);
 
 #endif

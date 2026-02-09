@@ -22,8 +22,7 @@ static tokenType _getTokenType(std::string token)
 	if (token == "}") return tokenType::BLOCK_CLOSE;
 	if (token == "location") return tokenType::LOCATION;
 	if (token == "error_page") return tokenType::ERROR_PAGE;
-	if (token == "host") return tokenType::HOST;
-	if (token == "listen") return tokenType::PORT;
+	if (token == "listen") return tokenType::LISTEN;
 	if (token == "client_max_body_size") return tokenType::MAX_CLIENT_SIZE;
 	if (token == "root") return tokenType::ROOT;
 	if (token == "allowed_methods") return tokenType::ALLOWED_METHODS;
@@ -43,8 +42,7 @@ std::string ConfToken::_convertTokenType(tokenType type)
         case tokenType::BLOCK_CLOSE:     return "}";
         case tokenType::LOCATION:        return "location";
         case tokenType::ERROR_PAGE:      return "error_page";
-        case tokenType::HOST:            return "host";
-        case tokenType::PORT:            return "listen";
+        case tokenType::LISTEN:            return "listen";
         case tokenType::MAX_CLIENT_SIZE: return "client_max_body_size";
         case tokenType::ROOT:            return "root";
         case tokenType::ALLOWED_METHODS: return "allowed_methods";
@@ -53,11 +51,12 @@ std::string ConfToken::_convertTokenType(tokenType type)
         case tokenType::SERVER_NAME:     return "server_name";
         case tokenType::UNKNOWN:         return "unknown";
     }
+	return "Undefined";
 }
 
 std::string ConfToken::catTokens(TokenLine& tokenLine)
 {
-	std::string s(_convertTokenType(tokenLine.first) + " ");
+	std::string s(ConfToken::_convertTokenType(tokenLine.first) + " ");
 	std::vector<std::string> &v = tokenLine.second;
 	for(size_t i = 0; i < v.size(); ++i)
 	{
@@ -111,4 +110,5 @@ TokenLine ConfToken::getNextToken()
 		else
 			break;
 	}
+	return tokens;
 }

@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/08 17:21:08 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/09 10:08:47 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,5 +31,7 @@ class WebservConf
 			void	pushServer(ServerConf serv);
 };
  
+//TODO
+// implement a matching location match(std::string) -> return location name + string
 
 #endif

@@ -1,6 +1,7 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 
+#include "conf_parse.hpp"
 #include <iostream>
 #include <vector>
 #include <set>
