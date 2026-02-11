@@ -28,6 +28,14 @@ enum struct tokenType
 	ENDOF
 };
 
+enum struct httpMethod
+{
+	GET,
+	POST,
+	DELETE,
+	UNKNOWN
+};
+
 struct error_conf
 {
 	bool		success;
@@ -54,10 +62,11 @@ class ConfToken
 		static std::string catTokens(TokenLine& tokenLine); //const
 };
 
-std::string	trim(const std::string& s);
-error_conf	isHostValid(std::string &s);
-error_conf	isDirectiveValid(TokenLine& tokenLine);
-bool		isDigitOnly(std::string &s);
-// bool		isAlphaNum(std::string& s);
+std::string			trim(const std::string& s);
+error_conf			isHostValid(std::string &s);
+error_conf			isDirectiveValid(TokenLine& tokenLine);
+bool				isDigitOnly(std::string &s);
+static httpMethod	getHttpMethod(std::string token);
+
 
 #endif

@@ -1,6 +1,6 @@
 #include "../../include/config/ServersConf.hpp"
 #include "../../include/config/conf_parse.hpp"
-#include "ServersConf.hpp"
+
 
 //set default value 
 //host = 0.0.0.0 
@@ -129,4 +129,42 @@ void ServerConf::setServName(TokenLine &tokenLine)
         
         this->server_name.push_back(name);
     }
+}
+
+//handle just error code(4xx; 5xx) e path /error_pages/xxx format 
+void ServerConf::setErrorPage(TokenLine &tokenLine)
+{
+	error_conf	status;
+
+	status = isDirectiveValid(tokenLine)
+	if (!status.success)
+		throw std::runtime_error(status.error_msg);
+	if (tokenLine.second.size() != 2)
+		throw std::runtime_error("Error: invalid token near " + ConfToken::catTokens(tmp));
+	
+	std::string	&error_code_str = tokenLine.second[0];
+	std::string	&error_path = tokenLine.second[1];
+	int	error_code;
+	try
+	{
+		size_t pos;
+		error_code = std::stoi(error_code_str, pos);
+		if (pos < error_code_str.size())
+			throw std::runtime_error("Error: invalid error code near token " + ConfToken::catTokens(tokenLine));
+	}
+	catch (std::exception &e)
+	{
+		throw std::runtime_error(e.what());
+	}
+
+	if (error_path.front() != '/')
+		throw std::runtime_error("Error: invalid error code path near token " + ConfToken::catTokens(tokenLine));
+	if (error_code < 400 || error_code > 599)
+		throw std::runtime_error("Error: invalid error code value near token " + ConfToken::catTokens(tokenLine));
+	this->erro_pages[error_code] = error_path;
+}
+
+void ServerConf::setLocation(TokenLine &tokenLine)
+{
+
 }
