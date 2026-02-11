@@ -1,0 +1,4 @@
+Use smart pointer to set server and location instead of copy =;
+
+// implement root in ServeConf class
+// matching path = root + path + uri

@@ -7,12 +7,6 @@
 #include <vector>
 #include <set>
 
-enum struct httpMethod
-{
-	GET,
-	POST,
-	DELETE
-};
 
 //store the servers 
 class Location
@@ -41,7 +35,12 @@ class Location
 			~Location();
 
 			//getters
-			//setters
+			void	setpath(TokenLine &tokenLine); //ok
+			void	root(TokenLine &tokenLine); //ok
+			void	allowed_methods(TokenLine &tokenLine); //ok
+			void	index_files(TokenLine &tokenLine); //
+			void	autoindex(TokenLine &tokenLine);
+
 };
  
 

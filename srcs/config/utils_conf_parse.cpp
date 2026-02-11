@@ -23,12 +23,7 @@ bool	isDigitOnly(std::string &s)
 	return false;
 }
 
-// bool	isAlphaNum(std::string& s)
-// {
-// 	if (!s.empty() && std::all_of(s.begin(), s.end(),[](unsigned char c) {return ::isalnum(c);}))
-// 		return true;
-// 	return false;
-// }
+
 
 error_conf isDirectiveValid(TokenLine& tokenLine)
 {
@@ -90,4 +85,13 @@ error_conf	isHostValid(std::string &s)
 	if (Octcount != 4)
 		return {false, 0};
 	return {true, 0};
+}
+
+static httpMethod getHttpMethod(std::string token)
+{
+	if (token == "GET") return httpMethod::GET;
+	if (token == "DELETE") return httpMethod::DELETE;
+	if (token == "POST") return httpMethod::POST;
+	
+	return httpMethod::UNKNOWN;
 }
