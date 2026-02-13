@@ -1,0 +1,25 @@
+Day 1. Building Request Parser
+Aim - raw bytes => object
+
+POST /upload/image.png HTTP/1.1\r\n       <-- Request Line
+Host: localhost:8080\r\n                  <-- Headers
+User-Agent: curl/7.64.1\r\n
+Content-Length: 15\r\n
+\r\n                                      <-- The "Double CRLF" (End of headers)
+name=john&age=25                          <-- Body (Optional)
+
+But, might receive this info in chunks so need a buffer. => in_buff.
+
+Reading the in_buff?
+Idea 1. read(): reads one byte at a time and check if the end of buff is "\r\n\r\n"
+Idea 2. read into larger chunks checking if "\r\n\r\n" using strstr() type
+
+
+
+
+
+
+
+
+https://codereview.stackexchange.com/questions/205704/very-basic-c-http-parser
+https://docs.python.org/3/library/html.parser.html
