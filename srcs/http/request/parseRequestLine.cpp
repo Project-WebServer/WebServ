@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/14 17:59:15 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/14 19:12:59 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,12 @@ ProtocolV HTTPrequests::findVersion(std::string version)
 void HTTPrequests::parseRequest(std::string request)
 {
 	size_t space1 = request.find(" ");
-	size_t space2 = request.find(" ", space1);
+	size_t space2 = request.find(" ", space1 + 1);
 	
 	if (space1 == std::string::npos || space2 == std::string::npos)
 		return ; //error code for wrong
 		
-	std::string first = request.substr(0, space1);
+	std::string first = request.substr(0, space1 + 1);
 	_methods = findMethods(first);
 	if (_methods == METHODS::ERR)
 		return ;//error code for not found issue

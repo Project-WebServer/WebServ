@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/14 18:04:29 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/14 19:10:46 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,10 @@ class Headers
 	private:
 		std::map<std::string, std::string> _headerMap; // or maybe call it a map
 	public:
-		void parseMap(std::string rawHeaderString);
+		void		parseMap(std::string rawHeaderString);
+		std::string	getKeys();
+		std::string	getValue(std::string key);
+		void print();
 };
 
 enum class COMPONENTS
@@ -77,8 +80,11 @@ class HTTPrequests
 		Headers		parseHeader(std::string header); // calls the Header class's function and validates?
 		std::string	parseBody(std::string body);
 		
-		HTTPrequests::METHODS findMethods(std::string first);
-		ProtocolV HTTPrequests::findVersion(std::string version);
+		METHODS findMethods(std::string first);
+		ProtocolV findVersion(std::string version);
+
+		//testing
+		void printRequest();
 		
 	private:
 		std::string _buffer;
@@ -87,7 +93,7 @@ class HTTPrequests
 		METHODS		_methods;
 		std::string	_path;
 		ProtocolV	_protocolv;
-		Headers		_headers;
+		Headers		_header;
 		std::string	_body;
 
 		// Request line parser

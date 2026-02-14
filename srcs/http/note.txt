@@ -1,4 +1,4 @@
-Day 1. Building Request Parser
+1. Building Request Parser
 Aim - raw bytes => object
 
 POST /upload/image.png HTTP/1.1\r\n       <-- Request Line
@@ -14,12 +14,21 @@ Reading the in_buff?
 Idea 1. read(): reads one byte at a time and check if the end of buff is "\r\n\r\n"
 Idea 2. read into larger chunks checking if "\r\n\r\n" using strstr() type
 
-
-
-
-
-
-
-
 https://codereview.stackexchange.com/questions/205704/very-basic-c-http-parser
 https://docs.python.org/3/library/html.parser.html
+
+2. Request line
+verb - what do they want?
+target - which file?
+protocol - how to talk back?
+
+server looks at the path and checks the config
+
+Get -> opens the file on the disk & reads the content into memory
+Delete -> removes the file from the disk
+Post -> saves data / runs a calculation
+
+=> generates a status code and content
+but this response has to be wrapped in the http response envelope
+: create a string that looks like this: HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n[The File Data].
+then push this back to the browser thru the socket
