@@ -1,53 +1,90 @@
-#include "socket.hpp"
+#include "include/io/socket.hpp"
 //socket() → bind() → listen() → accept() → poll()
 
+Server::Server() : _listen_fd(-1)
+{
+	std::memset(&_addr, 0, sizeof(_addr));
+	std::memset(&_pfd, 0, sizeof(_pfd));
+}
 
-int main (void)
+Server::~Server()
+{
+	if(_listen_fd >= 0)
+		close(_listen_fd);
+}
+
+int Server::start()
 {
 	int yes = 1;
-	int sfd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
-	if(sfd < 0)
+	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
+	if(_listen_fd < 0)
 	{
 		std::cerr << "socket() failed: " << std::strerror(errno) << std::endl;//write handle error func
 		return (1);
 	}
-	if(setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
+	if(setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
 	{
 		std::cerr << "setsockopt(SO_REUSEADDR) failed: " << std::strerror(errno) << std::endl;
-		close(sfd);
 		return (1);
 	}
 
-	sockaddr_in addr;//register socket by its address (IP + port)
-	std::memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(8080);
+	_addr.sin_family = AF_INET;
+	_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	_addr.sin_port = htons(8080);
 
 	//connect socket to IP:PORT
 	//int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 
-	if(bind(sfd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0)
+	if(bind(_listen_fd, reinterpret_cast<sockaddr*>(&_addr), sizeof(_addr)) < 0)
 	{
 		std::cerr << "bind() failed: " << std::strerror(errno) << std::endl;
-		close(sfd);
 		return (1);
 	}
 	//this sfd can listen up to 128 client and put them in a queue before accept() and said that its a server not client
-	if(listen(sfd, 128) < 0)
+	if(listen(_listen_fd, 128) < 0)
 	{
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
-		close(sfd);
 		return (1);
 	}
 
-	std::cout << "socket fd = " << sfd << std::endl;
-	std::cout << "listening to fd = " << sfd << std::endl;
+	_pfd.fd = _listen_fd;
+	_pfd.events = POLLIN;
+	_pfd.revents = 0;// poll will fill this in
 
-	while (true) pause();
-
-	close(sfd);
+	std::cout << "socket fd = " << _listen_fd << std::endl;
+	std::cout << "listening to fd = " << _listen_fd << std::endl;
 	return (0);
+}
+
+void Server::run ()
+{
+	int ready;
+
+	while (true)
+	{
+		ready = poll(&_pfd, 1, -1);//timeout -1 - wait forewer(later 1000 in mcsec)
+		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
+		{
+			if(errno == EINTR)
+				continue;// for signa interaption - keep waiting, not break the loop;
+			std::cerr << "poll() failed" << std::strerror(errno) << std::endl;
+			return;
+		}
+		if (_pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
+			return;
+		if (_pfd.revents & POLLIN)// i POLLIN included to the list of event that alredy happened
+		{
+			std::cout << "ready to accept" << std::endl;
+			int cfd = accept(_listen_fd, NULL, NULL);
+			if(cfd < 0)
+			{
+				std::cerr << "accept() failed" << std::strerror(errno) << std::endl;
+				return;
+			}
+			std::cout << "accepted cient fd"<< cfd << std::endl;
+			close(cfd);
+		}
+	}
 }
 
 
