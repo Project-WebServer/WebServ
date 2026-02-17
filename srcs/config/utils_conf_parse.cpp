@@ -87,7 +87,7 @@ error_conf	isHostValid(std::string &s)
 	return {true, 0};
 }
 
-static httpMethod getHttpMethod(std::string token)
+httpMethod getHttpMethod(std::string token)
 {
 	if (token == "GET") return httpMethod::GET;
 	if (token == "DELETE") return httpMethod::DELETE;

@@ -22,7 +22,8 @@ class ServerConf
 
 		public:
 			ServerConf();
-			~ServerConf();
+			ServerConf& operator=(const ServerConf& other);
+			~ServerConf(){};
 
 			const std::string& get_serverName();
 			const std::string& get_errorPage(std::string error_code);
@@ -31,7 +32,15 @@ class ServerConf
 			void setClientSize(TokenLine &tokenLine); //ok
 			void setServName(TokenLine &tokenLine); //ok
 			void setErrorPage(TokenLine &tokenLine); //ok
-			void setLocation(TokenLine &tokenLine);
+			void setLocation(TokenLine &tokenLine, ConfToken& confile); //ok 
+
+			const std::pair<std::string,int>& getListen() const; //
+			size_t getClientSize() const; //
+			const std::vector<std::string>& getServName() const; //
+			const std::map<int, std::string>& getErrorPage(); //
+			const std::map<std::string, Location>& getLocation() const; //
+
+			void print() const;
 			
 };
 

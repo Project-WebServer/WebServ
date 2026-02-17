@@ -66,7 +66,7 @@ std::string			trim(const std::string& s);
 error_conf			isHostValid(std::string &s);
 error_conf			isDirectiveValid(TokenLine& tokenLine);
 bool				isDigitOnly(std::string &s);
-static httpMethod	getHttpMethod(std::string token);
+httpMethod	getHttpMethod(std::string token);
 
 
 #endif

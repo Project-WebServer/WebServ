@@ -1,6 +1,7 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 
+
 #include "conf_parse.hpp"
 #include <algorithm>
 #include <iostream>
@@ -18,7 +19,7 @@ class Location
 		std::vector<std::string>	index_files;
 		bool						autoindex;
 
-		//redirections
+		//redirections 
 		bool		has_redirection;
 		std::string	redir_code;
 		std::string	redir_url;
@@ -32,15 +33,24 @@ class Location
 
 		public:
 			Location();
-			~Location();
+			//set copy constructor
+			Location& operator=(const Location& other);
+			~Location(){};
 
 			//getters
-			void	setpath(TokenLine &tokenLine); //ok
-			void	root(TokenLine &tokenLine); //ok
-			void	allowed_methods(TokenLine &tokenLine); //ok
-			void	index_files(TokenLine &tokenLine); //
-			void	autoindex(TokenLine &tokenLine);
+			void	setPath(TokenLine &tokenLine); //ok
+			void	setRoot(TokenLine &tokenLine); //ok
+			void	setAllowed_methods(TokenLine &tokenLine); //ok
+			void	setIndex_files(TokenLine &tokenLine); // ok
+			void	setAutoindex(TokenLine &tokenLine); //ok
 
+			std::string						getPath() const; 
+			std::string						getRoot() const; 
+			std::vector<std::string> 		getAllowed_methods() const; // for debug 
+			const std::vector<std::string>&	getIndex_files() const; // 
+			bool							getAutoindex() const; //
+
+			void print() const;
 };
  
 
