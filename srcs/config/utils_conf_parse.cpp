@@ -33,11 +33,13 @@ error_conf isDirectiveValid(TokenLine& tokenLine)
 		return {false, "Error: Invalid directive near " + ConfToken::catTokens(tokenLine)};
 	if (v[0] == "=")
 		v.erase(v.begin());
+	if (tokenLine.first == tokenType::ERROR_PAGE && v.size() > 1 && v[1] == "=")
+    	v.erase(v.begin() + 1);
 	std::string &last = v.back();
 	if (last.empty() || last.back() != ';')
 		return {false, "Error: missing ';' token near " + ConfToken::catTokens(tokenLine)};
 	last.pop_back();
-	return {true, 0};
+	return {true, "Success"};
 } 
 
 
@@ -51,7 +53,7 @@ error_conf	isHostValid(std::string &s)
 	if (ip == "localhost")
 	{
 		ip = "127.0.0.1";
-        return {true, 0};
+        return {true, "Success"};
 	}
 	if (ip.length() < 7 || ip.length() > 15)
 		return {false, 0}; 
@@ -84,7 +86,7 @@ error_conf	isHostValid(std::string &s)
 	}
 	if (Octcount != 4)
 		return {false, 0};
-	return {true, 0};
+	return {true, "Success"};
 }
 
 httpMethod getHttpMethod(std::string token)

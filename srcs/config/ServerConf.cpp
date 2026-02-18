@@ -1,4 +1,4 @@
-#include "../../include/config/ServersConf.hpp"
+#include "../../include/config/ServerConf.hpp"
 #include "../../include/config/conf_parse.hpp"
 
 
@@ -9,11 +9,12 @@
 //server_name = ""
 //client_max_body_size = 1m
 ServerConf::ServerConf(): listen("0.0.0.0", 80),
-	client_max_body_size(1024*1024)
+	client_max_body_size(1024*1024),
+	root("www/html")
 {
 	server_name.push_back("");
-	//set location 
-	//set erro_pages location
+
+	//set default erro_pages location 
 }
 
 ServerConf &ServerConf::operator=(const ServerConf &other)
@@ -67,6 +68,22 @@ void ServerConf::setListen(TokenLine &tokenLine)
 		throw std::runtime_error("Error:: Invalid token near " + ConfToken::catTokens(tmp));
 	}
 	return;
+}
+
+void	ServerConf::setRoot(TokenLine &tokenLine)
+{
+    error_conf status;
+
+	status = isDirectiveValid(tokenLine);
+	if (!status.success)
+		throw std::runtime_error(status.error_msg);
+    std::vector<std::string> &token = tokenLine.second;
+    if (token.size() != 1)
+        throw std::runtime_error("Error: invalid server root directive near token " + ConfToken::catTokens(tokenLine));
+    std::string &root = token[0];
+    if (root.front() != '/')
+        throw std::runtime_error("Error: invalid server root path near token " + ConfToken::catTokens(tokenLine));
+    this->root = root;
 }
 
 void ServerConf::setClientSize(TokenLine &tokenLine)
@@ -213,6 +230,8 @@ void ServerConf::setLocation(TokenLine &tokenLine, ConfToken& confile)
 			case tokenType::AUTO_INDEX:
 				loc.setAutoindex(loc_TokenLine);
 				break;
+			default:
+				continue; //handle it better 
 			//unkhown case and more cases
 			}
 		}
@@ -229,6 +248,11 @@ const std::pair<std::string, int>& ServerConf::getListen() const
 	return listen;
 }
 
+std::string ServerConf::getRoot() const
+{
+	return root;
+}
+
 size_t ServerConf::getClientSize() const
 {
 	return client_max_body_size;
@@ -239,7 +263,7 @@ const std::vector<std::string> &ServerConf::getServName() const
 	return server_name;
 }
 
-const std::map<int, std::string> &ServerConf::getErrorPage()
+const std::map<int, std::string> &ServerConf::getErrorPage() const
 {
 	return erro_pages;
 }
@@ -280,6 +304,7 @@ void ServerConf::print() const
     }
 
     // locations
+	std::cout << "\n" << std::endl;
     for (std::map<std::string, Location>::const_iterator it = this->locations.begin();
          it != this->locations.end(); ++it)
     {

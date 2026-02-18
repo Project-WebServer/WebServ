@@ -50,6 +50,7 @@ std::string ConfToken::_convertTokenType(tokenType type)
         case tokenType::AUTO_INDEX:      return "autoindex";
         case tokenType::SERVER_NAME:     return "server_name";
         case tokenType::UNKNOWN:         return "unknown";
+		default: 						break;	
     }
 	return "Undefined";
 }

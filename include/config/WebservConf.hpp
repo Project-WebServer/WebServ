@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/17 11:58:39 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/18 09:54:58 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define WEBSERV_CONF_HPP
 
 
-#include "ServersConf.hpp"
+#include "ServerConf.hpp"
 
 
 //store the servers 

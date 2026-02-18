@@ -31,6 +31,11 @@ Location &Location::operator=(const Location &other)
 void	Location::setPath(TokenLine &tokenLine)
 {
     std::vector<std::string> &location = tokenLine.second;
+	if (location.size() == 1 && location[0].size() > 1 && location[0].front() == '/' && location[0].back() == '{')
+	{
+		location[0] = "/";
+		location.push_back("{");
+	}
     if (location.size() != 2)
         throw std::runtime_error("Error: invalid location block near token " + ConfToken::catTokens(tokenLine));
     if (location[1] != "{")
@@ -39,10 +44,13 @@ void	Location::setPath(TokenLine &tokenLine)
     std::string &path = location[0];
     if (path.front() != '/')
         throw std::runtime_error("Error: invalid location path near token " + ConfToken::catTokens(tokenLine));
+	
     this->path = path;
 }
 
 //where is the root in our webserver (where we gonna put our static files)
+//verify here if the path is valid with stat / access??
+// handle the path to ww in our directory 
 void	Location::setRoot(TokenLine &tokenLine)
 {
     error_conf status;
@@ -52,10 +60,10 @@ void	Location::setRoot(TokenLine &tokenLine)
 		throw std::runtime_error(status.error_msg);
     std::vector<std::string> &token = tokenLine.second;
     if (token.size() != 1)
-        throw std::runtime_error("Error: invalid root directive near token " + ConfToken::catTokens(tokenLine));
+        throw std::runtime_error("Error: invalid location root directive near token " + ConfToken::catTokens(tokenLine));
     std::string &root = token[0];
     if (root.front() != '/')
-        throw std::runtime_error("Error: invalid location path near token " + ConfToken::catTokens(tokenLine));
+        throw std::runtime_error("Error: invalid location root path near token " + ConfToken::catTokens(tokenLine));
     this->root = root;
 }
 

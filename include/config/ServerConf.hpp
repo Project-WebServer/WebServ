@@ -12,33 +12,34 @@
 class ServerConf
 {
 	private:
-		std::pair<std::string,int>			listen;
-		std::vector<std::string>			server_name;
 		size_t								client_max_body_size;
+		std::string 						root; // implement root 
+		std::vector<std::string>			server_name;
+		std::pair<std::string,int>			listen;
 		std::map<int, std::string>			erro_pages;
 		std::map<std::string, Location> 	locations;
-		// implement root 
+
+		
 
 
 		public:
 			ServerConf();
 			ServerConf& operator=(const ServerConf& other);
 			~ServerConf(){};
-
-			const std::string& get_serverName();
-			const std::string& get_errorPage(std::string error_code);
 			
-			void setListen(TokenLine &tokenLine); //ok
-			void setClientSize(TokenLine &tokenLine); //ok
-			void setServName(TokenLine &tokenLine); //ok
-			void setErrorPage(TokenLine &tokenLine); //ok
-			void setLocation(TokenLine &tokenLine, ConfToken& confile); //ok 
+			void setListen(TokenLine &tokenLine);
+			void setRoot(TokenLine &tokenLine);
+			void setClientSize(TokenLine &tokenLine);
+			void setServName(TokenLine &tokenLine);
+			void setErrorPage(TokenLine &tokenLine);
+			void setLocation(TokenLine &tokenLine, ConfToken& confile);
 
-			const std::pair<std::string,int>& getListen() const; //
-			size_t getClientSize() const; //
-			const std::vector<std::string>& getServName() const; //
-			const std::map<int, std::string>& getErrorPage(); //
-			const std::map<std::string, Location>& getLocation() const; //
+			std::string getRoot() const;
+			size_t getClientSize() const;
+			const std::pair<std::string,int>& getListen() const;
+			const std::vector<std::string>& getServName() const;
+			const std::map<int, std::string>& getErrorPage() const;
+			const std::map<std::string, Location>& getLocation() const;
 
 			void print() const;
 			

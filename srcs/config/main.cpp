@@ -22,6 +22,9 @@ static error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLi
 			case tokenType::LISTEN:
 				server.setListen(ServTokenLine);
 				break;
+			case tokenType::ROOT:
+				server.setRoot(ServTokenLine);
+				break;
 			case tokenType::MAX_CLIENT_SIZE:
 				server.setClientSize(ServTokenLine);
 				break;
@@ -34,7 +37,8 @@ static error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLi
 			case tokenType::LOCATION:
 				server.setLocation(ServTokenLine, confFile);
 				break;
-			//unkhown case
+			default:
+				continue; //handle it better 
 			}
 		}
 		catch (std::exception &e)
@@ -43,7 +47,7 @@ static error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLi
 		}
 			
 	}
-	return {true, 0};
+	return {true, "Success"};
 }
 	
 
@@ -72,14 +76,13 @@ static error_conf setWebservConf(WebservConf &webserv, ConfToken& confFile)
 		}
 
 	}
-	return {true, 0};
+	return {true, "Success"};
 }
 
 int main()
 {
 	ConfToken 	confFile;
 	WebservConf	Webserv;
-	std::cout << "test1\n";
 	try
 	{
 		confFile.getFile("exemple.conf");
@@ -89,11 +92,14 @@ int main()
 		std::cout << e.what() << std::endl;
 		return 1;
 	}
-	std::cout << "test2\n";
+
 	error_conf status = setWebservConf(Webserv, confFile);
-	std::cout << "test3\n";
+	if (!status.success)
+	{
+		std::cout << status.error_msg + "\n";
+		return 1;
+	}
 	Webserv.print();
-	std::cout << "test4\n";
 	
 	return 0;
 }

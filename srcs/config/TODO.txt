@@ -13,3 +13,19 @@ implement member of Location class
 		bool		upload_enable;
 		std::string upload_path;
 		size_t		client_max_body_size;
+
+ROOT Path (setRoot())
+	//where is the root in our webserver (where we gonna put our static files)
+	//verify here if the path is valid with stat / access??
+	// handle the path to ww in our directory 
+
+//set default erro_pages location 
+	ServerConf::ServerConf(): listen("0.0.0.0", 80),
+		client_max_body_size(1024*1024)
+	{
+		server_name.push_back("");
+		//set default erro_pages location 
+	}
+
+// definir # define DEFAULT_ROOT = "../../www" 
+	implement getServerRoot , creat function to match the root with server root. 
