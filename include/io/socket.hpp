@@ -11,6 +11,7 @@
 # include <netinet/in.h>
 # include <unistd.h>
 # include <poll.h>
+# include <fcntl.h>
 
 
 class Server

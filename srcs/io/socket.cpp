@@ -1,4 +1,4 @@
-#include "include/io/socket.hpp"
+#include "io/socket.hpp"
 //socket() → bind() → listen() → accept() → poll()
 
 Server::Server() : _listen_fd(-1)
@@ -46,7 +46,17 @@ int Server::start()
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
 		return (1);
 	}
-
+	int flags = fcntl(_listen_fd,F_GETFL, 0);
+	if(flags < 0)
+	{
+		std::cerr << "fcntl(F_GETFL) failed: " << std::strerror(errno) << std::endl;
+		return (1);
+	}
+	if (fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK) < 0)
+	{
+		std::cerr << "fcntl(F_SETFL) failed: " << std::strerror(errno) << std::endl;
+		return 1;
+	}
 	_pfd.fd = _listen_fd;
 	_pfd.events = POLLIN;
 	_pfd.revents = 0;// poll will fill this in
@@ -67,7 +77,7 @@ void Server::run ()
 		{
 			if(errno == EINTR)
 				continue;// for signa interaption - keep waiting, not break the loop;
-			std::cerr << "poll() failed" << std::strerror(errno) << std::endl;
+			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
 		}
 		if (_pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
@@ -75,14 +85,40 @@ void Server::run ()
 		if (_pfd.revents & POLLIN)// i POLLIN included to the list of event that alredy happened
 		{
 			std::cout << "ready to accept" << std::endl;
-			int cfd = accept(_listen_fd, NULL, NULL);
-			if(cfd < 0)
+			while(true)
 			{
-				std::cerr << "accept() failed" << std::strerror(errno) << std::endl;
+				int cfd = accept(_listen_fd, NULL, NULL);
+				if(cfd >= 0)
+				{
+					std::cout << "accepted cient fd"<< cfd << std::endl;
+					//response for testing!!!
+					const char resp[] =
+					"HTTP/1.1 200 OK\r\n"
+					"Content-Length: 5\r\n"
+					"Connection: close\r\n"
+					"\r\n"
+					"Hello\n";
+
+					send(cfd, resp, sizeof(resp) - 1, 0);//
+					close(cfd);
+					continue;
+				}
+				if(errno == EAGAIN || errno == EWOULDBLOCK)
+				{
+					std::cout << "no more pending connections" << std::endl;
+					break;
+				}
+				if(errno == EINTR)//repeat accept; was interupted y signal try ones more
+				{
+					continue;
+				}
+				if(errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
+				{
+					continue;
+				}
+				std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
 				return;
 			}
-			std::cout << "accepted cient fd"<< cfd << std::endl;
-			close(cfd);
 		}
 	}
 }
