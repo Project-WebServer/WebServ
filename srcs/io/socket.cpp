@@ -4,13 +4,80 @@
 Server::Server() : _listen_fd(-1)
 {
 	std::memset(&_addr, 0, sizeof(_addr));
-	std::memset(&_pfd, 0, sizeof(_pfd));
 }
 
 Server::~Server()
 {
 	if(_listen_fd >= 0)
 		close(_listen_fd);
+}
+
+void Server::_addListenFd()
+{
+	pollfd pfd;
+	pfd.fd = _listen_fd;
+	pfd.events = POLLIN;
+	pfd.revents = 0;// poll will fill this in
+	_pfds.push_back(pfd);
+}
+
+void Server::_acceptClients()
+{
+	while(true)
+	{
+		int cfd = accept(_listen_fd, NULL, NULL);
+		if(cfd >= 0)
+		{
+			int flags = fcntl(cfd, F_GETFL, 0);
+			if(flags < 0 || fcntl(cfd, F_SETFL, flags | O_NONBLOCK) < 0)
+			{
+				std::cerr << "fcntl() failed: " << std::strerror(errno) << std::endl;
+				close(cfd);
+				continue;
+			}
+			pollfd p;
+			p.fd = cfd;
+			p.events = POLLIN;
+			p.revents = 0;
+			_pfds.push_back(p);
+			_clients.insert(cfd);
+			std::cout << "accepted cient fd"<< cfd << std::endl;
+			// //response for testing!!!
+			// const char resp[] =
+			// "HTTP/1.1 200 OK\r\n"
+			// "Content-Length: 5\r\n"
+			// "Connection: close\r\n"
+			// "\r\n"
+			// "Hello\n"
+			// send(cfd, resp, sizeof(resp) - 1, 0);//
+			continue;
+		}
+		if(errno == EAGAIN || errno == EWOULDBLOCK)
+		{
+			std::cout << "no more pending connections" << std::endl;
+			break;
+		}
+		if(errno == EINTR)//repeat accept; was interupted y signal try ones more
+		{
+			continue;
+		}
+		if(errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
+		{
+			continue;
+		}
+		std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
+		
+		break;
+	}
+}
+
+void Server::_removeFd(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+
+	close(fd);
+	_clients.erase(fd);
+	_pfds.erase(_pfds.begin() + indx);
 }
 
 int Server::start()
@@ -34,7 +101,6 @@ int Server::start()
 
 	//connect socket to IP:PORT
 	//int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-
 	if(bind(_listen_fd, reinterpret_cast<sockaddr*>(&_addr), sizeof(_addr)) < 0)
 	{
 		std::cerr << "bind() failed: " << std::strerror(errno) << std::endl;
@@ -46,6 +112,7 @@ int Server::start()
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
 		return (1);
 	}
+	//to make listen socket non-blocking
 	int flags = fcntl(_listen_fd,F_GETFL, 0);
 	if(flags < 0)
 	{
@@ -57,10 +124,9 @@ int Server::start()
 		std::cerr << "fcntl(F_SETFL) failed: " << std::strerror(errno) << std::endl;
 		return 1;
 	}
-	_pfd.fd = _listen_fd;
-	_pfd.events = POLLIN;
-	_pfd.revents = 0;// poll will fill this in
-
+	_pfds.clear();
+	_clients.clear();
+	_addListenFd();
 	std::cout << "socket fd = " << _listen_fd << std::endl;
 	std::cout << "listening to fd = " << _listen_fd << std::endl;
 	return (0);
@@ -72,7 +138,7 @@ void Server::run ()
 
 	while (true)
 	{
-		ready = poll(&_pfd, 1, -1);//timeout -1 - wait forewer(later 1000 in mcsec)
+		ready = poll(_pfds.data(), _pfds.size(), -1);//timeout -1 - wait forewer(later 1000 in mcsec)
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
@@ -80,45 +146,20 @@ void Server::run ()
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
 		}
-		if (_pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
+		if (_pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			return;
-		if (_pfd.revents & POLLIN)// i POLLIN included to the list of event that alredy happened
+		if (_pfds[0].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
+			_acceptClients();
+		_pfds[0].revents = 0;//not nessesary. only for debug
+		for (size_t i = 1; i < _pfds.size(); )
 		{
-			std::cout << "ready to accept" << std::endl;
-			while(true)
+			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
-				int cfd = accept(_listen_fd, NULL, NULL);
-				if(cfd >= 0)
-				{
-					std::cout << "accepted cient fd"<< cfd << std::endl;
-					//response for testing!!!
-					const char resp[] =
-					"HTTP/1.1 200 OK\r\n"
-					"Content-Length: 5\r\n"
-					"Connection: close\r\n"
-					"\r\n"
-					"Hello\n";
-
-					send(cfd, resp, sizeof(resp) - 1, 0);//
-					close(cfd);
-					continue;
-				}
-				if(errno == EAGAIN || errno == EWOULDBLOCK)
-				{
-					std::cout << "no more pending connections" << std::endl;
-					break;
-				}
-				if(errno == EINTR)//repeat accept; was interupted y signal try ones more
-				{
-					continue;
-				}
-				if(errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
-				{
-					continue;
-				}
-				std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
-				return;
+				_removeFd(i);
+				continue;
 			}
+			_pfds[i].revents = 0;
+			i++;
 		}
 	}
 }
