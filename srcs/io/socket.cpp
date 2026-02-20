@@ -158,6 +158,21 @@ void Server::run ()
 				_removeFd(i);
 				continue;
 			}
+
+			if(_pfds[i].revents & POLLIN)
+			{
+				char buf[4096];
+				ssize_t n = recv(_pfds[i].fd, buf, sizeof(buf), 0);
+				if(n > 0)
+				{
+					std::cout << "----received " << n << " bytes on fd " << _pfds[i].fd << "----" << std::endl;
+					std::cout.write(buf, n);
+					std::cout << std::endl;
+					std::cout << "----------------------" << std::endl;
+				}
+				_removeFd(i);
+				continue;
+			}
 			_pfds[i].revents = 0;
 			i++;
 		}
