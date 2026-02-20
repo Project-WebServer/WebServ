@@ -1,0 +1,1 @@
+bind - assign the address to the opened socket refered to by the file descriptor. also called assigning name to a socket
