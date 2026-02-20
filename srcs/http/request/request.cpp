@@ -3,14 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/14 19:10:25 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/20 16:36:27 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
+
+HTTPrequests::HTTPrequests() : _buffer(""), _body(""), _protocolv(ProtocolV::ERR), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR),  _path("")
+{
+}
+
+HTTPrequests::~HTTPrequests()
+{
+}
 
 void HTTPrequests::feed(std::string newChunk)
 {
@@ -20,7 +28,7 @@ void HTTPrequests::feed(std::string newChunk)
 		size_t end = _buffer.find("\r\n");
 		if (end != std::string::npos)
 		{
-			std::string request = _buffer.substr(0, end + 2);
+			std::string request = _buffer.substr(0, end);
 			parseRequest(request); // if it fails I return?
 			_buffer.erase(0, end + 2);
 			_components = COMPONENTS::HEADERS;

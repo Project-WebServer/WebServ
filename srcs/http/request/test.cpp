@@ -3,61 +3,77 @@
 /*                                                        :::      ::::::::   */
 /*   test.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:52:06 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/14 19:12:19 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/20 17:03:12 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
 
-void Headers::print()
-{
-    std::cout << "--- Headers ---" << std::endl;
-    for (std::map<std::string, std::string>::const_iterator it = _headerMap.begin(); it != _headerMap.end(); ++it)
-    {
-        std::cout << it->first << " : " << it->second << std::endl;
-    }
-}
 
 void HTTPrequests::printRequest()
 {
-    std::cout << "--- Request Line ---" << std::endl;
-    
+    std::cout << "Request Line:" << std::endl;
+
     std::cout << "Method: ";
-    if (_methods == METHODS::GET) std::cout << "GET";
-    else if (_methods == METHODS::POST) std::cout << "POST";
-    else if (_methods == METHODS::DELETE) std::cout << "DELETE";
-    else std::cout << "UNKNOWN";
-    std::cout << std::endl;
-
+    printMethod();
     std::cout << "Path: " << _path << std::endl;
-    
     std::cout << "Version: ";
-    if (_protocolv == ProtocolV::HTTP_1_1) std::cout << "HTTP/1.1";
-    else std::cout << "Other";
-    std::cout << std::endl;
-
-    // Now print the headers
-    _header.print();
+    printVersion();
+    // Headers printing
 }
 
+void Headers::printHeader()
+{
+	std::map<std::string, std::string>::iterator it;
+    std::cout << "Header Line:" << std::endl;
+	for (it = _headerMap.begin() ; it != _headerMap.end(); ++it)
+    {
+		std::cout << " {" << it->first << ": " << it->second
+             << "} " << std::endl;
+	}
+	// Headers printing
+}
+
+void HTTPrequests::printHeader()
+{
+	_header.printHeader();
+}
+
+void HTTPrequests::printMethod()
+{
+    switch (_methods)
+    {
+        case METHODS::GET:    std::cout << "GET";    break;
+        case METHODS::POST:   std::cout << "POST";   break;
+        case METHODS::DELETE: std::cout << "DELETE"; break;
+        case METHODS::ERR:    std::cout << "ERR";    break;
+    }
+    std::cout << std::endl;
+}
+
+void HTTPrequests::printVersion()
+{
+    switch (_protocolv)
+    {
+        case ProtocolV::HTTP_1_0:    std::cout << "1.0";    break;
+        case ProtocolV::HTTP_1_1:    std::cout << "1.1";   break;
+        case ProtocolV::HTTP_2_0:  std::cout << "2.0"; break;
+        case ProtocolV::ERR:    std::cout << "ERR";    break;
+    }
+    std::cout << std::endl;
+}
 
 int main()
 {
     HTTPrequests req;
-    std::string raw = 
-        "GET /index.html HTTP/1.1\r\n"
-        "Host: localhost:8080\r\n"
-        "User-Agent: Mozilla/5.0\r\n"
-        "Accept: text/html\r\n"
-        "Content-Length: 0\r\n"
-        "\r\n"; // The empty line marks the end of headers
-
+    std::string raw = "GET /index.html HTTP/1.1\r\n Host: localhost:8080\r\nUser-Agent: curl/7.64.1\r\nContent-Length: 15\r\n\r\n"; // The empty line marks the end of headers
 
     req.feed(raw);
     req.printRequest();
+	req.printHeader();
 
     return 0;
 }

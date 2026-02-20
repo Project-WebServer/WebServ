@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/14 19:10:46 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/20 17:02:21 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ class Headers
 		void		parseMap(std::string rawHeaderString);
 		std::string	getKeys();
 		std::string	getValue(std::string key);
-		void print();
+		void 		printHeader();
 };
 
 enum class COMPONENTS
@@ -64,8 +64,8 @@ enum class COMPONENTS
 class HTTPrequests
 {
 	public:
-		//HTTPrequests();
-		//~HTTPrequests();
+		HTTPrequests();
+		~HTTPrequests();
 
 		enum class METHODS
 		{
@@ -74,18 +74,22 @@ class HTTPrequests
 			DELETE,
 			ERR
 		};
-		
+
 		void		feed(std::string newChunk);
 		void		parseRequest(std::string request);
 		Headers		parseHeader(std::string header); // calls the Header class's function and validates?
 		std::string	parseBody(std::string body);
-		
+
 		METHODS findMethods(std::string first);
 		ProtocolV findVersion(std::string version);
 
 		//testing
 		void printRequest();
-		
+		void printMethod();
+		void printVersion();
+		void printHeader();
+
+
 	private:
 		std::string _buffer;
 		COMPONENTS	_components; // zero at birth, maybe move it to constructor?
