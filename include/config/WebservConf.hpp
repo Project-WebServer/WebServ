@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/18 09:54:58 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/20 11:43:16 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,12 @@
 
 #include "ServerConf.hpp"
 
+struct ENDPOINT
+{
+	std::string	ip;
+	int			port;
+	bool		wildcard;
+};
 
 //store the servers 
 class WebservConf
@@ -29,6 +35,7 @@ class WebservConf
 			
 			// std::shared_ptr<ServerConf> findServer(std::string& host, int port);
 			void	pushServer(ServerConf& serv);
+			int		getNumberOfServers() const;
 
 			void print() const;
 };

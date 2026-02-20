@@ -5,6 +5,11 @@ void WebservConf::pushServer(ServerConf& serv)
 	servers.push_back(serv);
 }
 
+int WebservConf::getNumberOfServers() const
+{
+	return (int)this->servers.size();
+}
+
 void WebservConf::print() const
 {
 	if (!this->servers.empty())

@@ -1,6 +1,4 @@
 #include "../../include/config/ServerConf.hpp"
-#include "../../include/config/conf_parse.hpp"
-
 
 
 //set default value 
@@ -29,217 +27,42 @@ ServerConf &ServerConf::operator=(const ServerConf &other)
 	}
 	return *this;
 }
-void ServerConf::setListen(TokenLine &tokenLine)
+void ServerConf::setListen(std::string &host, int port)
 {
-	error_conf status;
-	TokenLine tmp = tokenLine;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-
-	std::vector<std::string> &v = tokenLine.second;
-	if (v.size() != 1)
-		throw std::runtime_error("Error: invalid token near " + ConfToken::catTokens(tmp));
-	std::string &ip = v[0];
-
-	size_t colonPos = ip.find(':');
-	try
-	{
-		if (colonPos == std::string::npos)
-		{
-			this->listen.second = stoi(ip.substr(colonPos + 1));
-			if (listen.second < 0 || listen.second > 65535)
-				throw std::runtime_error("Error: Invalid port value near " + ip);
-		}
-		else
-		{
-			std::string host = ip.substr(0, colonPos);
-			if (!isHostValid(host).success)
-				throw std::runtime_error("Error: Invalid IP address near " + ip);
-			this->listen.first = host;
-			this->listen.second = stoi(ip.substr(colonPos + 1));
-			if (listen.second < 0 || listen.second > 65535)
-				throw std::runtime_error("Error: Invalid port value near " + ip);
-		}
-	}
-	catch (std::exception &e)
-	{
-		throw std::runtime_error("Error:: Invalid token near " + ConfToken::catTokens(tmp));
-	}
+	if (!host.empty())
+		this->listen.first = host;
+	this->listen.second = port;
 	return;
 }
 
-void	ServerConf::setRoot(TokenLine &tokenLine)
+void	ServerConf::setRoot(std::string& root)
 {
-    error_conf status;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-    std::vector<std::string> &token = tokenLine.second;
-    if (token.size() != 1)
-        throw std::runtime_error("Error: invalid server root directive near token " + ConfToken::catTokens(tokenLine));
-    std::string &root = token[0];
-    if (root.front() != '/')
-        throw std::runtime_error("Error: invalid server root path near token " + ConfToken::catTokens(tokenLine));
     this->root = root;
 }
 
-void ServerConf::setClientSize(TokenLine &tokenLine)
+void ServerConf::setClientBodySize(size_t bodySize)
 {
-	error_conf status;
-	TokenLine tmp = tokenLine;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-
-	if (tokenLine.second.size() != 1)
-		throw std::runtime_error("Error: invalid token near " + ConfToken::catTokens(tmp));
-
-	std::string ip = tokenLine.second[0];
-	size_t		size;
-	try
-	{
-		size = std::stoi(ip);
-	}
-	catch (std::exception &e)
-	{
-		throw std::runtime_error("Error: invalid token: " + ip + " near " + ConfToken::catTokens(tmp));
-	}
-
-	char unit = std::tolower(ip.back());
-	ip.pop_back();
-	
-	if (!isDigitOnly(ip))
-		throw std::runtime_error("Error: invalid token: " + ip + " near " + ConfToken::catTokens(tmp));
-	if (unit == 'k')
-        this->client_max_body_size = size * 1024;
-    else if (unit == 'm')
-        this->client_max_body_size = size * 1024 * 1024;
-    else if (unit == 'g')
-        this->client_max_body_size =  size * 1024 * 1024 * 1024;
-    else if(std::isdigit(unit))
-        this->client_max_body_size = size;
-	else
-		throw std::runtime_error("Error: invalid client_max_body_size unit near " + ConfToken::catTokens(tmp));
+	this->client_max_body_size = bodySize;
 }
 
-//acept only a-z, A-Z, - and . format 
-static bool isValidServerName(const std::string& name)
+
+void ServerConf::setServName(std::vector<std::string>& server_name)
 {
-    if (name.empty() || name[0] == '-')
-        return false;
-    
-    for (char c : name)
-    {
-        if (c != '-' && c != '.' && !::isalnum((unsigned char)c))
-            return false;
-    }
-    return true;
+    if (!server_name.empty())
+	{
+		for (std::string s : server_name)
+			this->server_name.push_back(s);
+	}
 }
 
-void ServerConf::setServName(TokenLine &tokenLine)
+
+void ServerConf::setErrorPage(int error_code, std::string& error_path)
 {
-    error_conf status;
-    TokenLine tmp = tokenLine;
-
-    status = isDirectiveValid(tokenLine);
-    if (!status.success)
-        throw std::runtime_error(status.error_msg);
-    
-    this->server_name.clear();
-    
-    for (const std::string& name : tokenLine.second)
-    {
-        if (!isValidServerName(name))
-            throw std::runtime_error("Error: invalid server_name format near " + ConfToken::catTokens(tmp));
-        
-        this->server_name.push_back(name);
-    }
-}
-
-//handle just error code(4xx; 5xx) e path /error_pages/xxx format 
-void ServerConf::setErrorPage(TokenLine &tokenLine)
-{
-	error_conf	status;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-	if (tokenLine.second.size() != 2)
-		throw std::runtime_error("Error: invalid token near " + ConfToken::catTokens(tokenLine));
-	
-	std::string	&error_code_str = tokenLine.second[0];
-	std::string	&error_path = tokenLine.second[1];
-	int	error_code;
-	try
-	{
-		size_t pos;
-		error_code = std::stoi(error_code_str, &pos);
-		if (pos < error_code_str.size())
-			throw std::runtime_error("Error: invalid error code near token " + ConfToken::catTokens(tokenLine));
-	}
-	catch (std::exception &e)
-	{
-		throw std::runtime_error(e.what());
-	}
-
-	if (error_path.front() != '/')
-		throw std::runtime_error("Error: invalid error code path near token " + ConfToken::catTokens(tokenLine));
-	if (error_code < 400 || error_code > 599)
-		throw std::runtime_error("Error: invalid error code value near token " + ConfToken::catTokens(tokenLine));
 	this->erro_pages[error_code] = error_path;
 }
 
-void ServerConf::setLocation(TokenLine &tokenLine, ConfToken& confile)
+void ServerConf::setLocation(Location& loc)
 {
-	Location loc;
-
-	try
-	{
-		loc.setPath(tokenLine);
-	}
-	catch (std::exception &e)
-	{
-		throw std::runtime_error(e.what());
-	}
-
-	TokenLine loc_TokenLine;
-	while (true)
-	{
-		loc_TokenLine = confile.getNextToken();
-		if (loc_TokenLine.first == tokenType::ENDOF)
-			throw std::runtime_error("Erro: Missing '}' close directive block (location) near " + ConfToken::catTokens(loc_TokenLine));
-		if (loc_TokenLine.first == tokenType::BLOCK_CLOSE)
-			break;
-		try
-		{
-			switch (loc_TokenLine.first)
-			{
-			case tokenType::ROOT:
-				loc.setRoot(loc_TokenLine);
-				break;
-			case tokenType::ALLOWED_METHODS:
-				loc.setAllowed_methods(loc_TokenLine);
-				break;
-			case tokenType::INDEX:
-				loc.setIndex_files(loc_TokenLine);
-				break;
-			case tokenType::AUTO_INDEX:
-				loc.setAutoindex(loc_TokenLine);
-				break;
-			default:
-				continue; //handle it better 
-			//unkhown case and more cases
-			}
-		}
-		catch (std::exception &e)
-		{
-			throw std::runtime_error(e.what());
-		}
-	}
 	this->locations[loc.getPath()] = loc;
 }
 

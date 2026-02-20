@@ -1,4 +1,5 @@
 #include "../../include/config/WebservConf.hpp"
+#include "../../include/config/conf_parse.hpp"
 
 
 static error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tokenLine)
@@ -20,22 +21,22 @@ static error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLi
 			switch (ServTokenLine.first)
 			{
 			case tokenType::LISTEN:
-				server.setListen(ServTokenLine);
+				setListenServer(ServTokenLine, server);
 				break;
 			case tokenType::ROOT:
-				server.setRoot(ServTokenLine);
+				setRootServer(ServTokenLine, server);
 				break;
 			case tokenType::MAX_CLIENT_SIZE:
-				server.setClientSize(ServTokenLine);
+				setClientSizeServer(ServTokenLine, server);
 				break;
 			case tokenType::SERVER_NAME:
-				server.setServName(ServTokenLine);
+				setNameServer(ServTokenLine, server);
 				break;
 			case tokenType::ERROR_PAGE:
-				server.setErrorPage(ServTokenLine);
+				setErrorPageServer(ServTokenLine, server);
 				break;
 			case tokenType::LOCATION:
-				server.setLocation(ServTokenLine, confFile);
+				setLocationServer(ServTokenLine, confFile, server);
 				break;
 			default:
 				continue; //handle it better 
@@ -85,7 +86,7 @@ int main()
 	WebservConf	Webserv;
 	try
 	{
-		confFile.getFile("exemple.conf");
+		confFile.setFile("exemple.conf");
 	}
 	catch(const std::exception& e)
 	{
@@ -100,6 +101,7 @@ int main()
 		return 1;
 	}
 	Webserv.print();
+	std::cout << "\nNUmber of servers: " << Webserv.getNumberOfServers() << "\n";
 	
 	return 0;
 }

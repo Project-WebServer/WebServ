@@ -9,6 +9,7 @@
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include "ServerConf.hpp"
 
 enum struct tokenType
 {
@@ -55,18 +56,29 @@ class ConfToken
 		ConfToken(){};
 		~ConfToken();
 
-		void getFile(std::string fileName);
-		TokenLine getNextToken(); //const
+		void 		setFile(std::string fileName);
+		TokenLine	getNextToken(); //const
 
 		static std::string _convertTokenType(tokenType type); //const
 		static std::string catTokens(TokenLine& tokenLine); //const
 };
 
-std::string			trim(const std::string& s);
-error_conf			isHostValid(std::string &s);
-error_conf			isDirectiveValid(TokenLine& tokenLine);
-bool				isDigitOnly(std::string &s);
-httpMethod	getHttpMethod(std::string token);
+std::string		trim(const std::string& s);
+error_conf		isHostValid(std::string &s);
+error_conf		isDirectiveValid(TokenLine& tokenLine);
+bool			isDigitOnly(std::string &s);
+httpMethod		getHttpMethod(std::string token);
+void			setRootServer(TokenLine &tokenLine, ServerConf& server);
+void 			setListenServer(TokenLine &tokenLine, ServerConf& server);
+void 			setClientSizeServer(TokenLine &tokenLine, ServerConf& server);
+void 			setNameServer(TokenLine &tokenLine, ServerConf& server);
+void 			setErrorPageServer(TokenLine &tokenLine, ServerConf& server);
+void			setLocationServer(TokenLine &tokenLine, ConfToken& confile, ServerConf& server);
+void			setPathLocation(TokenLine &tokenLine, Location& loc);
+void			setRootLocation(TokenLine &tokenLine, Location& loc);
+void			setAllowed_methodsLocation(TokenLine &tokenLine, Location& loc);
+void			setIndex_filesLocation(TokenLine &tokenLine, Location& loc);
+void 			setAutoindexLocation(TokenLine &tokenLine, Location& loc);
 
 
 #endif

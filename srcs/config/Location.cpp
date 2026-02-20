@@ -27,87 +27,33 @@ Location &Location::operator=(const Location &other)
 }
 
 
-//no implementantion of modifiers (=, ~, ~*, ^~, '')
-void	Location::setPath(TokenLine &tokenLine)
+void	Location::setPath(std::string& path)
 {
-    std::vector<std::string> &location = tokenLine.second;
-	if (location.size() == 1 && location[0].size() > 1 && location[0].front() == '/' && location[0].back() == '{')
-	{
-		location[0] = "/";
-		location.push_back("{");
-	}
-    if (location.size() != 2)
-        throw std::runtime_error("Error: invalid location block near token " + ConfToken::catTokens(tokenLine));
-    if (location[1] != "{")
-        throw std::runtime_error("Error: missing open block '{' location near token " + ConfToken::catTokens(tokenLine));
-    
-    std::string &path = location[0];
-    if (path.front() != '/')
-        throw std::runtime_error("Error: invalid location path near token " + ConfToken::catTokens(tokenLine));
-	
     this->path = path;
 }
 
 //where is the root in our webserver (where we gonna put our static files)
 //verify here if the path is valid with stat / access??
 // handle the path to ww in our directory 
-void	Location::setRoot(TokenLine &tokenLine)
+void	Location::setRoot(std::string& root)
 {
-    error_conf status;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-    std::vector<std::string> &token = tokenLine.second;
-    if (token.size() != 1)
-        throw std::runtime_error("Error: invalid location root directive near token " + ConfToken::catTokens(tokenLine));
-    std::string &root = token[0];
-    if (root.front() != '/')
-        throw std::runtime_error("Error: invalid location root path near token " + ConfToken::catTokens(tokenLine));
-    this->root = root;
+	this->root = root;
 }
 
-void	Location::setAllowed_methods(TokenLine &tokenLine)
+void	Location::setAllowed_methods(std::string method)
 {
-    error_conf status;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-    std::vector<std::string> &token = tokenLine.second;
-    if (token.size() < 1)
-        throw std::runtime_error("Error: invalid allowed_method directive near token " + ConfToken::catTokens(tokenLine));
-    for (auto method : token)
-        this->allowed_methods.insert(getHttpMethod(method));
+    this->allowed_methods.insert(getHttpMethod(method));
 }
 
 //implement it 
-void	Location::setIndex_files(TokenLine &tokenLine)
+void	Location::setIndex_files(std::string index_file)
 {
-    error_conf status;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-    std::vector<std::string> &token = tokenLine.second;
-    if (token.size() < 1)
-        throw std::runtime_error("Error: invalid allowed_method directive near token " + ConfToken::catTokens(tokenLine));
-    for (auto index : token)
-        this->index_files.push_back(index);
+    this->index_files.push_back(index_file);
 }
 
-void Location::setAutoindex(TokenLine &tokenLine)
+void Location::setAutoindex_On()
 {
-	error_conf status;
-
-	status = isDirectiveValid(tokenLine);
-	if (!status.success)
-		throw std::runtime_error(status.error_msg);
-	std::vector<std::string> &token = tokenLine.second;
-	if (token.size() != 1)
-        throw std::runtime_error("Error: invalid directive near token " + ConfToken::catTokens(tokenLine));
-	if (token[0] == "on")
-		this->autoindex = true;
+	this->autoindex = true;
 }
 
 std::string Location::getPath() const

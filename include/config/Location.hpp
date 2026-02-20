@@ -2,13 +2,12 @@
 #define LOCATION_HPP
 
 
-#include "conf_parse.hpp"
 #include <algorithm>
 #include <iostream>
 #include <vector>
 #include <set>
 
-
+enum struct httpMethod;
 //store the servers 
 class Location
 {
@@ -38,11 +37,11 @@ class Location
 			~Location(){};
 
 			//getters
-			void	setPath(TokenLine &tokenLine); //ok
-			void	setRoot(TokenLine &tokenLine); //ok
-			void	setAllowed_methods(TokenLine &tokenLine); //ok
-			void	setIndex_files(TokenLine &tokenLine); // ok
-			void	setAutoindex(TokenLine &tokenLine); //ok
+			void	setPath(std::string& path);
+			void	setRoot(std::string& root);
+			void	setAllowed_methods(std::string method);
+			void	setIndex_files(std::string index_file);
+			void	setAutoindex_On();
 
 			std::string						getPath() const; 
 			std::string						getRoot() const; 

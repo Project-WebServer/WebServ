@@ -1,31 +1,37 @@
-Use smart pointer to set server and location instead of copy =;
+configuration module 
+	Use smart pointer to set server and location instead of copy =;
 
-// implement root in ServeConf class
-// matching path = root + path + uri
+	// implement root in ServeConf class
+	// matching path = root + path + uri
 
-implement member of Location class 
-	//redirections 
-		bool		has_redirection;
-		std::string	redir_code;
-		std::string	redir_url;
+	implement member of Location class 
+		//redirections 
+			bool		has_redirection;
+			std::string	redir_code;
+			std::string	redir_url;
 
-		//upload
-		bool		upload_enable;
-		std::string upload_path;
-		size_t		client_max_body_size;
+			//upload
+			bool		upload_enable;
+			std::string upload_path;
+			size_t		client_max_body_size;
 
-ROOT Path (setRoot())
-	//where is the root in our webserver (where we gonna put our static files)
-	//verify here if the path is valid with stat / access??
-	// handle the path to ww in our directory 
+	ROOT Path (setRoot())
+		//where is the root in our webserver (where we gonna put our static files)
+		//verify here if the path is valid with stat / access??
+		// handle the path to ww in our directory 
 
-//set default erro_pages location 
-	ServerConf::ServerConf(): listen("0.0.0.0", 80),
-		client_max_body_size(1024*1024)
-	{
-		server_name.push_back("");
-		//set default erro_pages location 
-	}
+	//set default erro_pages location 
+		ServerConf::ServerConf(): listen("0.0.0.0", 80),
+			client_max_body_size(1024*1024)
+		{
+			server_name.push_back("");
+			//set default erro_pages location 
+		}
 
-// definir # define DEFAULT_ROOT = "../../www" 
-	implement getServerRoot , creat function to match the root with server root. 
+	// definir # define DEFAULT_ROOT = "../../www" 
+		implement getServerRoot , creat function to match the root with server root. 
+
+	set logic to handle empty conf file
+	set default server conf
+
+------ 

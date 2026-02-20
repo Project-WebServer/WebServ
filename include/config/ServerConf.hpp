@@ -12,12 +12,13 @@
 class ServerConf
 {
 	private:
-		size_t								client_max_body_size;
-		std::string 						root; // implement root 
-		std::vector<std::string>			server_name;
 		std::pair<std::string,int>			listen;
+		size_t								client_max_body_size;
+		std::string 						root;
+		std::vector<std::string>			server_name;
 		std::map<int, std::string>			erro_pages;
 		std::map<std::string, Location> 	locations;
+		//implemente index 
 
 		
 
@@ -27,12 +28,12 @@ class ServerConf
 			ServerConf& operator=(const ServerConf& other);
 			~ServerConf(){};
 			
-			void setListen(TokenLine &tokenLine);
-			void setRoot(TokenLine &tokenLine);
-			void setClientSize(TokenLine &tokenLine);
-			void setServName(TokenLine &tokenLine);
-			void setErrorPage(TokenLine &tokenLine);
-			void setLocation(TokenLine &tokenLine, ConfToken& confile);
+			void setListen(std::string &host, int port);
+			void setRoot(std::string& root);
+			void setClientBodySize(size_t bodySize);
+			void setServName(std::vector<std::string>& server_name);
+			void setErrorPage(int error_code, std::string& error_path);
+			void setLocation(Location& loc);
 
 			std::string getRoot() const;
 			size_t getClientSize() const;
