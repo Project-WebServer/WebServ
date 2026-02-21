@@ -40,7 +40,8 @@ void Server::_acceptClients()
 			p.events = POLLIN;
 			p.revents = 0;
 			_pfds.push_back(p);
-			_clients.insert(cfd);
+			// _clients.insert(cfd);
+			_conns[cfd] = Connection();
 			std::cout << "accepted cient fd"<< cfd << std::endl;
 			// //response for testing!!!
 			// const char resp[] =
@@ -76,7 +77,7 @@ void Server::_removeFd(size_t indx)
 	int fd = _pfds[indx].fd;
 
 	close(fd);
-	_clients.erase(fd);
+	_conns.erase(fd);
 	_pfds.erase(_pfds.begin() + indx);
 }
 
@@ -125,7 +126,7 @@ int Server::start()
 		return 1;
 	}
 	_pfds.clear();
-	_clients.clear();
+	_conns.clear();
 	_addListenFd();
 	std::cout << "socket fd = " << _listen_fd << std::endl;
 	std::cout << "listening to fd = " << _listen_fd << std::endl;
