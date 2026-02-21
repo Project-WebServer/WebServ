@@ -6,12 +6,11 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:52:06 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/20 17:03:12 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/21 15:19:36 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
-
 
 void HTTPrequests::printRequest()
 {
@@ -29,10 +28,10 @@ void Headers::printHeader()
 {
 	std::map<std::string, std::string>::iterator it;
     std::cout << "Header Line:" << std::endl;
-	for (it = _headerMap.begin() ; it != _headerMap.end(); ++it)
+	for (it = _headerMap.begin() ; it != _headerMap.end(); it++)
     {
-		std::cout << " {" << it->first << ": " << it->second
-             << "} " << std::endl;
+		std::cout << "" << it->first << ": " << it->second
+             << "" << std::endl;
 	}
 	// Headers printing
 }
@@ -66,14 +65,27 @@ void HTTPrequests::printVersion()
     std::cout << std::endl;
 }
 
+void HTTPrequests::printBody()
+{
+	std::cout << "Body Line:" << std::endl;
+	std::cout << _body << std::endl;
+}
+
 int main()
 {
-    HTTPrequests req;
-    std::string raw = "GET /index.html HTTP/1.1\r\n Host: localhost:8080\r\nUser-Agent: curl/7.64.1\r\nContent-Length: 15\r\n\r\n"; // The empty line marks the end of headers
+	HTTPrequests req;
+	std::string raw = "POST /users HTTP/1.1\r\n"
+	"Host: example.com\r\n"
+	"Content-Type: application/x-www-form-urlencoded\r\n"
+	"Content-Length: 49\r\n"
+	"\r\n"
+	"name=FirstName+LastName&email=bsmth%40example.com";
 
-    req.feed(raw);
-    req.printRequest();
+	req.feed(raw);
+	req.printRequest();
+	std::cout << std::endl;
 	req.printHeader();
-
-    return 0;
+	std::cout << std::endl;
+	req.printBody();
+	return 0;
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseHeader.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/14 19:11:39 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/21 14:46:59 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 //Host: localhost:8080\r\n                  <-- Headers
 //User-Agent: curl/7.64.1\r\n
 //Content-Length: 15\r\n
-//\r\n      
+//\r\n
 
 //class Headers
 //{
@@ -29,40 +29,46 @@ void Headers::parseMap(std::string rawHeaderString)
 {
 	//until : is the key and from there to \r\n is the value
 	// _headerMap[name] = value;
-	
+
 	std::string::iterator it = rawHeaderString.begin();
-	std::string name;
-	std::string value;
 
 	while (it != rawHeaderString.end())
 	{
-		// what happens if I don't clear the name and value here?
+		std::string name;
+		std::string value;
+
+		while (it != rawHeaderString.end() && (*it == ' ' || *it == '\r' || *it == '\n'))
+			it++;
+		if (it == rawHeaderString.end())
+			break;
+			// what happens if I don't clear the name and value here
 		while (it != rawHeaderString.end() && *it != ':')
 		{
 			name += *it;
 			it++;
 		}
-		// if we already reach the end before finding the colon -> error
-		it++;
-		// what happens if there are spaces?
-		while (it != rawHeaderString.end() && *it != '\r')
+		if (it == rawHeaderString.end() || name.empty())
+			break;
+		while (it != rawHeaderString.end() && (*it == ' ' || *it == ':'))
+			it++;
+		while (it != rawHeaderString.end() && *it != '\r' && *it != '\n')
 		{
 			value += *it;
 			it++;
 		}
 		_headerMap[name] = value;
-		while (it != rawHeaderString.end() && *it != '\r' || it != rawHeaderString.end() && *it != '\n')
-			it++;
+
+		//std::cout << "[DEBUG] Found Key: '" << name << "' | Found Value: '" << value << "'" << std::endl;
 	}
 }
 
 std::string Headers::getValue(std::string key)
 {
-	return (_headerMap["key"]);
+	return (_headerMap[key]);
 }
 
 Headers HTTPrequests::parseHeader(std::string header)
-{	
+{
 	_header.parseMap(header);
 	if (_header.getValue("Host").empty())
 	{
@@ -70,6 +76,8 @@ Headers HTTPrequests::parseHeader(std::string header)
 		return _header; // just for now
 	}
 	// content length tells you how much body to read
+	std::string contLen = _header.getValue("Content-Length");
+	std::stringstream stream(contLen);
+	stream >> _contLen;
 	return _header; //for now
 }
-

@@ -6,13 +6,14 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/20 17:02:21 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/21 17:47:23 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <map>
 #include <string>
+#include <sstream>
 
 //if you use enum it is anti-typo, so the compiler doesn't accept PST
 //also more memory & speed efficient
@@ -78,7 +79,6 @@ class HTTPrequests
 		void		feed(std::string newChunk);
 		void		parseRequest(std::string request);
 		Headers		parseHeader(std::string header); // calls the Header class's function and validates?
-		std::string	parseBody(std::string body);
 
 		METHODS findMethods(std::string first);
 		ProtocolV findVersion(std::string version);
@@ -88,6 +88,7 @@ class HTTPrequests
 		void printMethod();
 		void printVersion();
 		void printHeader();
+		void printBody();
 
 
 	private:
@@ -99,6 +100,8 @@ class HTTPrequests
 		ProtocolV	_protocolv;
 		Headers		_header;
 		std::string	_body;
+		size_t		_contLen;
+		size_t		_statusCode;
 
 		// Request line parser
 		// header parser

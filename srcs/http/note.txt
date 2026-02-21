@@ -32,3 +32,37 @@ Post -> saves data / runs a calculation
 but this response has to be wrapped in the http response envelope
 : create a string that looks like this: HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n[The File Data].
 then push this back to the browser thru the socket
+
+3. Status code
+HTTP response status codes indicate whether a specific HTTP request has been successfully completed. Responses are grouped in five classes:
+
+Informational responses (100 – 199)
+Successful responses (200 – 299)
+Redirection messages (300 – 399)
+Client error responses (400 – 499)
+Server error responses (500 – 599)
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+
+4. RFC semantic rules
+		1. Header Case Insensitivity
+		This is the trickiest part for your std::map. By default, std::map<std::string, std::string> treats "Host" and "host" as different keys.
+
+		The Fix: Before inserting or looking up a key in your map, convert the header name to lowercase.
+
+		Code logic: _headerMap[toLower(name)] = value;
+
+		2. Mandatory Host Header
+		The subject requires accurate status codes.
+
+		The Fix: After your header loop finishes (when you see \r\n\r\n), check if _headerMap.count("host") is 0.
+
+		Action: If it's missing, immediately set _statusCode = 400 and stop processing the request.
+
+		3. Strict Whitespace (The "No Space Before Colon" Rule)
+		This is a common "trick" in 42 projects to see if you read the RFC.
+
+		The Rule: Field-Name ":" [Field-Value]. There is zero space allowed between the name and the colon.
+
+		The Fix: In your while loop that reads the name, if you encounter a space ' ' before you find the ':', the request is malformed.
+
+		Action: Set _statusCode = 400.
