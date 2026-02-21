@@ -1,20 +1,25 @@
 #include "../../include/config/WebservConf.hpp"
 
-void WebservConf::pushServer(ServerConf& serv)
+void WebservConf::pushServer(const ServerConf& serv, const ENDPOINT& endPoint)
 {
-	servers.push_back(serv);
+	server_pool[endPoint].push_back(serv);
 }
 
 int WebservConf::getNumberOfServers() const
 {
-	return (int)this->servers.size();
+	return (int)this->server_pool.size();
 }
 
 void WebservConf::print() const
 {
-	if (!this->servers.empty())
-	{
-		for (size_t i = 0; i < this->servers.size(); ++i)
-			this->servers[i].print();
-	}
+    if (server_pool.empty())
+        return;
+
+    std::map<ENDPOINT, std::vector<ServerConf>, ENDPOINTCOMP>::const_iterator it;
+    for (it = server_pool.begin(); it != server_pool.end(); ++it)
+    {
+        // std::cout << "Endpoint " << it->first.ip << ":" << it->first.port << "\n";
+        for (size_t i = 0; i < it->second.size(); ++i)
+            it->second[i].print();
+    }
 }

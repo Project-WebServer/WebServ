@@ -68,7 +68,8 @@ static error_conf setWebservConf(WebservConf &webserv, ConfToken& confFile)
 			status = setServerConf(server, confFile, tokenLine);
 			if (!status.success)
 				return status;
-			webserv.pushServer(server);
+			ENDPOINT endPoint{server.getIpv4(), server.getPort()};
+			webserv.pushServer(server, endPoint);
 		}
 		else
 		{
@@ -101,7 +102,6 @@ int main()
 		return 1;
 	}
 	Webserv.print();
-	std::cout << "\nNUmber of servers: " << Webserv.getNumberOfServers() << "\n";
 	
 	return 0;
 }
