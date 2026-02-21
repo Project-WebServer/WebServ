@@ -80,7 +80,7 @@ static error_conf setWebservConf(WebservConf &webserv, ConfToken& confFile)
 	return {true, "Success"};
 }
 
-int main_test()
+int main()
 {
 	ConfToken 	confFile;
 	WebservConf	Webserv;
