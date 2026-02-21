@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -21,7 +22,7 @@ class ServerConf
 		std::string 						root;
 		std::vector<std::string>			server_name;
 		std::map<int, std::string>			erro_pages;
-		std::map<std::string, Location> 	locations;
+		std::unordered_map<std::string, Location> 	locations;
 		//implemente index 
 
 		
@@ -47,7 +48,7 @@ class ServerConf
 			uint32_t getIpv4() const;
 			const std::vector<std::string>& getServName() const;
 			const std::map<int, std::string>& getErrorPage() const;
-			const std::map<std::string, Location>& getLocation() const;
+			const std::unordered_map<std::string, Location>& getLocation() const;
 
 			void print() const;
 			

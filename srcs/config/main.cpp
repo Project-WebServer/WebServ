@@ -102,7 +102,6 @@ int main()
 		return 1;
 	}
 	Webserv.print();
-	std::cout << "\nNUmber of servers: " << Webserv.getNumberOfServers() << "\n";
 	
 	return 0;
 }

@@ -102,7 +102,7 @@ const std::map<int, std::string> &ServerConf::getErrorPage() const
 	return erro_pages;
 }
 
-const std::map<std::string, Location> &ServerConf::getLocation() const
+const std::unordered_map<std::string, Location> &ServerConf::getLocation() const
 {
 	return locations;
 }
@@ -118,10 +118,7 @@ void ServerConf::print() const
         std::cout << this->listen.first << ":";
     std::cout << this->listen.second << ";" << std::endl;
 
-	std::cout << "\tlisten network ";
-	std::cout << this->listen_ip << "; "<< this->listen_port << std::endl;
-
-
+	
     if (!this->server_name.empty())
     {
         std::cout << "\tserver_name";
@@ -142,7 +139,7 @@ void ServerConf::print() const
 
     // locations
 	std::cout << "\n" << std::endl;
-    for (std::map<std::string, Location>::const_iterator it = this->locations.begin();
+    for (std::unordered_map<std::string, Location>::const_iterator it = this->locations.begin();
          it != this->locations.end(); ++it)
     {
         std::cout << "\tlocation " << it->first << " {" << std::endl;
