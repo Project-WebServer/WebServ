@@ -6,9 +6,10 @@
 // matching path = root + path + uri
 Location::Location(): path(""), 
     root(""), 
-    autoindex(false), 
-    has_redirection(false),
-    upload_enable(false)
+    autoindex(false) 
+    // has_redirection(false),
+    // upload_enable(false)
+	
 {
 }
 

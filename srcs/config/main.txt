@@ -1,0 +1,36 @@
+#include "../../include/config/WebservConf.hpp"
+#include "../../include/config/conf_parse.hpp"
+#include "../../include/io/socket.hpp"
+
+
+
+
+int main()
+{
+	ConfToken 	confFile;
+	WebservConf	Webserv;
+	try
+	{
+		confFile.setFile("srcs/config/exemple.conf");
+	}
+	catch(const std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 1;
+	}
+
+	error_conf status = setWebservConf(Webserv, confFile);
+	if (!status.success)
+	{
+		std::cout << status.error_msg + "\n";
+		return 1;
+	}
+	Webserv.print();
+	
+	Server s;
+
+	if(s.start() != 0)
+		return (1);
+	s.run();
+	return 0;
+}

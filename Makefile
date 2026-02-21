@@ -1,7 +1,15 @@
 NAME		:=	webserv
 RM			:=	rm -rf
 CPP			:=	c++
-CPPFLAGS	:=	-Wall -Wextra  -std=c++11 #-Werror
+
+RESET   = \033[0m
+GREEN   = \033[32m
+YELLOW  = \033[33m
+BOLD    = \033[1m
+
+CPPFLAGS := -Wall -Wextra -Werror -MMD -MP -g
+CPPFLAGS += -std=c++20
+LDFLAGS  := -fsanitize=address
 
 SRCDIR		:=	srcs
 SRCS		:=	$(shell find $(SRCDIR) -iname "*.cpp")
@@ -10,24 +18,28 @@ INCL		:=	-I./inc
 
 OBJDIR		:=	.build
 OBJ			:=	$(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+DEP			:=	$(OBJ:.o=.d)
 
 all:		$(NAME)
 
 $(NAME):	$(OBJ)
-			@$(CPP) $(OBJ) -o $(NAME) $(INCL)
-# 			@printf "$(CREATED)" $@ $(CUR_DIR)
+			@$(CPP) $(OBJ) $(LDFLAGS) -o $(NAME)
+			@echo "\n$(GREEN)Compiling program $(NAME)...$(RESET)"
+			@echo "$(GREEN)Done!$(RESET)\n"
+
+-include $(DEP)
 
 $(OBJDIR)/%.o:	$(SRCDIR)/%.cpp
 			@mkdir -p $(@D)
-			@$(CPP) $(CPPFLAGS) $(INCL) -c $< -o $@
-# 			@printf "$(UPDATED)" $@ $(CUR_DIR)
+			@$(CPP) $(CPPFLAGS) $(LDFLAGS) $(INCL) -c $< -o $@
+			@echo "$(GREEN)Compiling: $< into $@$(RESET)"
 
 clean:
-			$(RM) $(OBJDIR)
+			@$(RM) $(OBJDIR)
 # 			@printf "$(REMOVED)" $(OBJDIR) $(CUR_DIR)
 
 fclean: clean
-			$(RM) $(NAME)
+			@$(RM) $(NAME)
 # 			@printf "$(REMOVED)" $(NAME) $(CUR_DIR)
 
 re:			fclean all

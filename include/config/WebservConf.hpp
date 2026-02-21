@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/21 18:46:35 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/21 19:36:51 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 
 #include "ServerConf.hpp"
+#include "conf_parse.hpp"
 
 struct ENDPOINT
 {

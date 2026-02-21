@@ -18,15 +18,15 @@ class Location
 		std::vector<std::string>	index_files;
 		bool						autoindex;
 
-		//redirections 
-		bool		has_redirection;
-		std::string	redir_code;
-		std::string	redir_url;
+		// //redirections 
+		// bool		has_redirection;
+		// std::string	redir_code;
+		// std::string	redir_url;
 
-		//upload
-		bool		upload_enable;
-		std::string upload_path;
-		size_t		client_max_body_size;
+		// //upload
+		// bool		upload_enable;
+		// std::string upload_path;
+		// size_t		client_max_body_size;
 
 
 
