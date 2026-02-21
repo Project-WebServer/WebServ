@@ -40,6 +40,13 @@ void	ServerConf::setRoot(std::string& root)
     this->root = root;
 }
 
+void ServerConf::conversion_listen()
+{
+	if (!conversion_ipv4(this->listen.first, this->listen_ip))
+		throw std::runtime_error("Error: impossible ipv4 conversion.");
+	this->listen_port = static_cast<uint16_t>(this->listen.second);
+}
+
 void ServerConf::setClientBodySize(size_t bodySize)
 {
 	this->client_max_body_size = bodySize;
@@ -66,11 +73,15 @@ void ServerConf::setLocation(Location& loc)
 	this->locations[loc.getPath()] = loc;
 }
 
-const std::pair<std::string, int>& ServerConf::getListen() const
+const int& ServerConf::getPort() const
 {
-	return listen;
+	return this->listen.second;
 }
 
+uint32_t ServerConf::getIpv4() const
+{
+	return this->listen_ip;
+}
 std::string ServerConf::getRoot() const
 {
 	return root;
@@ -107,7 +118,10 @@ void ServerConf::print() const
         std::cout << this->listen.first << ":";
     std::cout << this->listen.second << ";" << std::endl;
 
-    
+	std::cout << "\tlisten network ";
+	std::cout << this->listen_ip << "; "<< this->listen_port << std::endl;
+
+
     if (!this->server_name.empty())
     {
         std::cout << "\tserver_name";
@@ -139,3 +153,15 @@ void ServerConf::print() const
     std::cout << "}" << std::endl;
 }
 
+bool conversion_ipv4(std::string &ip, uint32_t &ipv4)
+{
+    struct addrinfo hints, *res;
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if (getaddrinfo(ip.c_str(), NULL, &hints, &res) != 0)
+        return false;
+    ipv4 = ntohl(((struct sockaddr_in*)res->ai_addr)->sin_addr.s_addr);
+    freeaddrinfo(res);
+    return true;
+}
