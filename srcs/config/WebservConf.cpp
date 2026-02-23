@@ -1,8 +1,27 @@
 #include "../../include/config/WebservConf.hpp"
 
-void WebservConf::pushServer(const ServerConf& serv, const ENDPOINT& endPoint)
+
+void WebservConf::pushServer(const ServerConf &serv, const ENDPOINT &endPoint)
 {
 	server_pool[endPoint].push_back(serv);
+}
+
+const std::vector<ServerConf> *WebservConf::matchServer(const uint32_t ipv4, const int port)
+{
+	ENDPOINT endpoint{ipv4,port};
+	std::vector<ServerConf> *ptr = nullptr;
+
+	std::map<ENDPOINT,std::vector<ServerConf>,ENDPOINTCOMP>::iterator it = server_pool.find(endpoint);
+	if (it != this->server_pool.end())
+		ptr = &it->second;
+	else
+	{
+		endpoint.ip = 0;
+		it = server_pool.find(endpoint);
+		if (it != this->server_pool.end())
+			ptr = &it->second;
+	}
+	return ptr;
 }
 
 int WebservConf::getNumberOfServers() const

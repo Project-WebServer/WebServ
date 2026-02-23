@@ -22,7 +22,7 @@ class ServerConf
 		std::string 						root;
 		std::vector<std::string>			server_name;
 		std::map<int, std::string>			error_pages;
-		std::unordered_map<std::string, Location> 	locations;
+		std::vector<Location> 				locations;
 		//implemente index 
 
 		
@@ -36,7 +36,7 @@ class ServerConf
 			void setListen(std::string &host, int port);
 
 			void setRoot(std::string& root);
-			void conversion_listen();
+			void convert_listen();
 			void setClientBodySize(size_t bodySize);
 			void setServName(std::vector<std::string>& server_name);
 			void setErrorPage(int error_code, std::string& error_path);
@@ -48,13 +48,13 @@ class ServerConf
 			uint32_t getIpv4() const;
 			const std::vector<std::string>& getServName() const;
 			const std::map<int, std::string>& getErrorPage() const;
-			const std::unordered_map<std::string, Location>& getLocation() const;
+			const std::vector<Location>& getLocation() const;
 
 			void print() const;
 			
 };
 
-bool conversion_ipv4(std::string& ip, uint32_t& ipv4);
+bool convert_ipv4(std::string& ip, uint32_t& ipv4);
 
 //standard port 80
 //standard IP 0.0.0.0

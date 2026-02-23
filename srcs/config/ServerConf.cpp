@@ -1,4 +1,5 @@
 #include "../../include/config/ServerConf.hpp"
+#include <cstring> 
 
 
 //set default value 
@@ -38,6 +39,7 @@ void ServerConf::setListen(std::string &host, int port)
 	if (!host.empty())
 		this->listen.first = host;
 	this->listen.second = port;
+	convert_listen();
 	return;
 }
 
@@ -46,9 +48,9 @@ void	ServerConf::setRoot(std::string& root)
     this->root = root;
 }
 
-void ServerConf::conversion_listen()
+void ServerConf::convert_listen()
 {
-	if (!conversion_ipv4(this->listen.first, this->listen_ip))
+	if (!convert_ipv4(this->listen.first, this->listen_ip))
 		throw std::runtime_error("Error: impossible ipv4 conversion.");
 	this->listen_port = static_cast<uint16_t>(this->listen.second);
 }
@@ -76,7 +78,7 @@ void ServerConf::setErrorPage(int error_code, std::string& error_path)
 
 void ServerConf::setLocation(Location& loc)
 {
-	this->locations[loc.getPath()] = loc;
+	this->locations.push_back(loc);
 }
 
 const int& ServerConf::getPort() const
@@ -108,7 +110,7 @@ const std::map<int, std::string> &ServerConf::getErrorPage() const
 	return error_pages;
 }
 
-const std::unordered_map<std::string, Location> &ServerConf::getLocation() const
+const std::vector<Location> &ServerConf::getLocation() const
 {
 	return locations;
 }
@@ -116,6 +118,7 @@ const std::unordered_map<std::string, Location> &ServerConf::getLocation() const
 
 void ServerConf::print() const
 {
+	std::cout << this->listen_ip << " " << this->listen_port << std::endl;
     std::cout << "server {" << std::endl;
 
     
@@ -145,20 +148,21 @@ void ServerConf::print() const
 
     // locations
 	std::cout << "\n" << std::endl;
-    for (std::unordered_map<std::string, Location>::const_iterator it = this->locations.begin();
-         it != this->locations.end(); ++it)
+    for (size_t i = 0; i < this->locations.size(); ++i)
     {
-        std::cout << "\tlocation " << it->first << " {" << std::endl;
-        it->second.print();
+        std::cout << "\tlocation " << locations[i].getPath() << " {" << std::endl;
+        locations[i].print();
         std::cout << "\t}" << std::endl;
     }
 
     std::cout << "}" << std::endl;
 }
 
-bool conversion_ipv4(std::string &ip, uint32_t &ipv4)
+bool convert_ipv4(std::string &ip, uint32_t &ipv4)
 {
     struct addrinfo hints, *res;
+
+	std::memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
 

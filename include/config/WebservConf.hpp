@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/21 19:36:51 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/23 16:02:15 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 struct ENDPOINT
 {
 	uint32_t	ip;
-	int	port;
+	int			port;
 };
 
 struct ENDPOINTCOMP
@@ -44,7 +44,7 @@ class WebservConf
 			WebservConf(){};
 			~WebservConf(){};
 			
-			// std::shared_ptr<ServerConf> findServer(std::string& host, int port);
+			const std::vector<ServerConf>* matchServer(const uint32_t ipv4,const int port);
 			void 	pushServer(const ServerConf& serv, const ENDPOINT& endPoint);
 			int		getNumberOfServers() const;
 
