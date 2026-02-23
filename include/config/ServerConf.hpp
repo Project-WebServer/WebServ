@@ -21,7 +21,7 @@ class ServerConf
 		size_t								client_max_body_size;
 		std::string 						root;
 		std::vector<std::string>			server_name;
-		std::map<int, std::string>			erro_pages;
+		std::map<int, std::string>			error_pages;
 		std::unordered_map<std::string, Location> 	locations;
 		//implemente index 
 

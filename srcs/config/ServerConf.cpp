@@ -8,11 +8,17 @@
 //client_max_body_size = 1m
 ServerConf::ServerConf(): listen("0.0.0.0", 80),
 	client_max_body_size(1024*1024),
-	root("www/html")
+	root("")
 {
 	server_name.push_back("");
-
-	//set default erro_pages location 
+	error_pages[400] = "/error_pages/400.html";
+	error_pages[403] = "/error_pages/403.html";
+	error_pages[404] = "/error_pages/404.html";
+	error_pages[405] = "/error_pages/405.html";
+	error_pages[413] = "/error_pages/413.html";
+	error_pages[500] = "/error_pages/500.html";
+	error_pages[502] = "/error_pages/502.html";
+	
 }
 
 ServerConf &ServerConf::operator=(const ServerConf &other)
@@ -22,7 +28,7 @@ ServerConf &ServerConf::operator=(const ServerConf &other)
 		listen = other.listen;
 		server_name = other.server_name;
 		client_max_body_size = other.client_max_body_size;
-		erro_pages = other.erro_pages;
+		error_pages = other.error_pages;
 		locations = other.locations;
 	}
 	return *this;
@@ -65,7 +71,7 @@ void ServerConf::setServName(std::vector<std::string>& server_name)
 
 void ServerConf::setErrorPage(int error_code, std::string& error_path)
 {
-	this->erro_pages[error_code] = error_path;
+	this->error_pages[error_code] = error_path;
 }
 
 void ServerConf::setLocation(Location& loc)
@@ -99,7 +105,7 @@ const std::vector<std::string> &ServerConf::getServName() const
 
 const std::map<int, std::string> &ServerConf::getErrorPage() const
 {
-	return erro_pages;
+	return error_pages;
 }
 
 const std::unordered_map<std::string, Location> &ServerConf::getLocation() const
@@ -127,13 +133,13 @@ void ServerConf::print() const
         std::cout << ";" << std::endl;
     }
 
-    
+	std::cout << "\troot " << root + ";\n";
     std::cout << "\tclient_max_body_size " << this->client_max_body_size << ";" << std::endl;
 
-    if (!this->erro_pages.empty())
+    if (!this->error_pages.empty())
     {
-        for (std::map<int, std::string>::const_iterator it = this->erro_pages.begin();
-             it != this->erro_pages.end(); ++it)
+        for (std::map<int, std::string>::const_iterator it = this->error_pages.begin();
+             it != this->error_pages.end(); ++it)
             std::cout << "\terror_page " << it->first << " " << it->second << ";" << std::endl;
     }
 

@@ -20,12 +20,12 @@ configuration module
 		//verify here if the path is valid with stat / access??
 		// handle the path to ww in our directory 
 
-	//set default erro_pages location 
+	//set default error_pages location 
 		ServerConf::ServerConf(): listen("0.0.0.0", 80),
 			client_max_body_size(1024*1024)
 		{
 			server_name.push_back("");
-			//set default erro_pages location 
+			//set default error_pages location 
 		}
 
 	// definir # define DEFAULT_ROOT = "../../www" 
@@ -35,3 +35,9 @@ configuration module
 	set default server conf
 
 ------ 
+
+// add more default error_pages in ServerConf constructor 
+
+edge cases: the conf dont suport host and port - just listen (host + port)
+
+//change conf_parse.hpp: move function to static

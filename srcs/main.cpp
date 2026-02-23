@@ -1,13 +1,22 @@
 #include "../include/io/socket.hpp"
 #include "../include/config/WebservConf.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
 	ConfToken 	confFile;
 	WebservConf	Webserv;
+	if (argc > 2)
+	{
+		std::cout << "Error: invalid parameters\n";
+		return 1;
+	}
+
 	try
 	{
-		confFile.setFile("srcs/exemple.conf");
+		if (argc == 2)
+			confFile.setFile(argv[1]);
+		else
+			confFile.setFile("conf_files/default.conf");
 	}
 	catch(const std::exception& e)
 	{
@@ -23,10 +32,10 @@ int main()
 	}
 	Webserv.print();
 	
-	Server s;
+	// Server s;
 
-	if(s.start() != 0)
-		return (1);
-	s.run();
+	// if(s.start() != 0)
+	// 	return (1);
+	// s.run();
 	return 0;
 }

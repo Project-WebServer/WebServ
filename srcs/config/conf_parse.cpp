@@ -50,7 +50,7 @@ std::string ConfToken::_convertTokenType(tokenType type)
         case tokenType::INDEX:           return "index";
         case tokenType::AUTO_INDEX:      return "autoindex";
         case tokenType::SERVER_NAME:     return "server_name";
-        case tokenType::UNKNOWN:         return "unknown";
+        case tokenType::UNKNOWN:         return "";
 		default: 						break;	
     }
 	return "Undefined";
@@ -58,6 +58,7 @@ std::string ConfToken::_convertTokenType(tokenType type)
 
 std::string ConfToken::catTokens(TokenLine& tokenLine)
 {
+
 	std::string s(ConfToken::_convertTokenType(tokenLine.first) + " ");
 	std::vector<std::string> &v = tokenLine.second;
 	for(size_t i = 0; i < v.size(); ++i)
@@ -85,6 +86,8 @@ void ConfToken::getNextLine(TokenLine& tokens)
 		{
 			tokens.first = _getTokenType(value);
 			std::vector<std::string>	values;
+			if (tokens.first == tokenType::UNKNOWN)
+				values.push_back(value);
 			while(ss >> value)
 				values.push_back(value);
 			tokens.second = values;
@@ -171,7 +174,7 @@ void	setRootServer(TokenLine &tokenLine, ServerConf& server)
         throw std::runtime_error("Error: invalid server root directive near token " + ConfToken::catTokens(tokenLine));
     std::string &root = token[0];
     if (root.front() != '/')
-        throw std::runtime_error("Error: invalid server root path near token " + ConfToken::catTokens(tokenLine));
+        throw std::runtime_error("Error: invalid server root path near token " + ConfToken::catTokens(tokenLine) + ": missing token '/'");
     server.setRoot(root);
 }
 
@@ -281,7 +284,7 @@ void setErrorPageServer(TokenLine &tokenLine, ServerConf& server)
 	server.setErrorPage(error_code, error_path);
 }
 
-void setLocationServer(TokenLine &tokenLine, ConfToken& confile, ServerConf& server)
+void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& server)
 {
 	Location loc;
 
@@ -297,7 +300,7 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confile, ServerConf& ser
 	TokenLine loc_TokenLine;
 	while (true)
 	{
-		loc_TokenLine = confile.getNextToken();
+		loc_TokenLine = confFile.getNextToken();
 		if (loc_TokenLine.first == tokenType::ENDOF)
 			throw std::runtime_error("Erro: Missing '}' close directive block (location) near " + ConfToken::catTokens(loc_TokenLine));
 		if (loc_TokenLine.first == tokenType::BLOCK_CLOSE)
@@ -319,8 +322,7 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confile, ServerConf& ser
 				setAutoindexLocation(loc_TokenLine, loc);
 				break;
 			default:
-				continue; //handle it better 
-			//unkhown case and more cases
+				throw std::runtime_error("Error: UNKNOWN token type near " + confFile.catTokens(loc_TokenLine));
 			}
 		}
 		catch (std::exception &e)
@@ -448,7 +450,7 @@ error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tok
 				setLocationServer(ServTokenLine, confFile, server);
 				break;
 			default:
-				continue; //handle it better 
+				return {false, "Error: UNKNOWN token type near " + confFile.catTokens(ServTokenLine)};
 			}
 		}
 		catch (std::exception &e)
@@ -480,10 +482,7 @@ error_conf setWebservConf(WebservConf &webserv, ConfToken& confFile)
 			webserv.pushServer(server, endPoint);
 		}
 		else
-		{
-			std::cout << "UNKNOWN token type\n";
-			exit(1); ///implementar retorno pois nao chama destructor locais
-		}
+			return {false, "Error: UNKNOWN token type near " + confFile.catTokens(tokenLine)};
 
 	}
 	return {true, "Success"};
