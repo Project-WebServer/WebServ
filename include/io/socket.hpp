@@ -19,10 +19,22 @@
 class Server
 {
 	private:
+		struct Connection
+		{
+			std::string in_buf;
+			std::string out_buf;
+			size_t o_buf;
+			bool want_write;
+			bool should_close;
+			//timestamps
+			//last_activity
+		};
+
 		int _listen_fd;
 		sockaddr_in _addr;//register socket by its address (IP + port)
 		std::vector<pollfd> _pfds;
-		std::set<int> _clients;
+		// std::set<int> _clients;
+		std::map<int, Connection> _conns;
 
 		void _addListenFd();
 		void _acceptClients();
@@ -38,5 +50,7 @@ class Server
 		void run();
 		
 };
+
+
 
 #endif

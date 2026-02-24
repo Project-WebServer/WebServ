@@ -1,4 +1,4 @@
-#include "socket.hpp"
+#include "io/socket.hpp"
 //socket() → bind() → listen() → accept() → poll()
 
 Server::Server() : _listen_fd(-1)
@@ -25,23 +25,24 @@ void Server::_acceptClients()
 {
 	while(true)
 	{
-		int cfd = accept(_listen_fd, NULL, NULL);
-		if(cfd >= 0)
+		int c_fd = accept(_listen_fd, NULL, NULL);
+		if(c_fd >= 0)
 		{
-			int flags = fcntl(cfd, F_GETFL, 0);
-			if(flags < 0 || fcntl(cfd, F_SETFL, flags | O_NONBLOCK) < 0)
+			int flags = fcntl(c_fd, F_GETFL, 0);//file control help change or read fd settings
+			if(flags < 0 || fcntl(c_fd, F_SETFL, flags | O_NONBLOCK) < 0)
 			{
 				std::cerr << "fcntl() failed: " << std::strerror(errno) << std::endl;
-				close(cfd);
+				close(c_fd);
 				continue;
 			}
 			pollfd p;
-			p.fd = cfd;
+			p.fd = c_fd;
 			p.events = POLLIN;
 			p.revents = 0;
 			_pfds.push_back(p);
-			_clients.insert(cfd);
-			std::cout << "accepted cient fd"<< cfd << std::endl;
+			// _clients.insert(c_fd);
+			_conns[c_fd] = Connection();
+			std::cout << "accepted cient fd"<< c_fd << std::endl;
 			// //response for testing!!!
 			// const char resp[] =
 			// "HTTP/1.1 200 OK\r\n"
@@ -49,7 +50,7 @@ void Server::_acceptClients()
 			// "Connection: close\r\n"
 			// "\r\n"
 			// "Hello\n"
-			// send(cfd, resp, sizeof(resp) - 1, 0);//
+			// send(c_fd, resp, sizeof(resp) - 1, 0);//
 			continue;
 		}
 		if(errno == EAGAIN || errno == EWOULDBLOCK)
@@ -76,7 +77,7 @@ void Server::_removeFd(size_t indx)
 	int fd = _pfds[indx].fd;
 
 	close(fd);
-	_clients.erase(fd);
+	_conns.erase(fd);
 	_pfds.erase(_pfds.begin() + indx);
 }
 
@@ -84,6 +85,7 @@ int Server::start()
 {
 	int yes = 1;
 	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
+	//add flag NONBLOCKING through fcntl??
 	if(_listen_fd < 0)
 	{
 		std::cerr << "socket() failed: " << std::strerror(errno) << std::endl;//write handle error func
@@ -107,7 +109,7 @@ int Server::start()
 		return (1);
 	}
 	//this sfd can listen up to 128 client and put them in a queue before accept() and said that its a server not client
-	if(listen(_listen_fd, 128) < 0)
+	if(listen(_listen_fd, 128) < 0)// 128 - backlog
 	{
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
 		return (1);
@@ -125,7 +127,7 @@ int Server::start()
 		return 1;
 	}
 	_pfds.clear();
-	_clients.clear();
+	_conns.clear();
 	_addListenFd();
 	std::cout << "socket fd = " << _listen_fd << std::endl;
 	std::cout << "listening to fd = " << _listen_fd << std::endl;
@@ -150,7 +152,6 @@ void Server::run ()
 			return;
 		if (_pfds[0].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
 			_acceptClients();
-		_pfds[0].revents = 0;//not nessesary. only for debug
 		for (size_t i = 1; i < _pfds.size(); )
 		{
 			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
@@ -161,19 +162,28 @@ void Server::run ()
 
 			if(_pfds[i].revents & POLLIN)
 			{
+				int fd = _pfds[i].fd;
+				// Connection &c = _conns[fd];
 				char buf[4096];
-				ssize_t n = recv(_pfds[i].fd, buf, sizeof(buf), 0);
+				ssize_t n = recv(fd, buf, sizeof(buf), 0);
 				if(n > 0)
 				{
-					std::cout << "----received " << n << " bytes on fd " << _pfds[i].fd << "----" << std::endl;
+					_conns[fd].in_buf.append(buf, n);
+					//i own al buffers, not track B
+					std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
 					std::cout.write(buf, n);
 					std::cout << std::endl;
 					std::cout << "----------------------" << std::endl;
+					//logic for append to buf;// witout desiding the boundaries of request(NEED_MORE, COMPLETE, EROOR(enum???))
+					//call htt parser here??
+						//bytes send > 0 ==> delete from buf?
+					//switch to pollout for this fd??
+					///how exactly w comunicate with track c?
 				}
-				_removeFd(i);
+				if(n == 0 || n < 0)
+					_removeFd(i);
 				continue;
 			}
-			_pfds[i].revents = 0;
 			i++;
 		}
 	}
