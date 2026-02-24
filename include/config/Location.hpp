@@ -31,7 +31,7 @@ class Location
 
 
 		public:
-			Location();
+			Location(const std::string& servRoot);
 			//set copy constructor
 			Location& operator=(const Location& other);
 			~Location(){};

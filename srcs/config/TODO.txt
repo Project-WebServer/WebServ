@@ -1,6 +1,5 @@
 configuration module 
-	Use smart pointer to set server and location instead of copy =;
-
+	
 	// implement root in ServeConf class
 	// matching path = root + path + uri
 
@@ -16,19 +15,11 @@ configuration module
 			size_t		client_max_body_size;
 
 	ROOT Path (setRoot())
-		//where is the root in our webserver (where we gonna put our static files)
 		//verify here if the path is valid with stat / access??
 		// handle the path to ww in our directory 
 
-	//set default error_pages location 
-		ServerConf::ServerConf(): listen("0.0.0.0", 80),
-			client_max_body_size(1024*1024)
-		{
-			server_name.push_back("");
-			//set default error_pages location 
-		}
 
-	// definir # define DEFAULT_ROOT = "../../www" 
+	// definir # define DEFAULT_ROOT = "../../data" 
 		implement getServerRoot , creat function to match the root with server root. 
 
 	set logic to handle empty conf file
@@ -39,5 +30,10 @@ configuration module
 // add more default error_pages in ServerConf constructor 
 
 edge cases: the conf dont suport host and port - just listen (host + port)
+bad conf file :parsing error
+		if (root == ""), after parsing, root == "". 
+		check other directives.
+		
+			
 
 //change conf_parse.hpp: move function to static

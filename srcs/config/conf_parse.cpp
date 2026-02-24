@@ -286,7 +286,7 @@ void setErrorPageServer(TokenLine &tokenLine, ServerConf& server)
 
 void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& server)
 {
-	Location loc;
+	Location loc(server.getRoot());
 
 	try
 	{
