@@ -115,6 +115,20 @@ const std::vector<Location> &ServerConf::getLocation() const
 	return locations;
 }
 
+//uri should start with /
+// const Location *ServerConf::matchLocation(std::string &uri) const
+// {
+// 	Location *ptr = nullptr;
+// 	std::string root;
+
+// 	for (size_t i = 0; i < this->locations.size(); ++i)
+// 	{
+// 		root = this->locations[i].getRoot();
+// 		if (root.back() == '/')
+// 			root.pop_back();
+// 		std::string path = root + uri;
+// 	}
+// }
 
 void ServerConf::print() const
 {

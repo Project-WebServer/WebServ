@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/23 16:02:15 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/24 20:07:39 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@ struct ENDPOINTCOMP
 class WebservConf
 {
 	private:
-		std::map<ENDPOINT,std::vector<ServerConf>,ENDPOINTCOMP> server_pool;
+		std::map<ENDPOINT,std::vector<ServerConf>,ENDPOINTCOMP> virtual_servers;
+		std::vector<int>										available_ports;
 
 		public:
 			WebservConf(){};
@@ -47,6 +48,7 @@ class WebservConf
 			const std::vector<ServerConf>* matchServer(const uint32_t ipv4,const int port);
 			void 	pushServer(const ServerConf& serv, const ENDPOINT& endPoint);
 			int		getNumberOfServers() const;
+			const std::vector<int>& getAvailablePorts();  
 
 			void print() const;
 };

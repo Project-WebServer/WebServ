@@ -30,8 +30,16 @@ int main(int argc, char **argv)
 		std::cout << status.error_msg + "\n";
 		return 1;
 	}
-	Webserv.print();
-	
+	// const std::vector<ServerConf>* ptr = nullptr;
+	// ptr = Webserv.matchServer(0, 8080);
+	// if (ptr != nullptr)
+	// {
+	// 	std::cout << ptr->size() << "\n"; 
+	// 	ptr->front().print();
+	// }
+
+	std::cout << "Available port: " << Webserv.getAvailablePorts().front() << std::endl;
+
 	// Server s;
 
 	// if(s.start() != 0)
@@ -39,3 +47,6 @@ int main(int argc, char **argv)
 	// s.run();
 	return 0;
 }
+
+// Webserv.getAvailablePorts(); return a vector<int> with all port we have available to listen to
+	//for now just vector[0] = 8080;

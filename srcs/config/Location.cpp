@@ -4,8 +4,8 @@
 
 //set default values for root. shoult it be srcs?? or what
 // matching path = root + path + uri
-Location::Location(): path(""), 
-    root(""), 
+Location::Location(const std::string& servRoot): path(""), 
+    root(servRoot), 
     autoindex(false) 
     // has_redirection(false),
     // upload_enable(false)
