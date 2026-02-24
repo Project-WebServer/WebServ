@@ -22,6 +22,12 @@ class Server
 		struct Connection
 		{
 			std::string in_buf;
+			std::string out_buf;
+			size_t o_buf;
+			bool want_write;
+			bool should_close;
+			//timestamps
+			//last_activity
 		};
 
 		int _listen_fd;
