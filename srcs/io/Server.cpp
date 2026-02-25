@@ -40,17 +40,8 @@ void Server::_acceptClients()
 			p.events = POLLIN;
 			p.revents = 0;
 			_pfds.push_back(p);
-			// _clients.insert(c_fd);
 			_conns[c_fd] = Connection();
 			std::cout << "accepted cient fd"<< c_fd << std::endl;
-			// //response for testing!!!
-			// const char resp[] =
-			// "HTTP/1.1 200 OK\r\n"
-			// "Content-Length: 5\r\n"
-			// "Connection: close\r\n"
-			// "\r\n"
-			// "Hello\n"
-			// send(c_fd, resp, sizeof(resp) - 1, 0);//
 			continue;
 		}
 		if(errno == EAGAIN || errno == EWOULDBLOCK)
@@ -76,7 +67,7 @@ void Server::_buildResponse(size_t indx)
 	int fd = _pfds[indx].fd;
 	Connection &c = _conns[fd];
 
-	if(c.want_write)
+	if(c.ready_to_write)
 		return;
 	if(c.in_buf.find("\r\n\r\n") == std::string::npos)
 		return;
@@ -87,8 +78,8 @@ void Server::_buildResponse(size_t indx)
         "\r\n"
         "Hello\n";
 	c.out_buf.assign(response, sizeof(response) - 1);
-	c.want_write = true;
-	c.should_close = true;
+	c.ready_to_write = true;
+	c.empty_out = true;
 
 	_pfds[indx].events = POLLOUT;
 }
@@ -115,6 +106,7 @@ void Server::_handleClientError(size_t indx)
 void Server::_handleClientReadable(size_t indx)
 {
 	int fd = _pfds[indx].fd;
+	Connection &c = _conns[fd];
 	char buf[4096];
 	while(true)
 	{
@@ -122,18 +114,37 @@ void Server::_handleClientReadable(size_t indx)
 		if(n > 0)
 		{
 			_conns[fd].in_buf.append(buf, n);
-			//i own all buffers, not track B
+			c.last_activity = time(NULL);
+			//--------temporary------//
 			std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
 			std::cout.write(buf, n);
 			std::cout << std::endl;
 			std::cout << "----------------------" << std::endl;
-			//logic for append to buf;// witout desiding the boundaries of request(NEED_MORE, COMPLETE, EROOR(enum???))
-			//call htt parser here??
-				//bytes send > 0 ==> delete from buf?
-			//switch to pollout for this fd??
-			///how exactly w comunicate with track c?
 			_buildResponse(indx);
-			continue;
+			//--------temporary------//
+			// this is the place to call http parser which read from in_buf
+			//ParseResult result = HttpParser::feed(c.in_buf, c.request) (NEED_MORE, COMPLETE, ERROR(enum???)// do i realy need an reques here
+			//if(result = NEED_MORE)
+			//	continue;
+			//if(result = ERROR)
+			// {
+            //     track B said thad request is not valid
+            //     send 400 Bad Request and close
+            //     c.out_buf = HttpResponse::makeError(400);
+            //     c.state = CLOSING;
+            //     _pfds[indx].events = POLLOUT;
+            //     return;
+            // }
+			// if (result == COMPLETE)
+            // {
+            	// --- Pass to track C---
+            	// Router::handle() return serialized answer as a string
+				// c.out_buf = Router::handle(c.request);
+				//c.keep_alive = c.request.isKeepAlive();
+				//c.state = SENDING_RESPONSE;
+				//_pfds[indx].events = POLLOUT;
+				//return;
+			//}
 		}
 		if(n == 0)
 		{
@@ -155,24 +166,28 @@ void Server::_handleClientWritable(size_t indx)
 
 	if(c.out_buf.empty())
 	{
-		if(c.should_close)
+		if(c.empty_out)
 			_removeFd(indx);
 		else
 		{
-			c.want_write = false;
-			_pfds[indx].events = POLLIN;
+			c.ready_to_write = false;
+			_pfds[indx].events = POLLIN;// still waiting
 		}
-		_pfds[indx].revents = 0;
 		return;
 	}
 	
-	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);
+	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);//bytes
+	if(n <= 0)
+	{
+		_removeFd(indx);
+		return;
+	}
 	if (n > 0)
 	{
 		c.out_buf.erase(0, n);
 		if (c.out_buf.empty())
 		{
-			if(c.should_close)
+			if(c.empty_out)
 			{
 				_removeFd(indx);
 				return;
@@ -182,15 +197,14 @@ void Server::_handleClientWritable(size_t indx)
 			return;
 		}
 	}
-	_removeFd(indx);
 }
 
 void Server::_resetConnection(Connection &c)
 {
 	c.in_buf.clear();
 	c.out_buf.clear();
-	c.want_write = false;
-	c.should_close = false;
+	c.ready_to_write = false;
+	c.empty_out = false;
 }
 
 int Server::start()
@@ -214,7 +228,6 @@ int Server::start()
 	_addr.sin_port = htons(8080);
 
 	//connect socket to IP:PORT
-	//int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 	if(bind(_listen_fd, reinterpret_cast<sockaddr*>(&_addr), sizeof(_addr)) < 0)
 	{
 		std::cerr << "bind() failed: " << std::strerror(errno) << std::endl;
@@ -252,7 +265,8 @@ void Server::run ()
 
 	while (true)
 	{
-		ready = poll(_pfds.data(), _pfds.size(), -1);//timeout -1 - wait forewer(later 1000 in mcsec)
+		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
+		//check timeout here
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
@@ -285,6 +299,7 @@ void Server::run ()
 			i++;
 		}
 	}
+	//managr cgi fds somewhere here in run
 }
 
 
