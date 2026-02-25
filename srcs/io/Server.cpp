@@ -1,4 +1,4 @@
-#include "io/socket.hpp"
+#include "io/Server.hpp"
 //socket() → bind() → listen() → accept() → poll()
 
 Server::Server() : _listen_fd(-1)
@@ -81,6 +81,52 @@ void Server::_removeFd(size_t indx)
 	_pfds.erase(_pfds.begin() + indx);
 }
 
+void Server::_handleListenReadable()
+{
+	_acceptClients();
+}
+
+void Server::_handleClientError(size_t indx)
+{
+	_removeFd(indx);
+}
+
+void Server::_handleClientReadable(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+	// Connection &c = _conns[fd];
+	char buf[4096];
+	while(true)
+	{
+		ssize_t n = recv(fd, buf, sizeof(buf), 0);
+		if(n > 0)
+		{
+			_conns[fd].in_buf.append(buf, n);
+			//i own all buffers, not track B
+			std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
+			std::cout.write(buf, n);
+			std::cout << std::endl;
+			std::cout << "----------------------" << std::endl;
+			//logic for append to buf;// witout desiding the boundaries of request(NEED_MORE, COMPLETE, EROOR(enum???))
+			//call htt parser here??
+				//bytes send > 0 ==> delete from buf?
+			//switch to pollout for this fd??
+			///how exactly w comunicate with track c?
+			continue;
+		}
+		if(n == 0)
+		{
+			_removeFd(indx);
+			return;
+		}
+		if(n < 0)
+		{
+			_removeFd(indx);
+			return;
+		}
+	}
+}
+
 int Server::start()
 {
 	int yes = 1;
@@ -144,44 +190,24 @@ void Server::run ()
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
-				continue;// for signa interaption - keep waiting, not break the loop;
+				continue;// for signal interaption - keep waiting, not break the loop;
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
 		}
 		if (_pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			return;
 		if (_pfds[0].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
-			_acceptClients();
+			_handleListenReadable();
 		for (size_t i = 1; i < _pfds.size(); )
 		{
 			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
-				_removeFd(i);
+				_handleClientError(i);
 				continue;
 			}
-
 			if(_pfds[i].revents & POLLIN)
 			{
-				int fd = _pfds[i].fd;
-				// Connection &c = _conns[fd];
-				char buf[4096];
-				ssize_t n = recv(fd, buf, sizeof(buf), 0);
-				if(n > 0)
-				{
-					_conns[fd].in_buf.append(buf, n);
-					//i own al buffers, not track B
-					std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
-					std::cout.write(buf, n);
-					std::cout << std::endl;
-					std::cout << "----------------------" << std::endl;
-					//logic for append to buf;// witout desiding the boundaries of request(NEED_MORE, COMPLETE, EROOR(enum???))
-					//call htt parser here??
-						//bytes send > 0 ==> delete from buf?
-					//switch to pollout for this fd??
-					///how exactly w comunicate with track c?
-				}
-				if(n == 0 || n < 0)
-					_removeFd(i);
+				_handleClientReadable(i);
 				continue;
 			}
 			i++;
