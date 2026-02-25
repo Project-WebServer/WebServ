@@ -67,20 +67,26 @@ void Server::_buildResponse(size_t indx)
 	int fd = _pfds[indx].fd;
 	Connection &c = _conns[fd];
 
-	if(c.ready_to_write)
+	if(c.state != READING_REQUEST)
 		return;
 	if(c.in_buf.find("\r\n\r\n") == std::string::npos)
 		return;
-	const char response[] =
-		"HTTP/1.1 200 OK\r\n"
-        "Content-Length: 6\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-        "Hello\n";
-	c.out_buf.assign(response, sizeof(response) - 1);
-	c.ready_to_write = true;
-	c.empty_out = true;
-
+	std::cout << "=== REQUEST ON fd " << fd << " ===" << std::endl;
+    std::cout << c.in_buf << std::endl;
+    std::cout << "=======================" << std::endl;
+	std::string body = "received " 
+                     + std::to_string(c.in_buf.size()) 
+                     + " bytes\n"
+                     + c.in_buf;
+	std::string response =
+       "HTTP/1.1 200 OK\r\n"
+       "Content-Type: text/plain\r\n"
+       "Content-Length: " + std::to_string(body.size()) + "\r\n"
+       "Connection: close\r\n"
+       "\r\n"
+       + body;
+	c.out_buf = response;
+	c.state = SENDING_RESPONSE;
 	_pfds[indx].events = POLLOUT;
 }
 
@@ -166,45 +172,45 @@ void Server::_handleClientWritable(size_t indx)
 
 	if(c.out_buf.empty())
 	{
-		if(c.empty_out)
-			_removeFd(indx);
-		else
+		if(c.state == CLOSING)
 		{
-			c.ready_to_write = false;
-			_pfds[indx].events = POLLIN;// still waiting
+			_removeFd(indx);
+			return;
 		}
+		_resetConnection(c);
+		_pfds[indx].events = POLLIN;
 		return;
 	}
 	
 	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);//bytes
-	if(n <= 0)
+	if(n < 0)
 	{
 		_removeFd(indx);
 		return;
 	}
-	if (n > 0)
+	if(n == 0)
 	{
-		c.out_buf.erase(0, n);
-		if (c.out_buf.empty())
-		{
-			if(c.empty_out)
-			{
-				_removeFd(indx);
-				return;
-			}
-			_resetConnection(c);
-			_pfds[indx].events = POLLIN;
-			return;
-		}
+		_removeFd(indx);
+		return;
 	}
+	c.out_buf.erase(0, n);
+	if (c.out_buf.empty())
+		return;
+	if(c.state == CLOSING || !c.keep_alive)
+	{
+		_removeFd(indx);
+		return;
+	}
+	_resetConnection(c);
+	_pfds[indx].events = POLLIN;
 }
 
 void Server::_resetConnection(Connection &c)
 {
 	c.in_buf.clear();
 	c.out_buf.clear();
-	c.ready_to_write = false;
-	c.empty_out = false;
+	c.state = READING_REQUEST;
+	c.keep_alive = false;
 }
 
 int Server::start()

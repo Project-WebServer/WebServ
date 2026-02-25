@@ -2,7 +2,7 @@
 #define CONNECTION_HPP
 
 # include <string>
-# include "http/request.hpp "
+// # include "src/http/request.hpp "
 
 enum ParseState
 {
@@ -18,7 +18,7 @@ struct CgiState
 	pid_t		pid;// for waitpid()
 	std::string	cgi_buf;//collect CGI output
 	time_t		started_at;//for CGI timeout
-}
+};
 
 struct Connection
 {
