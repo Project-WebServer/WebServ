@@ -290,7 +290,7 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& se
 
 	try
 	{
-		setPathLocation(tokenLine, loc);
+		setPrefixLocation(tokenLine, loc);
 	}
 	catch (std::exception &e)
 	{
@@ -335,7 +335,7 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& se
 
 //-----------Location validation--------//
 //no implementantion of modifiers (=, ~, ~*, ^~, '')
-void	setPathLocation(TokenLine &tokenLine, Location& loc)
+void	setPrefixLocation(TokenLine &tokenLine, Location& loc)
 {
     std::vector<std::string> &location = tokenLine.second;
 	if (location.size() == 1 && location[0].size() > 1 && location[0].front() == '/' && location[0].back() == '{')
@@ -348,11 +348,11 @@ void	setPathLocation(TokenLine &tokenLine, Location& loc)
     if (location[1] != "{")
         throw std::runtime_error("Error: missing open block '{' location near token " + ConfToken::catTokens(tokenLine));
     
-    std::string &path = location[0];
-    if (path.front() != '/')
+    std::string &prefix= location[0];
+    if (prefix.front() != '/')
         throw std::runtime_error("Error: invalid location path near token " + ConfToken::catTokens(tokenLine));
 	
-    loc.setPath(path);
+    loc.setPrefix(prefix);
 }
 
 void	setRootLocation(TokenLine &tokenLine, Location& loc)

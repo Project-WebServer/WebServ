@@ -3,8 +3,8 @@
 
 
 //set default values for root. shoult it be srcs?? or what
-// matching path = root + path + uri
-Location::Location(const std::string& servRoot): path(""), 
+// matching path = root + uri
+Location::Location(const std::string& servRoot): prefix(""), 
     root(servRoot), 
     autoindex(false) 
     // has_redirection(false),
@@ -17,7 +17,7 @@ Location &Location::operator=(const Location &other)
 {
 	if (this != &other)
 	{
-		path = other.path;
+		prefix = other.prefix;
 		root = other.root;
 		allowed_methods = other.allowed_methods;
 		index_files = other.index_files;
@@ -28,9 +28,9 @@ Location &Location::operator=(const Location &other)
 }
 
 
-void	Location::setPath(std::string& path)
+void	Location::setPrefix(std::string& prefix)
 {
-    this->path = path;
+    this->prefix = prefix;
 }
 
 //where is the root in our webserver (where we gonna put our static files)
@@ -57,9 +57,9 @@ void Location::setAutoindex_On()
 	this->autoindex = true;
 }
 
-std::string Location::getPath() const
+std::string Location::getPrefix() const
 {
-	return this->path;
+	return this->prefix;
 }
 
 std::string Location::getRoot() const

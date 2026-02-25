@@ -11,7 +11,6 @@
 #include "Location.hpp"
 
 
-
 class ServerConf
 {
 	private:
@@ -50,7 +49,7 @@ class ServerConf
 			const std::map<int, std::string>& getErrorPage() const;
 			const std::vector<Location>& getLocation() const;
 
-			// const Location* matchLocation(std::string& uri) const;
+			const Location* matchLocation(std::string& uri) const;
 			void print() const;
 			
 };

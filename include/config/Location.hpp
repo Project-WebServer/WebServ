@@ -12,7 +12,7 @@ enum struct httpMethod;
 class Location
 {
 	private:
-		std::string 				path;
+		std::string 				prefix;
 		std::string					root;
 		std::set<httpMethod>		allowed_methods;
 		std::vector<std::string>	index_files;
@@ -37,13 +37,13 @@ class Location
 			~Location(){};
 
 			//getters
-			void	setPath(std::string& path);
+			void	setPrefix(std::string& prefix);
 			void	setRoot(std::string& root);
 			void	setAllowed_methods(std::string method);
 			void	setIndex_files(std::string index_file);
 			void	setAutoindex_On();
 
-			std::string						getPath() const; 
+			std::string						getPrefix() const; 
 			std::string						getRoot() const; 
 			std::vector<std::string> 		getAllowed_methods() const; // for debug 
 			const std::vector<std::string>&	getIndex_files() const; // 

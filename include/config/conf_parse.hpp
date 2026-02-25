@@ -76,7 +76,7 @@ void 			setClientSizeServer(TokenLine &tokenLine, ServerConf& server);
 void 			setNameServer(TokenLine &tokenLine, ServerConf& server);
 void 			setErrorPageServer(TokenLine &tokenLine, ServerConf& server);
 void			setLocationServer(TokenLine &tokenLine, ConfToken& confile, ServerConf& server);
-void			setPathLocation(TokenLine &tokenLine, Location& loc);
+void			setPrefixLocation(TokenLine &tokenLine, Location& loc);
 void			setRootLocation(TokenLine &tokenLine, Location& loc);
 void			setAllowed_methodsLocation(TokenLine &tokenLine, Location& loc);
 void			setIndex_filesLocation(TokenLine &tokenLine, Location& loc);

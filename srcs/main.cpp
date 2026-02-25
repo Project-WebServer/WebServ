@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	// 	ptr->front().print();
 	// }
 
-	std::cout << "Available port: " << Webserv.getAvailablePorts().front() << std::endl;
+	std::cout << "Available port: " << Webserv.getAvailablePorts()[0] << std::endl;
 
 	// Server s;
 

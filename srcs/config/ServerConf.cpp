@@ -115,20 +115,33 @@ const std::vector<Location> &ServerConf::getLocation() const
 	return locations;
 }
 
-//uri should start with /
-// const Location *ServerConf::matchLocation(std::string &uri) const
-// {
-// 	Location *ptr = nullptr;
-// 	std::string root;
+static bool	matchPrefix(const std::string& prefix, std::string& uri)
+{
+	if (uri.size() < prefix.size())
+		return false;
+	if (uri.compare(0, prefix.size(), prefix) != 0)
+		return false;
+	if (uri.size() == prefix.size())
+		return true;
+	return prefix.back() == '/' || uri[prefix.size()] == '/';
+}
 
-// 	for (size_t i = 0; i < this->locations.size(); ++i)
-// 	{
-// 		root = this->locations[i].getRoot();
-// 		if (root.back() == '/')
-// 			root.pop_back();
-// 		std::string path = root + uri;
-// 	}
-// }
+const Location *ServerConf::matchLocation(std::string &uri) const
+{
+	const Location *bestLoc = nullptr;
+	size_t			bestLength = 0;
+
+	for (size_t i = 0; i < this->locations.size(); ++i)
+	{	
+		std::string prefix = this->locations[i].getPrefix();
+		if (matchPrefix(prefix, uri) && prefix.size() > bestLength)
+		{
+			bestLoc = &locations[i];
+			bestLength = prefix.size();
+		}
+	}
+	return bestLoc;
+}
 
 void ServerConf::print() const
 {
@@ -164,7 +177,7 @@ void ServerConf::print() const
 	std::cout << "\n" << std::endl;
     for (size_t i = 0; i < this->locations.size(); ++i)
     {
-        std::cout << "\tlocation " << locations[i].getPath() << " {" << std::endl;
+        std::cout << "\tlocation " << locations[i].getPrefix() << " {" << std::endl;
         locations[i].print();
         std::cout << "\t}" << std::endl;
     }
