@@ -36,6 +36,7 @@ class Server
 		void _handleClientWritable(size_t indx);
 		void _handleClientError(size_t indx);
 
+		void _resetConnection(Connection &c);
 		// int _setNonBlocking(int fd);
 		// bool _isListenFd(size_t indx) const;
 

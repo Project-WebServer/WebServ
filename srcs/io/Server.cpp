@@ -170,14 +170,27 @@ void Server::_handleClientWritable(size_t indx)
 	if (n > 0)
 	{
 		c.out_buf.erase(0, n);
-		if (c.out_buf.empty() && c.should_close)
+		if (c.out_buf.empty())
 		{
-			_removeFd(indx);
+			if(c.should_close)
+			{
+				_removeFd(indx);
+				return;
+			}
+			_resetConnection(c);
+			_pfds[indx].events = POLLIN;
 			return;
 		}
-		return;
 	}
 	_removeFd(indx);
+}
+
+void Server::_resetConnection(Connection &c)
+{
+	c.in_buf.clear();
+	c.out_buf.clear();
+	c.want_write = false;
+	c.should_close = false;
 }
 
 int Server::start()
