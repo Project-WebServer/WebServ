@@ -1,4 +1,5 @@
-#include "io/Server.hpp"
+#include "../../include/io/Server.hpp"
+#include <sstream>
 //socket() → bind() → listen() → accept() → poll()
 
 Server::Server() : _listen_fd(-1)
@@ -62,32 +63,39 @@ void Server::_acceptClients()
 		break;
 	}
 }
+
+void Server::_logRecv(int fd, ssize_t n) const
+{
+	std::cout << "---- fd " << fd 
+			<< " | received " << n << " bytes"
+			<< " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
+			<< " ----" << std::endl;
+
+}
+
 void Server::_buildResponse(size_t indx)
 {
 	int fd = _pfds[indx].fd;
-	Connection &c = _conns[fd];
+    Connection &c = _conns[fd];
 
-	if(c.state != READING_REQUEST)
-		return;
-	if(c.in_buf.find("\r\n\r\n") == std::string::npos)
-		return;
-	std::cout << "=== REQUEST ON fd " << fd << " ===" << std::endl;
-    std::cout << c.in_buf << std::endl;
-    std::cout << "=======================" << std::endl;
-	std::string body = "received " 
-                     + std::to_string(c.in_buf.size()) 
-                     + " bytes\n"
-                     + c.in_buf;
-	std::string response =
-       "HTTP/1.1 200 OK\r\n"
-       "Content-Type: text/plain\r\n"
-       "Content-Length: " + std::to_string(body.size()) + "\r\n"
-       "Connection: close\r\n"
-       "\r\n"
-       + body;
-	c.out_buf = response;
-	c.state = SENDING_RESPONSE;
-	_pfds[indx].events = POLLOUT;
+    if (c.state != READING_REQUEST)
+        return;
+    if (c.in_buf.find("\r\n\r\n") == std::string::npos)
+        return;
+
+    std::string body = "received " + c.in_buf;
+
+    std::ostringstream oss;
+    oss << "HTTP/1.1 200 OK\r\n"
+        << "Content-Type: text/plain\r\n"
+        << "Content-Length: " << body.size() << "\r\n"
+        << "Connection: close\r\n"
+        << "\r\n"
+        << body;
+
+    c.out_buf = oss.str();
+    c.state = SENDING_RESPONSE;
+    _pfds[indx].events = POLLOUT;
 }
 
 void Server::_removeFd(size_t indx)
@@ -121,12 +129,13 @@ void Server::_handleClientReadable(size_t indx)
 		{
 			_conns[fd].in_buf.append(buf, n);
 			c.last_activity = time(NULL);
+			_logRecv(fd, n);
 			//--------temporary------//
-			std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
-			std::cout.write(buf, n);
-			std::cout << std::endl;
-			std::cout << "----------------------" << std::endl;
-			_buildResponse(indx);
+			// std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
+			// std::cout.write(buf, n);
+			// std::cout << std::endl;
+			// std::cout << "----------------------" << std::endl;
+			// _buildResponse(indx);
 			//--------temporary------//
 			// this is the place to call http parser which read from in_buf
 			//ParseResult result = HttpParser::feed(c.in_buf, c.request) (NEED_MORE, COMPLETE, ERROR(enum???)// do i realy need an reques here

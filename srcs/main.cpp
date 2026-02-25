@@ -40,11 +40,11 @@ int main(int argc, char **argv)
 
 	std::cout << "Available port: " << Webserv.getAvailablePorts().front() << std::endl;
 
-	// Server s;
+	Server s;
 
-	// if(s.start() != 0)
-	// 	return (1);
-	// s.run();
+	if(s.start() != 0)
+		return (1);
+	s.run();
 	return 0;
 }
 

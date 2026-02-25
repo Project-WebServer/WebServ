@@ -15,7 +15,7 @@
 # include <poll.h>
 # include <fcntl.h>
 
-# include "io/Connection.hpp"
+# include "Connection.hpp"
 
 class Server
 {
@@ -30,6 +30,7 @@ class Server
 		void _acceptClients();
 		void _removeFd(size_t indx);//should recieve some index from array
 
+		void _logRecv(int fd, ssize_t n) const;
 		void _buildResponse(size_t indx);
 		void _handleListenReadable();
 		void _handleClientReadable(size_t indx);

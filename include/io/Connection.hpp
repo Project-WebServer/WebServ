@@ -2,6 +2,7 @@
 #define CONNECTION_HPP
 
 # include <string>
+# include <ctime>
 // # include "src/http/request.hpp "
 
 enum ParseState
@@ -35,6 +36,12 @@ struct Connection
 	bool		is_cgi;
 	CgiState	cgi;
 	Connection() : state(READING_REQUEST), keep_alive(false), last_activity(0) {}
+	
+	size_t bytesReceived() const
+	{
+	    return in_buf.size();
+	}
 };
+
 
 #endif
