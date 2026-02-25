@@ -1,0 +1,13 @@
+Feed returns: need more info, complete, error
+check which errors apply
+
+RFC semantic rules
+
+
+As HTTP 1.0,
+No 400 error when the Host is missing
+Must add that if not HTTP1.0 or HTTP1.1, it is not supported
+
+getters for the struct info for filipe
+
+must handle the different spaces case!
