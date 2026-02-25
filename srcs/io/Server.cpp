@@ -71,6 +71,27 @@ void Server::_acceptClients()
 		break;
 	}
 }
+void Server::_buildResponse(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+	Connection &c = _conns[fd];
+
+	if(c.want_write)
+		return;
+	if(c.in_buf.find("\r\n\r\n") == std::string::npos)
+		return;
+	const char response[] =
+		"HTTP/1.1 200 OK\r\n"
+        "Content-Length: 6\r\n"
+        "Connection: close\r\n"
+        "\r\n"
+        "Hello\n";
+	c.out_buf.assign(response, sizeof(response) - 1);
+	c.want_write = true;
+	c.should_close = true;
+
+	_pfds[indx].events = POLLOUT;
+}
 
 void Server::_removeFd(size_t indx)
 {
@@ -94,7 +115,6 @@ void Server::_handleClientError(size_t indx)
 void Server::_handleClientReadable(size_t indx)
 {
 	int fd = _pfds[indx].fd;
-	// Connection &c = _conns[fd];
 	char buf[4096];
 	while(true)
 	{
@@ -112,6 +132,7 @@ void Server::_handleClientReadable(size_t indx)
 				//bytes send > 0 ==> delete from buf?
 			//switch to pollout for this fd??
 			///how exactly w comunicate with track c?
+			_buildResponse(indx);
 			continue;
 		}
 		if(n == 0)
@@ -121,10 +142,42 @@ void Server::_handleClientReadable(size_t indx)
 		}
 		if(n < 0)
 		{
-			_removeFd(indx);
+			//_removeFd(indx);
 			return;
 		}
 	}
+}
+
+void Server::_handleClientWritable(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+	Connection &c = _conns[fd];
+
+	if(c.out_buf.empty())
+	{
+		if(c.should_close)
+			_removeFd(indx);
+		else
+		{
+			c.want_write = false;
+			_pfds[indx].events = POLLIN;
+		}
+		_pfds[indx].revents = 0;
+		return;
+	}
+	
+	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);
+	if (n > 0)
+	{
+		c.out_buf.erase(0, n);
+		if (c.out_buf.empty() && c.should_close)
+		{
+			_removeFd(indx);
+			return;
+		}
+		return;
+	}
+	_removeFd(indx);
 }
 
 int Server::start()
@@ -208,6 +261,12 @@ void Server::run ()
 			if(_pfds[i].revents & POLLIN)
 			{
 				_handleClientReadable(i);
+				i++;
+				continue;
+			}
+			if(_pfds[i].revents & POLLOUT)
+			{
+				_handleClientWritable(i);
 				continue;
 			}
 			i++;

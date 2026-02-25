@@ -30,8 +30,10 @@ class Server
 		void _acceptClients();
 		void _removeFd(size_t indx);//should recieve some index from array
 
+		void _buildResponse(size_t indx);
 		void _handleListenReadable();
 		void _handleClientReadable(size_t indx);
+		void _handleClientWritable(size_t indx);
 		void _handleClientError(size_t indx);
 
 		// int _setNonBlocking(int fd);
