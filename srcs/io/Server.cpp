@@ -131,13 +131,9 @@ void Server::_handleClientReadable(size_t indx)
 			c.last_activity = time(NULL);
 			_logRecv(fd, n);
 			//--------temporary------//
-			// std::cout << "----received " << n << " bytes on fd " << fd << "----" << std::endl;
-			// std::cout.write(buf, n);
-			// std::cout << std::endl;
-			// std::cout << "----------------------" << std::endl;
-			// _buildResponse(indx);
+			_buildResponse(indx);
 			//--------temporary------//
-			// this is the place to call http parser which read from in_buf
+			//this is the place to call http parser which read from in_buf <===============
 			//ParseResult result = HttpParser::feed(c.in_buf, c.request) (NEED_MORE, COMPLETE, ERROR(enum???)// do i realy need an reques here
 			//if(result = NEED_MORE)
 			//	continue;

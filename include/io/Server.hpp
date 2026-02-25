@@ -30,7 +30,7 @@ class Server
 		void _acceptClients();
 		void _removeFd(size_t indx);//should recieve some index from array
 
-		void _logRecv(int fd, ssize_t n) const;
+		void _logRecv(int fd, ssize_t n) const;// debbug
 		void _buildResponse(size_t indx);
 		void _handleListenReadable();
 		void _handleClientReadable(size_t indx);
