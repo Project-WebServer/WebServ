@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/21 14:46:59 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/25 21:11:06 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,17 @@ std::string Headers::getValue(std::string key)
 	return (_headerMap[key]);
 }
 
-Headers HTTPrequests::parseHeader(std::string header)
+feedReturn HTTPrequests::parseHeader(std::string header)
 {
 	_header.parseMap(header);
-	if (_header.getValue("Host").empty())
-	{
-		//error, no host
-		return _header; // just for now
-	}
+	//if (_header.getValue("Host").empty())
+	//{
+	//	//error, no host
+	//	return _header; // just for now
+	//}
 	// content length tells you how much body to read
 	std::string contLen = _header.getValue("Content-Length");
 	std::stringstream stream(contLen);
 	stream >> _contLen;
-	return _header; //for now
+	return feedReturn::COMPLETE; // for now, later add other error cases
 }

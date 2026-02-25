@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/21 17:47:23 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/25 21:29:27 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,18 @@
 //also more memory & speed efficient
 //by using enum class, the names don't crash with other libraries because you must type METHOD::DELETE
 
+// to be changed
+enum class feedReturn
+{
+	INCOMPLETE,
+	COMPLETE,
+	ERROR
+};
+
 enum class StatCode
 //indicates whether the HTTP request has been succesfully completed
 {
-	INFORM, //100-199
+	INFORM, //100-199    not relevant in HTTP1.0
 	SUCCESS, //200-299
 	REDIRECT, //300-399
 	CLIENT_ERR, //400-499
@@ -46,7 +54,7 @@ class Headers
 		std::map<std::string, std::string> _headerMap; // or maybe call it a map
 	public:
 		void		parseMap(std::string rawHeaderString);
-		std::string	getKeys();
+		//std::string	getKeys();
 		std::string	getValue(std::string key);
 		void 		printHeader();
 };
@@ -76,9 +84,9 @@ class HTTPrequests
 			ERR
 		};
 
-		void		feed(std::string newChunk);
-		void		parseRequest(std::string request);
-		Headers		parseHeader(std::string header); // calls the Header class's function and validates?
+		feedReturn	feed(std::string newChunk);
+		feedReturn		parseRequest(std::string request);
+		feedReturn		parseHeader(std::string header); // calls the Header class's function and validates?
 
 		METHODS findMethods(std::string first);
 		ProtocolV findVersion(std::string version);

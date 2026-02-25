@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:52:06 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/21 15:19:36 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/25 21:29:21 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,21 +71,27 @@ void HTTPrequests::printBody()
 	std::cout << _body << std::endl;
 }
 
-int main()
-{
-	HTTPrequests req;
-	std::string raw = "POST /users HTTP/1.1\r\n"
-	"Host: example.com\r\n"
-	"Content-Type: application/x-www-form-urlencoded\r\n"
-	"Content-Length: 49\r\n"
-	"\r\n"
-	"name=FirstName+LastName&email=bsmth%40example.com";
+//int main()
+//{
+//	HTTPrequests req;
+//	std::string raw = "POST /users HTTP/1.1\r\n"
+//	"Host: example.com\r\n"
+//	"Content-Type: application/x-www-form-urlencoded\r\n"
+//	"Content-Length: 49\r\n"
+//	"\r\n"
+//	"name=FirstName+LastName&email=bsmth%40example.com";
+//	feedReturn state;
 
-	req.feed(raw);
-	req.printRequest();
-	std::cout << std::endl;
-	req.printHeader();
-	std::cout << std::endl;
-	req.printBody();
-	return 0;
-}
+//	state = req.feed(raw);
+//	if (state != feedReturn::COMPLETE)
+//		std::cout << "ERROR" << std::endl;
+//	else
+//	{
+//		req.printRequest();
+//		std::cout << std::endl;
+//		req.printHeader();
+//		std::cout << std::endl;
+//		req.printBody();
+//	}
+//	return 0;
+//}

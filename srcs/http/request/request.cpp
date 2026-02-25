@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/21 17:22:54 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/25 21:09:53 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,10 @@ HTTPrequests::~HTTPrequests()
 {
 }
 
-void HTTPrequests::feed(std::string newChunk)
+feedReturn	HTTPrequests::feed(std::string newChunk)
 {
+	feedReturn status;
+
 	_buffer += newChunk;
 	if (_components == COMPONENTS::REQUEST)
 	{
@@ -29,23 +31,24 @@ void HTTPrequests::feed(std::string newChunk)
 		if (end != std::string::npos)
 		{
 			std::string request = _buffer.substr(0, end);
-			parseRequest(request); // if it fails I return?
+			status = parseRequest(request);
+			if (status != feedReturn::COMPLETE)
+				return (status);
 			_buffer.erase(0, end + 2);
 		}
 		_components = COMPONENTS::HEADERS;
 	}
 	else
-	{
-		//not enough data yet
-		return ;
-	}
+		return feedReturn::INCOMPLETE;
 	if (_components == COMPONENTS::HEADERS)
 	{
 		size_t end = _buffer.find("\r\n\r\n");
 		if (end != std::string::npos)
 		{
 			std::string header = _buffer.substr(0, end + 4);
-			parseHeader(header);
+			status = parseHeader(header);
+			if (status != feedReturn::COMPLETE)
+				return (status);
 			_buffer.erase(0, end + 4);
 			if (_contLen == 0)
 				_components = COMPONENTS::COMPLETED;
@@ -54,10 +57,7 @@ void HTTPrequests::feed(std::string newChunk)
 		}
 	}
 	else
-	{
-		//not enough data yet
-		return ;
-	}
+		return feedReturn::INCOMPLETE;
 	if (_components == COMPONENTS::BODY)
 	{
 		if (_buffer.length() >= _contLen)
@@ -70,13 +70,14 @@ void HTTPrequests::feed(std::string newChunk)
 		_components = COMPONENTS::COMPLETED;
 	}
 	else
-	{
-		//not enough data yet
-		return ;
-	}
+		return feedReturn::INCOMPLETE;
+	if (!_buffer.empty())
+		std::cout << "Buffer not empty though reached the end :(" << std::endl;
+	return feedReturn::COMPLETE;
 }
 
-//when _components == COMPONENTS::COMPLETED check what is left in the buffer.
+//when _components == COMPONENTS::COMPLETED check what is left in the buffer. WJAT IF SOMETHING LEFT IN THERE???
+
 
 // after I use select() loop to tell me whether the data is already in the socket
 // the you call recv(fd, buffer, ...)
