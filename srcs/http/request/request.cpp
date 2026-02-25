@@ -6,13 +6,13 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/25 21:09:53 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/02/25 21:38:59 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "request.hpp"
 
-HTTPrequests::HTTPrequests() : _buffer(""), _body(""), _protocolv(ProtocolV::ERR), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR),  _path("")
+HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body("")
 {
 }
 
