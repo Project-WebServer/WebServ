@@ -200,14 +200,15 @@ void Server::_handleClientWritable(size_t indx)
 	}
 	c.out_buf.erase(0, n);
 	if (c.out_buf.empty())
-		return;
-	if(c.state == CLOSING || !c.keep_alive)
 	{
-		_removeFd(indx);
-		return;
+		if(c.state == CLOSING || !c.keep_alive)
+		{
+			_removeFd(indx);
+			return;
+		}
+		_resetConnection(c);
+		_pfds[indx].events = POLLIN;
 	}
-	_resetConnection(c);
-	_pfds[indx].events = POLLIN;
 }
 
 void Server::_resetConnection(Connection &c)
@@ -284,6 +285,22 @@ void Server::run ()
 				continue;// for signal interaption - keep waiting, not break the loop;
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
+		}
+		if(ready == 0)//timeout
+		{
+			time_t now = time(NULL);
+			for (size_t i = 1; i < _pfds.size(); )
+			{
+				Connection &c = _conns[_pfds[i].fd];
+				if (now - c.last_activity > 30) // 30 секунд без активності
+				{
+					std::cout << "timeout: closing fd " << _pfds[i].fd << std::endl;
+					_removeFd(i);
+					continue;
+				}
+				i++;
+			}
+			continue;
 		}
 		if (_pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			return;

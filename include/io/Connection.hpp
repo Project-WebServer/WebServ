@@ -35,7 +35,7 @@ struct Connection
    	//HttpResponse response; // можна зберігати тут або одразу серіалізувати
 	bool		is_cgi;
 	CgiState	cgi;
-	Connection() : state(READING_REQUEST), keep_alive(false), last_activity(0) {}
+	Connection() : state(READING_REQUEST), keep_alive(false), last_activity(0), is_cgi(false) {}
 	
 	size_t bytesReceived() const
 	{
