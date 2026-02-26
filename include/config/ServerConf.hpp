@@ -21,6 +21,7 @@ class ServerConf
 		std::string 						root;
 		std::vector<std::string>			server_name;
 		std::map<int, std::string>			error_pages;
+		std::map<int, std::string>			error_pages_default;
 		std::vector<Location> 				locations;
 		//implemente index 
 
@@ -47,6 +48,7 @@ class ServerConf
 			uint32_t getIpv4() const;
 			const std::vector<std::string>& getServName() const;
 			const std::map<int, std::string>& getErrorPage() const;
+			const std::map<int, std::string>& getDefaultErrorPage() const;
 			const std::vector<Location>& getLocation() const;
 
 			const Location* matchLocation(std::string& uri) const;

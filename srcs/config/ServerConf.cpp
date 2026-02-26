@@ -1,5 +1,6 @@
 #include "../../include/config/ServerConf.hpp"
 #include <cstring> 
+#include "ServerConf.hpp"
 
 
 //set default value 
@@ -12,13 +13,17 @@ ServerConf::ServerConf(): listen("0.0.0.0", 80),
 	root("")
 {
 	server_name.push_back("");
-	error_pages[400] = "/error_pages/400.html";
-	error_pages[403] = "/error_pages/403.html";
-	error_pages[404] = "/error_pages/404.html";
-	error_pages[405] = "/error_pages/405.html";
-	error_pages[413] = "/error_pages/413.html";
-	error_pages[500] = "/error_pages/500.html";
-	error_pages[502] = "/error_pages/502.html";
+	error_pages_default[400] = "/error_pages/400.html";
+	error_pages_default[403] = "/error_pages/403.html";
+	error_pages_default[404] = "/error_pages/404.html";
+	error_pages_default[405] = "/error_pages/405.html";
+	error_pages_default[408] = "/error_pages/408.html";
+	error_pages_default[409] = "/error_pages/409.html";
+	error_pages_default[413] = "/error_pages/413.html";
+	error_pages_default[415] = "/error_pages/415.html";
+	error_pages_default[500] = "/error_pages/500.html";
+	error_pages_default[502] = "/error_pages/502.html";
+	error_pages_default[504] = "/error_pages/504.html";
 	
 }
 
@@ -110,6 +115,10 @@ const std::map<int, std::string> &ServerConf::getErrorPage() const
 	return error_pages;
 }
 
+const std::map<int, std::string> &ServerConf::getDefaultErrorPage() const
+{
+	return error_pages_default;
+}
 const std::vector<Location> &ServerConf::getLocation() const
 {
 	return locations;

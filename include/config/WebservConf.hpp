@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/26 18:52:31 by flima            ###   ########.fr       */
+/*   Updated: 2026/02/26 20:23:24 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class WebservConf
 		std::map<ENDPOINT,std::vector<ServerConf>,ENDPOINTCOMP> virtual_servers;
 		std::vector<ENDPOINT>									available_endPoints;
 
-		public:
+	public:
 			WebservConf(){};
 			~WebservConf(){};
 			
