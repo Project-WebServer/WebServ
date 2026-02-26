@@ -1,5 +1,2 @@
-.vscode
 webserv
-.build
-.build/config
-.build/io
+.vscode

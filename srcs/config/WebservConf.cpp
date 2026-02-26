@@ -4,7 +4,7 @@
 void WebservConf::pushServer(const ServerConf &serv, const ENDPOINT &endPoint)
 {
 	this->virtual_servers[endPoint].push_back(serv);
-	this->available_ports.push_back(serv.getPort());
+	this->available_endPoints.push_back(endPoint);
 }
 
 const std::vector<ServerConf> *WebservConf::matchServer(const uint32_t ipv4, const int port)
@@ -30,9 +30,9 @@ int WebservConf::getNumberOfServers() const
 	return (int)this->virtual_servers.size();
 }
 
-const std::vector<int> &WebservConf::getAvailablePorts()
+const std::vector<ENDPOINT> &WebservConf::getAvailableEndPoints()
 {
-	return this->available_ports;
+	return this->available_endPoints;
 }
 void WebservConf::print() const
 {
