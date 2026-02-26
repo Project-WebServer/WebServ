@@ -1,4 +1,5 @@
-#include "socket.hpp"
+#include "../../include/io/Server.hpp"
+#include <sstream>
 //socket() → bind() → listen() → accept() → poll()
 
 Server::Server() : _listen_fd(-1)
@@ -25,31 +26,23 @@ void Server::_acceptClients()
 {
 	while(true)
 	{
-		int cfd = accept(_listen_fd, NULL, NULL);
-		if(cfd >= 0)
+		int c_fd = accept(_listen_fd, NULL, NULL);
+		if(c_fd >= 0)
 		{
-			int flags = fcntl(cfd, F_GETFL, 0);
-			if(flags < 0 || fcntl(cfd, F_SETFL, flags | O_NONBLOCK) < 0)
+			int flags = fcntl(c_fd, F_GETFL, 0);//file control help change or read fd settings
+			if(flags < 0 || fcntl(c_fd, F_SETFL, flags | O_NONBLOCK) < 0)
 			{
 				std::cerr << "fcntl() failed: " << std::strerror(errno) << std::endl;
-				close(cfd);
+				close(c_fd);
 				continue;
 			}
 			pollfd p;
-			p.fd = cfd;
+			p.fd = c_fd;
 			p.events = POLLIN;
 			p.revents = 0;
 			_pfds.push_back(p);
-			_clients.insert(cfd);
-			std::cout << "accepted cient fd"<< cfd << std::endl;
-			// //response for testing!!!
-			// const char resp[] =
-			// "HTTP/1.1 200 OK\r\n"
-			// "Content-Length: 5\r\n"
-			// "Connection: close\r\n"
-			// "\r\n"
-			// "Hello\n"
-			// send(cfd, resp, sizeof(resp) - 1, 0);//
+			_conns[c_fd] = Connection();
+			std::cout << "accepted cient fd"<< c_fd << std::endl;
 			continue;
 		}
 		if(errno == EAGAIN || errno == EWOULDBLOCK)
@@ -71,19 +64,165 @@ void Server::_acceptClients()
 	}
 }
 
+void Server::_logRecv(int fd, ssize_t n) const
+{
+	std::cout << "---- fd " << fd 
+			<< " | received " << n << " bytes"
+			<< " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
+			<< " ----" << std::endl;
+
+}
+
+void Server::_buildResponse(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+    Connection &c = _conns[fd];
+
+    if (c.state != READING_REQUEST)
+        return;
+    if (c.in_buf.find("\r\n\r\n") == std::string::npos)
+        return;
+
+    std::string body = "received " + c.in_buf;
+
+    std::ostringstream oss;
+    oss << "HTTP/1.1 200 OK\r\n"
+        << "Content-Type: text/plain\r\n"
+        << "Content-Length: " << body.size() << "\r\n"
+        << "Connection: close\r\n"
+        << "\r\n"
+        << body;
+
+    c.out_buf = oss.str();
+    c.state = SENDING_RESPONSE;
+    _pfds[indx].events = POLLOUT;
+}
+
 void Server::_removeFd(size_t indx)
 {
 	int fd = _pfds[indx].fd;
 
 	close(fd);
-	_clients.erase(fd);
+	_conns.erase(fd);
 	_pfds.erase(_pfds.begin() + indx);
+}
+
+void Server::_handleListenReadable()
+{
+	_acceptClients();
+}
+
+void Server::_handleClientError(size_t indx)
+{
+	_removeFd(indx);
+}
+
+void Server::_handleClientReadable(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+	Connection &c = _conns[fd];
+	char buf[4096];
+	while(true)
+	{
+		ssize_t n = recv(fd, buf, sizeof(buf), 0);
+		if(n > 0)
+		{
+			_conns[fd].in_buf.append(buf, n);
+			c.last_activity = time(NULL);
+			_logRecv(fd, n);
+			//--------temporary------//
+			_buildResponse(indx);
+			//--------temporary------//
+			//this is the place to call http parser which read from in_buf <===============
+			//ParseResult result = HttpParser::feed(c.in_buf, c.request) (NEED_MORE, COMPLETE, ERROR(enum???)// do i realy need an reques here
+			//if(result = NEED_MORE)
+			//	continue;
+			//if(result = ERROR)
+			// {
+            //     track B said thad request is not valid
+            //     send 400 Bad Request and close
+            //     c.out_buf = HttpResponse::makeError(400);
+            //     c.state = CLOSING;
+            //     _pfds[indx].events = POLLOUT;
+            //     return;
+            // }
+			// if (result == COMPLETE)
+            // {
+            	// --- Pass to track C---
+            	// Router::handle() return serialized answer as a string
+				// c.out_buf = Router::handle(c.request);
+				//c.keep_alive = c.request.isKeepAlive();
+				//c.state = SENDING_RESPONSE;
+				//_pfds[indx].events = POLLOUT;
+				//return;
+			//}
+		}
+		if(n == 0)
+		{
+			_removeFd(indx);
+			return;
+		}
+		if(n < 0)
+		{
+			//_removeFd(indx);
+			return;
+		}
+	}
+}
+
+void Server::_handleClientWritable(size_t indx)
+{
+	int fd = _pfds[indx].fd;
+	Connection &c = _conns[fd];
+
+	if(c.out_buf.empty())
+	{
+		if(c.state == CLOSING)
+		{
+			_removeFd(indx);
+			return;
+		}
+		_resetConnection(c);
+		_pfds[indx].events = POLLIN;
+		return;
+	}
+	
+	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);//bytes
+	if(n < 0)
+	{
+		_removeFd(indx);
+		return;
+	}
+	if(n == 0)
+	{
+		_removeFd(indx);
+		return;
+	}
+	c.out_buf.erase(0, n);
+	if (c.out_buf.empty())
+		return;
+	if(c.state == CLOSING || !c.keep_alive)
+	{
+		_removeFd(indx);
+		return;
+	}
+	_resetConnection(c);
+	_pfds[indx].events = POLLIN;
+}
+
+void Server::_resetConnection(Connection &c)
+{
+	c.in_buf.clear();
+	c.out_buf.clear();
+	c.state = READING_REQUEST;
+	c.keep_alive = false;
 }
 
 int Server::start()
 {
 	int yes = 1;
 	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
+	//add flag NONBLOCKING through fcntl??
 	if(_listen_fd < 0)
 	{
 		std::cerr << "socket() failed: " << std::strerror(errno) << std::endl;//write handle error func
@@ -100,14 +239,13 @@ int Server::start()
 	_addr.sin_port = htons(8080);
 
 	//connect socket to IP:PORT
-	//int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
 	if(bind(_listen_fd, reinterpret_cast<sockaddr*>(&_addr), sizeof(_addr)) < 0)
 	{
 		std::cerr << "bind() failed: " << std::strerror(errno) << std::endl;
 		return (1);
 	}
 	//this sfd can listen up to 128 client and put them in a queue before accept() and said that its a server not client
-	if(listen(_listen_fd, 128) < 0)
+	if(listen(_listen_fd, 128) < 0)// 128 - backlog
 	{
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
 		return (1);
@@ -125,7 +263,7 @@ int Server::start()
 		return 1;
 	}
 	_pfds.clear();
-	_clients.clear();
+	_conns.clear();
 	_addListenFd();
 	std::cout << "socket fd = " << _listen_fd << std::endl;
 	std::cout << "listening to fd = " << _listen_fd << std::endl;
@@ -138,45 +276,41 @@ void Server::run ()
 
 	while (true)
 	{
-		ready = poll(_pfds.data(), _pfds.size(), -1);//timeout -1 - wait forewer(later 1000 in mcsec)
+		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
+		//check timeout here
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
-				continue;// for signa interaption - keep waiting, not break the loop;
+				continue;// for signal interaption - keep waiting, not break the loop;
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
 		}
 		if (_pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			return;
 		if (_pfds[0].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
-			_acceptClients();
-		_pfds[0].revents = 0;//not nessesary. only for debug
+			_handleListenReadable();
 		for (size_t i = 1; i < _pfds.size(); )
 		{
 			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
 			{
-				_removeFd(i);
+				_handleClientError(i);
 				continue;
 			}
-
 			if(_pfds[i].revents & POLLIN)
 			{
-				char buf[4096];
-				ssize_t n = recv(_pfds[i].fd, buf, sizeof(buf), 0);
-				if(n > 0)
-				{
-					std::cout << "----received " << n << " bytes on fd " << _pfds[i].fd << "----" << std::endl;
-					std::cout.write(buf, n);
-					std::cout << std::endl;
-					std::cout << "----------------------" << std::endl;
-				}
-				_removeFd(i);
+				_handleClientReadable(i);
+				i++;
 				continue;
 			}
-			_pfds[i].revents = 0;
+			if(_pfds[i].revents & POLLOUT)
+			{
+				_handleClientWritable(i);
+				continue;
+			}
 			i++;
 		}
 	}
+	//managr cgi fds somewhere here in run
 }
 
 

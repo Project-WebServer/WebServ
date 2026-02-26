@@ -1,5 +1,5 @@
-#ifndef SOCKET_HPP
-#define SOCKET_HPP
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 # include <iostream>
 # include <cerrno>
@@ -15,20 +15,31 @@
 # include <poll.h>
 # include <fcntl.h>
 
+# include "Connection.hpp"
 
 class Server
 {
 	private:
+
 		int _listen_fd;
 		sockaddr_in _addr;//register socket by its address (IP + port)
-		std::vector<pollfd> _pfds;
-		std::set<int> _clients;
+		std::vector<pollfd> _pfds; //listen fd
+		std::map<int, Connection> _conns; //key = client fd
 
 		void _addListenFd();
 		void _acceptClients();
 		void _removeFd(size_t indx);//should recieve some index from array
-		int _setNonBlocking(int fd);
-		bool _isListenFd(size_t indx) const;
+
+		void _logRecv(int fd, ssize_t n) const;// debbug
+		void _buildResponse(size_t indx);
+		void _handleListenReadable();
+		void _handleClientReadable(size_t indx);
+		void _handleClientWritable(size_t indx);
+		void _handleClientError(size_t indx);
+
+		void _resetConnection(Connection &c);
+		// int _setNonBlocking(int fd);
+		// bool _isListenFd(size_t indx) const;
 
 	public:
 		Server();
@@ -38,5 +49,6 @@ class Server
 		void run();
 		
 };
+
 
 #endif
