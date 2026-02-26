@@ -36,7 +36,7 @@ class Server
 		void _handleClientReadable(size_t indx);
 		void _handleClientWritable(size_t indx);
 		void _handleClientError(size_t indx);
-
+		void _checkTimeout();
 		void _resetConnection(Connection &c);
 
 	public:

@@ -42,6 +42,7 @@ void Server::_acceptClients()
 			p.revents = 0;
 			_pfds.push_back(p);
 			_conns[c_fd] = Connection();
+			_conns[c_fd].last_activity = time(NULL);
 			std::cout << "accepted cient fd"<< c_fd << std::endl;
 			continue;
 		}
@@ -63,6 +64,8 @@ void Server::_acceptClients()
 		break;
 	}
 }
+
+//---------------------temporary-----------------------//
 
 void Server::_logRecv(int fd, ssize_t n) const
 {
@@ -98,6 +101,8 @@ void Server::_buildResponse(size_t indx)
     _pfds[indx].events = POLLOUT;
 }
 
+//---------------------temporary-----------------------//
+
 void Server::_removeFd(size_t indx)
 {
 	int fd = _pfds[indx].fd;
@@ -129,9 +134,10 @@ void Server::_handleClientReadable(size_t indx)
 		{
 			_conns[fd].in_buf.append(buf, n);
 			c.last_activity = time(NULL);
-			_logRecv(fd, n);
 			//--------temporary------//
+			_logRecv(fd, n);
 			_buildResponse(indx);
+			continue;
 			//--------temporary------//
 			//this is the place to call http parser which read from in_buf <===============
 			//ParseResult result = HttpParser::feed(c.in_buf, c.request) (NEED_MORE, COMPLETE, ERROR(enum???)// do i realy need an reques here
@@ -157,14 +163,16 @@ void Server::_handleClientReadable(size_t indx)
 				//return;
 			//}
 		}
-		if(n == 0)
+		else if(n == 0)
 		{
+			std::cout << "fd " << fd << " closed by client" << std::endl;
 			_removeFd(indx);
 			return;
 		}
-		if(n < 0)
+		else
 		{
-			//_removeFd(indx);
+			std::cerr << "recv() error on fd " << fd << std::endl;
+			_removeFd(indx);
 			return;
 		}
 	}
@@ -217,6 +225,22 @@ void Server::_resetConnection(Connection &c)
 	c.out_buf.clear();
 	c.state = READING_REQUEST;
 	c.keep_alive = false;
+}
+
+void Server::_checkTimeout()
+{
+	time_t now = time(NULL);
+	for (size_t i = 1; i < _pfds.size(); )
+	{
+		Connection &c = _conns[_pfds[i].fd];
+		if (now - c.last_activity > 30) // 30 секунд без активності
+		{
+			std::cout << "timeout: closing fd " << _pfds[i].fd << std::endl;
+			_removeFd(i);
+			continue;
+		}
+		i++;
+	}
 }
 
 int Server::start()
@@ -278,7 +302,7 @@ void Server::run ()
 	while (true)
 	{
 		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
-		//check timeout here
+		//check every 5 sec max imit is 30 sec
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
@@ -286,22 +310,9 @@ void Server::run ()
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
 		}
+		_checkTimeout();
 		if(ready == 0)//timeout
-		{
-			time_t now = time(NULL);
-			for (size_t i = 1; i < _pfds.size(); )
-			{
-				Connection &c = _conns[_pfds[i].fd];
-				if (now - c.last_activity > 30) // 30 секунд без активності
-				{
-					std::cout << "timeout: closing fd " << _pfds[i].fd << std::endl;
-					_removeFd(i);
-					continue;
-				}
-				i++;
-			}
 			continue;
-		}
 		if (_pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			return;
 		if (_pfds[0].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
