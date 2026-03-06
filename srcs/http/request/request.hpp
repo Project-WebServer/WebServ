@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/06 17:02:29 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/06 18:19:57 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ class Headers
 	private:
 		std::map<std::string, std::string> _headerMap; // or maybe call it a map
 	public:
-		void		parseMap(std::string rawHeaderString);
+		feedReturn	parseMap(std::string rawHeaderString);
 		//std::string	getKeys();
 		std::string	getValue(std::string key);
 		void 		printHeader();

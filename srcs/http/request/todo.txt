@@ -8,8 +8,6 @@
 must handle the different spaces case!
 
 3. Strict Whitespace (The "No Space Before Colon" Rule)
-This is a common "trick" in 42 projects to see if you read the RFC.
-
 The Rule: Field-Name ":" [Field-Value]. There is zero space allowed between the name and the colon.
 
 The Fix: In your while loop that reads the name, if you encounter a space ' ' before you find the ':', the request is malformed.
