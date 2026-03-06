@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/06 18:20:43 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/06 18:21:25 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ std::string Headers::getValue(std::string key)
 
 feedReturn HTTPrequests::parseHeader(std::string header)
 {
-	if (_header.parseMap(header) != COMPLETE)
+	if (_header.parseMap(header) != feedReturn::COMPLETE)
 		_statusCode = 400; // only 400 or others too?
 	if (_header.getValue("host").empty())
 		return feedReturn::NO_HOST_ERROR;
