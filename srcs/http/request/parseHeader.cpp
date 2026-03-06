@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseHeader.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/25 21:11:06 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/06 17:19:56 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,15 @@
 //		std::map<std::string, std::string> _headerMap;
 //	public:
 //};
+
+static std::string toLower(std::string name)
+{
+	std::string lowercased = "";
+	int N = name.length();
+	for (int i = 0; i < N; i++)
+		lowercased += tolower(name[i]);
+	return (lowercased);
+}
 
 void Headers::parseMap(std::string rawHeaderString)
 {
@@ -56,7 +65,7 @@ void Headers::parseMap(std::string rawHeaderString)
 			value += *it;
 			it++;
 		}
-		_headerMap[name] = value;
+		_headerMap[toLower(name)] = value;
 
 		//std::cout << "[DEBUG] Found Key: '" << name << "' | Found Value: '" << value << "'" << std::endl;
 	}
@@ -70,13 +79,13 @@ std::string Headers::getValue(std::string key)
 feedReturn HTTPrequests::parseHeader(std::string header)
 {
 	_header.parseMap(header);
-	//if (_header.getValue("Host").empty())
-	//{
-	//	//error, no host
-	//	return _header; // just for now
-	//}
+	if (_header.getValue("host").empty())
+	{
+		//error, no host
+		return feedReturn::NO_HOST_ERROR;
+	}
 	// content length tells you how much body to read
-	std::string contLen = _header.getValue("Content-Length");
+	std::string contLen = _header.getValue("content-length");
 	std::stringstream stream(contLen);
 	stream >> _contLen;
 	return feedReturn::COMPLETE; // for now, later add other error cases

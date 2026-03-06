@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseRequestLine.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/25 21:25:16 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/06 16:50:49 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ ProtocolV HTTPrequests::findVersion(std::string version)
 		return (ProtocolV::HTTP_1_0);
 	if (version == "HTTP/1.1")
 		return (ProtocolV::HTTP_1_1);
-	if (version == "HTTP/2.0")
-		return (ProtocolV::HTTP_2_0);
 	return (ProtocolV::ERR);
 }
 
@@ -59,7 +57,7 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 	if (_protocolv == ProtocolV::ERR)
 		return feedReturn::ERROR;
 	//printVersion();
-	// in case protocol v not found -> ?
+	// in case protocol v not found -> it will just return the Error
 	return feedReturn::COMPLETE;
 }
 
