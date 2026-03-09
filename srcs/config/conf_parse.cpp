@@ -485,5 +485,6 @@ error_conf setWebservConf(WebservConf &webserv, ConfToken& confFile)
 			return {false, "Error: UNKNOWN token type near " + confFile.catTokens(tokenLine)};
 
 	}
+	confFile.~ConfToken();
 	return {true, "Success"};
 }

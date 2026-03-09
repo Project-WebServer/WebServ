@@ -1,4 +1,5 @@
 #include "../include/io/Server.hpp"
+#include "../include/handlers/Response.hpp"
 #include "../include/config/WebservConf.hpp"
 
 int main(int argc, char **argv)
@@ -38,14 +39,20 @@ int main(int argc, char **argv)
 	// 	ptr->front().print();
 	// }
 
-	std::cout << "Available port: " << Webserv.getAvailableEndPoints().front().port << std::endl;
+	uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
+	int port = Webserv.getAvailableEndPoints().front().port;
+	const std::vector<ServerConf> *test1= Webserv.matchServer(ip, port);
+	const ServerConf &serv = test1->front();
+	std::string uri = "/";
+	Response test(serv, uri);
+	std::cout << test.handleHttpError(401) << std::endl;
 
-	Server s;
+	// Server s;
 
-	if(s.start() != 0)
-		return (1);
-	s.run();
-	return 0;
+	// if(s.start() != 0)
+	// 	return (1);
+	// s.run();
+	// return 0;
 }
 
 // Webserv.getAvailablePorts(); return a vector<int> with all port we have available to listen to

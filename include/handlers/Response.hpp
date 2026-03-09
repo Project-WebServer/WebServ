@@ -5,20 +5,31 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <sstream>
+#include <cerrno>
+#include <cstring>
 #include "../config/ServerConf.hpp"
+
+struct errmsg
+{
+	bool 	success;
+	std::string msg;
+};
 
 class Response
 {
 	private:
 		const ServerConf&	virtualServer;
-		const Location&		Location;	
+		const Location*		Location;	
 
-		std::string getHttpErrorBody(std::string& errorFile);
 		std::string	getHttpCode(int code);
-		std::string getErrorFilePath(int& errorCode);
+		std::string getErrorFileBody(int errorCode);
+		errmsg		getFileContent(std::string& filePath, std::string& content);
+		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
 	public:
+		Response(const ServerConf&, std::string&);
+		~Response(){};
 		std::string handleHttpError(int errorCode);
-		std::string buildHeader(int httpCode, size_t bodySize, std::string& contetType);
+		bool isLocationValid();
 
 
 };

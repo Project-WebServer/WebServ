@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 — Internal Error</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --gold: #e8c547;
+      --orange: #ff6b35;
+      --dark: #080808;
+      --muted: #555;
+      --text: #e8e0d0;
+    }
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .status-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 0.9rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .status-dot {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+    .status-right {
+      font-size: 0.55rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .center { text-align: center; max-width: 480px; }
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      opacity: 0.6;
+    }
+    .code {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(5rem, 18vw, 9rem);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      opacity: 0.15;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+    .content { position: relative; }
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+      padding-top: 3rem;
+    }
+    .msg {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 2.5rem;
+    }
+    .back {
+      display: inline-block;
+      border: 1px solid rgba(232,197,71,0.3);
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.8rem;
+      transition: all 0.2s;
+    }
+    .back:hover {
+      background: var(--gold);
+      color: var(--dark);
+    }
+    .divider {
+      width: 30px; height: 1px;
+      background: rgba(232,197,71,0.2);
+      margin: 2rem auto;
+    }
+    .http-label {
+      font-size: 0.55rem;
+      color: #2a2a2a;
+      letter-spacing: 0.15em;
+    }
+  </style>
+</head>
+<body>
+  <div class="status-bar">
+    <div class="status-dot">
+      <div class="dot"></div>
+      error 500
+    </div>
+    <div class="status-right">HTTP/1.1 · Soundwave</div>
+  </div>
+
+  <div class="center">
+    <span class="icon">💀</span>
+    <div class="content">
+      <div class="code">500</div>
+      <h1 class="title">Internal Error</h1>
+      <p class="msg">Something went wrong on our end.<br>We're looking into it.</p>
+      <a href="/" class="back">← Back to Home</a>
+    </div>
+    <div class="divider"></div>
+    <p class="http-label">HTTP 500</p>
+  </div>
+</body>
+</html>
