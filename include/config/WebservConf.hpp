@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebservConf.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/26 18:52:31 by flima            ###   ########.fr       */
+/*   Updated: 2026/03/09 17:54:45 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ class WebservConf
 			const std::vector<ServerConf>* matchServer(const uint32_t ipv4,const int port);
 			void 	pushServer(const ServerConf& serv, const ENDPOINT& endPoint);
 			int		getNumberOfServers() const;
-			const std::vector<ENDPOINT>& getAvailableEndPoints();  
+			const std::vector<ENDPOINT>& getAvailableEndPoints() const;  
 
 			void print() const;
 };
