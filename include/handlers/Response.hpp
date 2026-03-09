@@ -7,7 +7,8 @@
 #include <sstream>
 #include <cerrno>
 #include <cstring>
-#include "../config/ServerConf.hpp"
+#include "../config/WebservConf.hpp"
+#include "../http/request.hpp"
 
 struct errmsg
 {
@@ -18,7 +19,7 @@ struct errmsg
 class Response
 {
 	private:
-		const ServerConf&	virtualServer;
+		const ServerConf*	virtualServer; 
 		const Location*		Location;	
 
 		std::string	getHttpCode(int code);
@@ -26,11 +27,14 @@ class Response
 		errmsg		getFileContent(std::string& filePath, std::string& content);
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
 	public:
-		Response(const ServerConf&, std::string&);
+
+		Response();
 		~Response(){};
 		std::string handleHttpError(int errorCode);
 		bool isLocationValid();
 
+		void setVirtualServ(const ServerConf* serv);
+		void setLocation(std::string& uri);
 
 };
 

@@ -1,10 +1,21 @@
 #include "../../include/handlers/Response.hpp"
 
-Response::Response(const ServerConf& serv, std::string& uri): virtualServer(serv)
+
+Response::Response()
 {
-	this->Location = virtualServer.matchLocation(uri);
+	this->virtualServer = nullptr;
+	this->Location = nullptr;
 }
 
+void Response::setVirtualServ(const ServerConf* serv)
+{
+	this->virtualServer = serv;
+}
+
+void Response::setLocation(std::string& uri)
+{
+	this->Location = virtualServer->matchLocation(uri);
+}
 
 std::string Response::getHttpCode(int code)
 {
@@ -30,11 +41,11 @@ std::string Response::getHttpCode(int code)
 
 std::string Response::getErrorFileBody(int errorCode)
 {
-	std::map<int,std::string> errorMap = virtualServer.getErrorPage();
+	std::map<int,std::string> errorMap = virtualServer->getErrorPage();
 
 	if (errorMap.size() != 0 && errorMap.find(errorCode) != errorMap.end())
 	{
-		std::string errorPath = "." +  virtualServer.getRoot() + errorMap.find(errorCode)->second; //need check '/'?
+		std::string errorPath = "." +  virtualServer->getRoot() + errorMap.find(errorCode)->second; //need check '/'?
 		std::string body;
 
 		errmsg status = getFileContent(errorPath, body);
@@ -42,7 +53,7 @@ std::string Response::getErrorFileBody(int errorCode)
 			return body;
 	}
 
-	std::map<int,std::string> DefErrorMap = virtualServer.getDefaultErrorPage();
+	std::map<int,std::string> DefErrorMap = virtualServer->getDefaultErrorPage();
 	if (DefErrorMap.size() != 0 && DefErrorMap.find(errorCode) != DefErrorMap.end())
 	{
 		std::string DefErrorPath = DefErrorMap.find(errorCode)->second;
