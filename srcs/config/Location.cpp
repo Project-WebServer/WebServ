@@ -94,6 +94,11 @@ bool Location::getAutoindex() const
 	return autoindex;
 }
 
+std::string Location::resolverPath(std::string& uri)
+{
+	return getRoot() + uri;
+}
+
 void Location::print() const
 {
     if (!this->root.empty())
@@ -118,3 +123,4 @@ void Location::print() const
 
     std::cout << "\t\tautoindex " << (this->autoindex ? "on" : "off") << ";" << std::endl;
 }
+

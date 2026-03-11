@@ -20,12 +20,13 @@ class Response
 {
 	private:
 		const ServerConf*	virtualServer; 
-		const Location*		Location;	
+		const Location*		_Location;	
 
 		std::string	getHttpCode(int code);
 		std::string getErrorFileBody(int errorCode);
 		errmsg		getFileContent(std::string& filePath, std::string& content);
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
+		bool		isMethodAllowed(int);
 	public:
 
 		Response();
@@ -37,5 +38,9 @@ class Response
 		void setLocation(std::string& uri);
 
 };
+
+std::string	responseHandler(HTTPrequests& request);
+
+
 
 #endif

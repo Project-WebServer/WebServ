@@ -49,6 +49,8 @@ class Location
 			const std::vector<std::string>&	getIndex_files() const; // 
 			bool							getAutoindex() const; //
 
+			std::string resolverPath(std::string& uri);
+
 			void print() const;
 };
  

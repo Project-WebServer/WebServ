@@ -4,7 +4,7 @@
 Response::Response()
 {
 	this->virtualServer = nullptr;
-	this->Location = nullptr;
+	this->_Location = nullptr;
 }
 
 void Response::setVirtualServ(const ServerConf* serv)
@@ -14,7 +14,7 @@ void Response::setVirtualServ(const ServerConf* serv)
 
 void Response::setLocation(std::string& uri)
 {
-	this->Location = virtualServer->matchLocation(uri);
+	this->_Location = virtualServer->matchLocation(uri);
 }
 
 std::string Response::getHttpCode(int code)
@@ -113,9 +113,60 @@ std::string Response::handleHttpError(int errorCode)
 	return response;
 }
 
+bool	Response::isMethodAllowed(int Method)
+{
+	std::vector<std::string> methods = this->_Location.getAllowed_methods();
+
+	if (methods.size() == 0)
+	{
+		std::cout << "Error: method not allowed.\n";
+		return false;
+	}
+	for (size_t i = 0; i < methods.size(); ++i)
+	{
+		if (Method == (int)methods[i])
+			return true;
+	}
+	std::cout << "Error: method not allowed.\n";
+	return false;
+}
+
 bool Response::isLocationValid()
 {
-	if (!Location) 
+	if (!_Location) 
 		return false;
 	return true;
+}
+
+// turn into methods ----------------------------
+
+errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Response& response)
+{
+	//get from HTTPrequests the (uint32_t)ip and (int)port
+	//temporaly
+	uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
+	int port = Webserv.getAvailableEndPoints().front().port;
+	const std::vector<ServerConf> *virtualServers= Webserv.matchServer(ip, port);
+	const ServerConf &virtualServ = virtualServers->front();
+
+	response.setVirtualServ(&virtualServ);
+	response.setLocation(request.getPath()) // ask Yuleum to implemnt getters
+	if (!response.isLocationValid())
+	{
+		std::cout << "Error: request`s uri not found.\n";
+		return {false, ""};
+	}
+	return {true, ""};
+}
+
+
+std::string	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
+{
+	Response response;
+
+	if (!select_serv_n_location(request, servConf, response).success)
+		return response.handleHttpError(404);
+	if (!response.isMethodAllowed((int)request.getMethod()))
+		return reponse.handleHttpError(405)
+	
 }

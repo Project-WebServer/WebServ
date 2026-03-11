@@ -44,8 +44,10 @@ int main(int argc, char **argv)
 	const std::vector<ServerConf> *test1= Webserv.matchServer(ip, port);
 	const ServerConf &serv = test1->front();
 	std::string uri = "/";
-	Response test(&serv, uri);
-	// std::cout << test.handleHttpError(401) << std::endl;
+	Response test;
+	test.setVirtualServ(&serv);
+	test.setLocation(uri);
+	std::cout << test.handleHttpError(401) << std::endl;
 
 	// Server s;
 
