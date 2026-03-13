@@ -1,13 +1,13 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 
-#include "conf_parse.hpp"
+
 #include <algorithm>
 #include <iostream>
 #include <vector>
 #include <set>
 
-
+enum struct httpMethod;
 //store the servers 
 class Location
 {
@@ -18,29 +18,38 @@ class Location
 		std::vector<std::string>	index_files;
 		bool						autoindex;
 
-		//redirections
-		bool		has_redirection;
-		std::string	redir_code;
-		std::string	redir_url;
+		// //redirections 
+		// bool		has_redirection;
+		// std::string	redir_code;
+		// std::string	redir_url;
 
-		//upload
-		bool		upload_enable;
-		std::string upload_path;
-		size_t		client_max_body_size;
+		// //upload
+		// bool		upload_enable;
+		// std::string upload_path;
+		// size_t		client_max_body_size;
 
 
 
 		public:
-			Location();
-			~Location();
+			Location(const std::string& servRoot);
+			//set copy constructor
+			Location& operator=(const Location& other);
+			~Location(){};
 
 			//getters
-			void	setpath(TokenLine &tokenLine); //ok
-			void	root(TokenLine &tokenLine); //ok
-			void	allowed_methods(TokenLine &tokenLine); //ok
-			void	index_files(TokenLine &tokenLine); //
-			void	autoindex(TokenLine &tokenLine);
+			void	setPath(std::string& path);
+			void	setRoot(std::string& root);
+			void	setAllowed_methods(std::string method);
+			void	setIndex_files(std::string index_file);
+			void	setAutoindex_On();
 
+			std::string						getPath() const; 
+			std::string						getRoot() const; 
+			std::vector<std::string> 		getAllowed_methods() const; // for debug 
+			const std::vector<std::string>&	getIndex_files() const; // 
+			bool							getAutoindex() const; //
+
+			void print() const;
 };
  
 

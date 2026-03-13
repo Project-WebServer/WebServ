@@ -1,4 +1,39 @@
-Use smart pointer to set server and location instead of copy =;
+configuration module 
+	
+	// implement root in ServeConf class
+	// matching path = root + path + uri
 
-// implement root in ServeConf class
-// matching path = root + path + uri
+	implement member of Location class 
+		//redirections 
+			bool		has_redirection;
+			std::string	redir_code;
+			std::string	redir_url;
+
+			//upload
+			bool		upload_enable;
+			std::string upload_path;
+			size_t		client_max_body_size;
+
+	ROOT Path (setRoot())
+		//verify here if the path is valid with stat / access??
+		// handle the path to ww in our directory 
+
+
+	// definir # define DEFAULT_ROOT = "../../data" 
+		implement getServerRoot , creat function to match the root with server root. 
+
+	set logic to handle empty conf file
+	set default server conf
+
+------ 
+
+// add more default error_pages in ServerConf constructor 
+
+edge cases: the conf dont suport host and port - just listen (host + port)
+bad conf file :parsing error
+		if (root == ""), after parsing, root == "". 
+		check other directives.
+		
+			
+
+//change conf_parse.hpp: move function to static
