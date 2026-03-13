@@ -1,4 +1,5 @@
 #include "../../include/handlers/Response.hpp"
+#include "Response.hpp"
 
 
 Response::Response()
@@ -17,6 +18,10 @@ void Response::setLocation(std::string& uri)
 	this->_Location = virtualServer->matchLocation(uri);
 }
 
+const ServerConf *Response::getVirtualServ() const
+{
+    return this->virtualServer;
+}
 std::string Response::getHttpCode(int code)
 {
 	switch (code)
@@ -115,7 +120,7 @@ std::string Response::handleHttpError(int errorCode)
 
 bool	Response::isMethodAllowed(int Method)
 {
-	std::vector<std::string> methods = this->_Location.getAllowed_methods();
+	std::vector<httpMethod> methods = this->_Location->getAllowed_methods();
 
 	if (methods.size() == 0)
 	{
@@ -144,13 +149,13 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 {
 	//get from HTTPrequests the (uint32_t)ip and (int)port
 	//temporaly
-	uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
-	int port = Webserv.getAvailableEndPoints().front().port;
-	const std::vector<ServerConf> *virtualServers= Webserv.matchServer(ip, port);
+	uint32_t ip = servConf.getAvailableEndPoints().front().ip;
+	int port = servConf.getAvailableEndPoints().front().port;
+	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
 	const ServerConf &virtualServ = virtualServers->front();
 
 	response.setVirtualServ(&virtualServ);
-	response.setLocation(request.getPath()) // ask Yuleum to implemnt getters
+	response.setLocation(request.getPath()); // ask Yuleum to implemnt getters
 	if (!response.isLocationValid())
 	{
 		std::cout << "Error: request`s uri not found.\n";
@@ -167,6 +172,11 @@ std::string	responseHandler(HTTPrequests& request, WebservConf& servConf) //main
 	if (!select_serv_n_location(request, servConf, response).success)
 		return response.handleHttpError(404);
 	if (!response.isMethodAllowed((int)request.getMethod()))
-		return reponse.handleHttpError(405)
+		return response.handleHttpError(405);
+	if (request.getBody().size() > response.getVirtualServ()->getClientSize()) // create getter for body size in HTTPrequests
+		return response.handleHttpError(413);
+	// if (request.getMethod() == HTTPrequests::METHODS::POST && request.getHeader().getValue("Content-Type").empty())
+	// 	return response.handleHttpError(400); // check if content type is valid for POST method, create getter for header in HTTPrequests
+	if (int status = )
 	
 }

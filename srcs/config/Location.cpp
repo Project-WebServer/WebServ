@@ -1,5 +1,7 @@
 #include "../../include/config/Location.hpp"
 #include "../../include/config/conf_parse.hpp"
+#include <stdlib.h>
+#include <limits.h>
 
 
 //set default values for root. shoult it be srcs?? or what
@@ -67,18 +69,18 @@ std::string Location::getRoot() const
 	return this->root;
 }
 
-std::vector<std::string> Location::getAllowed_methods() const
+std::vector<httpMethod> Location::getAllowed_methods() const
 {
-	std::vector<std::string> methods;
+	std::vector<httpMethod> methods;
 
 	for (auto s : allowed_methods)
 	{
 		if (s == httpMethod::GET)
-			methods.push_back("GET");
+			methods.push_back(httpMethod::GET);
 		else if (s == httpMethod::DELETE)
-			methods.push_back("DELETE");
+			methods.push_back(httpMethod::DELETE);
 		else if (s == httpMethod::POST)
-			methods.push_back("POST");
+			methods.push_back(httpMethod::POST);
 	}
 
 	return methods;
@@ -94,9 +96,18 @@ bool Location::getAutoindex() const
 	return autoindex;
 }
 
-std::string Location::resolverPath(std::string& uri)
+int Location::resolverPath(std::string& uri, std::string& realPath)
 {
-	return getRoot() + uri;
+	std::string _realPath = getRoot() + uri;
+
+	char resolved[PATH_MAX];
+	if (realpath(_realPath.c_str(), resolved) == NULL)
+		return 404;
+	std::string validPath(resolved);
+	if (validPath.find(getRoot()) != 0)
+		return 403;
+	realPath = validPath;
+	return 0;
 }
 
 void Location::print() const
@@ -112,14 +123,14 @@ void Location::print() const
         std::cout << ";" << std::endl;
     }
 
-    if (!this->allowed_methods.empty())
-    {
-		std::vector<std::string> methods = getAllowed_methods();
-        std::cout << "\t\tallowed_methods";
-        for (size_t i = 0; i < methods.size(); i++)
-            std::cout << " " << methods[i];
-        std::cout << ";" << std::endl;
-    }
+    // if (!this->allowed_methods.empty())
+    // {
+	// 	std::vector<std::string> methods = getAllowed_methods();
+    //     std::cout << "\t\tallowed_methods";
+    //     for (size_t i = 0; i < methods.size(); i++)
+    //         std::cout << " " << methods[i];
+    //     std::cout << ";" << std::endl;
+    // }
 
     std::cout << "\t\tautoindex " << (this->autoindex ? "on" : "off") << ";" << std::endl;
 }

@@ -45,11 +45,11 @@ class Location
 
 			std::string						getPrefix() const; 
 			std::string						getRoot() const; 
-			std::vector<std::string> 		getAllowed_methods() const; // for debug 
+			std::vector<httpMethod> 		getAllowed_methods() const; // for debug 
 			const std::vector<std::string>&	getIndex_files() const; // 
 			bool							getAutoindex() const; //
 
-			std::string resolverPath(std::string& uri);
+			int Location::resolverPath(std::string& uri, std::string& realPath);
 
 			void print() const;
 };

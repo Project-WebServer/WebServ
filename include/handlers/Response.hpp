@@ -26,20 +26,22 @@ class Response
 		std::string getErrorFileBody(int errorCode);
 		errmsg		getFileContent(std::string& filePath, std::string& content);
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
-		bool		isMethodAllowed(int);
 	public:
 
 		Response();
 		~Response(){};
 		std::string handleHttpError(int errorCode);
-		bool isLocationValid();
+		bool 		isLocationValid();
+		bool		isMethodAllowed(int);
 
 		void setVirtualServ(const ServerConf* serv);
 		void setLocation(std::string& uri);
 
+		const ServerConf* getVirtualServ() const;
+
 };
 
-std::string	responseHandler(HTTPrequests& request);
+std::string	responseHandler(HTTPrequests& request, WebservConf& servConf);
 
 
 
