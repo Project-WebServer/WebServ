@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   parseHeader.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/06 18:21:25 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/13 15:51:17 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "request.hpp"
+#include "../../../include/http/request.hpp"
 
 //Host: localhost:8080\r\n                  <-- Headers
 //User-Agent: curl/7.64.1\r\n
@@ -88,7 +88,7 @@ feedReturn HTTPrequests::parseHeader(std::string header)
 		_statusCode = 400; // only 400 or others too?
 	if (_header.getValue("host").empty())
 		return feedReturn::NO_HOST_ERROR;
-		
+
 	// content length tells you how much body to read
 	std::string contLen = _header.getValue("content-length");
 	std::stringstream stream(contLen);

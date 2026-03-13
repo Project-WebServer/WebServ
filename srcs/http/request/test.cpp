@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   test.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:52:06 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/06 18:21:56 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/13 15:51:30 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "request.hpp"
+#include "../../../include/http/request.hpp"
 
 void HTTPrequests::printRequest()
 {

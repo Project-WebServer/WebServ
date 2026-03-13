@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/06 18:19:57 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/13 16:29:17 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <map>
 #include <string>
 #include <sstream>
+
+#include "../io/Server.hpp"
 
 //if you use enum it is anti-typo, so the compiler doesn't accept PST
 //also more memory & speed efficient
@@ -106,6 +108,11 @@ class HTTPrequests
 		std::string				getBody() const;
 		size_t					getContLen() const;
 		size_t					getStatusCode() const;
+		int						getServerPort() const;
+		std::string				getServerIP() const;
+		std::string				getClientIP() const;
+
+		void	setConectionInfo(std::string ServerIP, std::string ClientIP, int Port);
 
 
 	private:
@@ -119,6 +126,10 @@ class HTTPrequests
 		std::string	_body;
 		size_t		_contLen;
 		size_t		_statusCode;
+
+		int			_serverPort;
+		std::string	_serverIP;
+		std::string _clientIP;
 
 		// Request line parser
 		// header parser

@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   parseRequestLine.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/06 16:50:49 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/13 15:51:19 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "request.hpp"
+#include "../../../include/http/request.hpp"
 
 HTTPrequests::METHODS HTTPrequests::findMethods(std::string first)
 {
