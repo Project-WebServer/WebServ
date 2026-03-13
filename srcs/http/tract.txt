@@ -11,3 +11,5 @@ Must add that if not HTTP1.0 or HTTP1.1, it is not supported
 getters for the struct info for filipe
 
 must handle the different spaces case!
+
+

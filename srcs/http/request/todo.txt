@@ -13,3 +13,5 @@ The Rule: Field-Name ":" [Field-Value]. There is zero space allowed between the 
 The Fix: In your while loop that reads the name, if you encounter a space ' ' before you find the ':', the request is malformed.
 
 Action: Set _statusCode = 400.
+
+IP, Port + getter

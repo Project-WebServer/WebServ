@@ -66,3 +66,33 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
 		The Fix: In your while loop that reads the name, if you encounter a space ' ' before you find the ':', the request is malformed.
 
 		Action: Set _statusCode = 400.
+
+
+5. IP and Port
+- Webserver ports
+	communication endpoints that allow data to flow b/w client & server over the internet
+	ensures incoming messages to be directed to the appropriate destination on the server e.g. website, email, application
+	defined by a number ranging between 0-65535 -> often 80 or 443 to exchange content over the internet
+
+	Data arrives at the computer's IP address -> Port gives the final destination label.
+	the Host header is mandatory but the port is often omitted if it is the default.
+
+	serverIP: ip address of the server that the client connected to
+	clientIP: IP address of the person sending the request - for logging, where the request comes from
+
+
+	when listening for a connection, it is listening t a specific PORT (specific folder)
+
+	IP Address: Finds the computer.
+	Server Port: Finds the specific "Virtual Server" or website on that computer.
+	Connection: The temporary private tunnel between the user and that port.
+
+	-> there are multiple servers being hosted via virtual hosting.
+
+
+When a request comes in, it doesn't just hit "the webserver." It hits a specific listening socket on a specific Port.
+The Arrival: A user types localhost:9090 in their browser.
+The Entry: The request enters your program through the socket that was set up for Port 9090.
+The Labeling: IO part sees this and should tell your HTTPrequests object: "Hey, this request belongs to Port 9090" (This is your Step 1 setter).
+The Choice: When The Handler receives your completed request object, he calls req.getServerPort(). He sees 9090.
+The Mapping: Because he knows it’s 9090, he goes to the config and finds Server Block 2. He now knows the "Destination" for this request is the /www/siteB folder.
