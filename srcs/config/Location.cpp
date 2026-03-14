@@ -1,7 +1,6 @@
 #include "../../include/config/Location.hpp"
 #include "../../include/config/conf_parse.hpp"
-#include <stdlib.h>
-#include <limits.h>
+
 
 
 //set default values for root. shoult it be srcs?? or what
@@ -96,20 +95,12 @@ bool Location::getAutoindex() const
 	return autoindex;
 }
 
-int Location::resolverPath(std::string& uri, std::string& realPath)
+std::string Location::resolvePath(std::string& uri) const
 {
 	std::string _realPath = getRoot() + uri;
-
-	char resolved[PATH_MAX];
-	if (realpath(_realPath.c_str(), resolved) == NULL)
-		return 404;
-	std::string validPath(resolved);
-	if (validPath.find(getRoot()) != 0)
-		return 403;
-	realPath = validPath;
-	return 0;
+	return _realPath;
 }
-
+	
 void Location::print() const
 {
     if (!this->root.empty())

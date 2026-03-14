@@ -2,6 +2,7 @@
 #define LOCATION_HPP
 
 
+#include <sys/stat.h>
 #include <algorithm>
 #include <iostream>
 #include <vector>
@@ -49,7 +50,7 @@ class Location
 			const std::vector<std::string>&	getIndex_files() const; // 
 			bool							getAutoindex() const; //
 
-			int Location::resolverPath(std::string& uri, std::string& realPath);
+			std::string Location::resolvePath(std::string& uri) const;
 
 			void print() const;
 };

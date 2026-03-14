@@ -3,6 +3,7 @@
 #define RESPONSE_HPP
 
 #include <sys/stat.h>
+#include <unistd.h>
 #include <fstream>
 #include <sstream>
 #include <cerrno>
@@ -20,7 +21,8 @@ class Response
 {
 	private:
 		const ServerConf*	virtualServer; 
-		const Location*		_Location;	
+		const Location*		_Location;
+		std::string			realPath;
 
 		std::string	getHttpCode(int code);
 		std::string getErrorFileBody(int errorCode);
@@ -38,6 +40,7 @@ class Response
 		void setLocation(std::string& uri);
 
 		const ServerConf* getVirtualServ() const;
+		int Response::resolvePath(std::string& uri);
 
 };
 

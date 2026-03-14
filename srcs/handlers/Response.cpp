@@ -2,10 +2,8 @@
 #include "Response.hpp"
 
 
-Response::Response()
+Response::Response(): realPath(""), virtualServer(nullptr), _Location(nullptr)
 {
-	this->virtualServer = nullptr;
-	this->_Location = nullptr;
 }
 
 void Response::setVirtualServ(const ServerConf* serv)
@@ -21,6 +19,27 @@ void Response::setLocation(std::string& uri)
 const ServerConf *Response::getVirtualServ() const
 {
     return this->virtualServer;
+}
+int Response::resolvePath(std::string& uri)
+{
+	realPath = _Location->resolvePath(uri);
+
+	if (realPath.find("..") != std::string::npos)
+		return 403; // forbidden
+	struct stat fileStat;
+	if (stat(realPath.c_str(), &fileStat) == -1)
+		return 404; // file not found
+	if (S_ISDIR(fileStat.st_mode))
+	{
+		if (access(realPath.c_str(), X_OK) == -1)
+			return 403; // forbidden
+	}
+	else if(S_ISREG(fileStat.st_mode))
+	{
+		if (access(realPath.c_str(), R_OK) == -1)
+			return 403; // forbidden
+	}
+    return 200;
 }
 std::string Response::getHttpCode(int code)
 {
@@ -177,6 +196,8 @@ std::string	responseHandler(HTTPrequests& request, WebservConf& servConf) //main
 		return response.handleHttpError(413);
 	// if (request.getMethod() == HTTPrequests::METHODS::POST && request.getHeader().getValue("Content-Type").empty())
 	// 	return response.handleHttpError(400); // check if content type is valid for POST method, create getter for header in HTTPrequests
-	if (int status = )
+	if (int status = response.resolvePath(request.getPath()); status != 200)
+		return response.handleHttpError(status);
+	
 	
 }
