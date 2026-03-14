@@ -6,11 +6,11 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/25 21:11:06 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/13 15:51:17 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "request.hpp"
+#include "../../../include/http/request.hpp"
 
 //Host: localhost:8080\r\n                  <-- Headers
 //User-Agent: curl/7.64.1\r\n
@@ -25,7 +25,16 @@
 //	public:
 //};
 
-void Headers::parseMap(std::string rawHeaderString)
+static std::string toLower(std::string name)
+{
+	std::string lowercased = "";
+	int N = name.length();
+	for (int i = 0; i < N; i++)
+		lowercased += tolower(name[i]);
+	return (lowercased);
+}
+
+feedReturn Headers::parseMap(std::string rawHeaderString)
 {
 	//until : is the key and from there to \r\n is the value
 	// _headerMap[name] = value;
@@ -44,6 +53,11 @@ void Headers::parseMap(std::string rawHeaderString)
 			// what happens if I don't clear the name and value here
 		while (it != rawHeaderString.end() && *it != ':')
 		{
+			if (*it == ' ')
+			{
+				//HTTPrequests::_statusCode = 400;
+				return feedReturn::ERROR;
+			}
 			name += *it;
 			it++;
 		}
@@ -56,10 +70,11 @@ void Headers::parseMap(std::string rawHeaderString)
 			value += *it;
 			it++;
 		}
-		_headerMap[name] = value;
+		_headerMap[toLower(name)] = value;
 
 		//std::cout << "[DEBUG] Found Key: '" << name << "' | Found Value: '" << value << "'" << std::endl;
 	}
+	return feedReturn::COMPLETE;
 }
 
 std::string Headers::getValue(std::string key)
@@ -69,14 +84,13 @@ std::string Headers::getValue(std::string key)
 
 feedReturn HTTPrequests::parseHeader(std::string header)
 {
-	_header.parseMap(header);
-	//if (_header.getValue("Host").empty())
-	//{
-	//	//error, no host
-	//	return _header; // just for now
-	//}
+	if (_header.parseMap(header) != feedReturn::COMPLETE)
+		_statusCode = 400; // only 400 or others too?
+	if (_header.getValue("host").empty())
+		return feedReturn::NO_HOST_ERROR;
+
 	// content length tells you how much body to read
-	std::string contLen = _header.getValue("Content-Length");
+	std::string contLen = _header.getValue("content-length");
 	std::stringstream stream(contLen);
 	stream >> _contLen;
 	return feedReturn::COMPLETE; // for now, later add other error cases

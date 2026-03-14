@@ -11,7 +11,7 @@ void Response::setVirtualServ(const ServerConf* serv)
 	this->virtualServer = serv;
 }
 
-void Response::setLocation(std::string& uri)
+void Response::setLocation(std::string uri)
 {
 	this->_Location = virtualServer->matchLocation(uri);
 }
@@ -20,7 +20,7 @@ const ServerConf *Response::getVirtualServ() const
 {
     return this->virtualServer;
 }
-int Response::resolvePath(std::string& uri)
+int Response::resolvePath(std::string uri)
 {
 	realPath = _Location->resolvePath(uri);
 
@@ -172,7 +172,7 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 	const ServerConf &virtualServ = virtualServers->front();
 
 	response.setVirtualServ(&virtualServ);
-	response.setLocation(request.getPath()); // ask Yuleum to implemnt getters
+	response.setLocation(request.getPath());
 	if (!response.isLocationValid())
 	{
 		std::cout << "Error: request`s uri not found.\n";
@@ -188,7 +188,7 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main functi
 
 	if (!select_serv_n_location(request, servConf, response).success)
 		return response.handleHttpError(404);
-	if (!response.isMethodAllowed((int)request.getMethod()))
+	if (!response.isMethodAllowed((int)request.getMethods()))
 		return response.handleHttpError(405);
 	if (request.getBody().size() > response.getVirtualServ()->getClientSize()) // create getter for body size in HTTPrequests
 		return response.handleHttpError(413);
@@ -196,6 +196,5 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main functi
 	// 	return response.handleHttpError(400); // check if content type is valid for POST method, create getter for header in HTTPrequests
 	if (int status = response.resolvePath(request.getPath()); status != 200)
 		return response.handleHttpError(status);
-	
-	
+	return;
 }

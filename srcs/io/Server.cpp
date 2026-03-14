@@ -2,31 +2,28 @@
 #include <sstream>
 //socket() → bind() → listen() → accept() → poll()
 
-Server::Server() : _listen_fd(-1)
-{
-	std::memset(&_addr, 0, sizeof(_addr));
-}
+Server::Server() {}
 
 Server::~Server()
 {
-	if(_listen_fd >= 0)
-		close(_listen_fd);
+	for (size_t i = 0; i < _listen_fds.size(); i++)
+		close(_listen_fds[i]);
 }
 
-void Server::_addListenFd()
+void Server::_addListenFd(int fd)
 {
 	pollfd pfd;
-	pfd.fd = _listen_fd;
+	pfd.fd = fd;
 	pfd.events = POLLIN;
 	pfd.revents = 0;// poll will fill this in
 	_pfds.push_back(pfd);
 }
 
-void Server::_acceptClients()
+void Server::_acceptClients(int listen_fd)
 {
 	while(true)
 	{
-		int c_fd = accept(_listen_fd, NULL, NULL);
+		int c_fd = accept(listen_fd, NULL, NULL);
 		if(c_fd >= 0)
 		{
 			int flags = fcntl(c_fd, F_GETFL, 0);//file control help change or read fd settings
@@ -42,27 +39,29 @@ void Server::_acceptClients()
 			p.revents = 0;
 			_pfds.push_back(p);
 			_conns[c_fd] = Connection();
+			_conns[c_fd].last_activity = time(NULL);
 			std::cout << "accepted cient fd"<< c_fd << std::endl;
 			continue;
 		}
-		if(errno == EAGAIN || errno == EWOULDBLOCK)
+		else if(errno == EAGAIN || errno == EWOULDBLOCK)
 		{
 			std::cout << "no more pending connections" << std::endl;
 			break;
 		}
-		if(errno == EINTR)//repeat accept; was interupted y signal try ones more
+		else if(errno == EINTR)//repeat accept; was interupted y signal try ones more
 		{
 			continue;
 		}
-		if(errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
+		else if (errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
 		{
 			continue;
 		}
 		std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
-		
 		break;
 	}
 }
+
+//---------------------temporary-----------------------//
 
 void Server::_logRecv(int fd, ssize_t n) const
 {
@@ -70,7 +69,6 @@ void Server::_logRecv(int fd, ssize_t n) const
 			<< " | received " << n << " bytes"
 			<< " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
 			<< " ----" << std::endl;
-
 }
 
 void Server::_buildResponse(size_t indx)
@@ -98,6 +96,8 @@ void Server::_buildResponse(size_t indx)
     _pfds[indx].events = POLLOUT;
 }
 
+//---------------------temporary-----------------------//
+
 void Server::_removeFd(size_t indx)
 {
 	int fd = _pfds[indx].fd;
@@ -107,9 +107,9 @@ void Server::_removeFd(size_t indx)
 	_pfds.erase(_pfds.begin() + indx);
 }
 
-void Server::_handleListenReadable()
+void Server::_handleListenReadable(int listen_fd)
 {
-	_acceptClients();
+	_acceptClients(listen_fd);
 }
 
 void Server::_handleClientError(size_t indx)
@@ -129,9 +129,10 @@ void Server::_handleClientReadable(size_t indx)
 		{
 			_conns[fd].in_buf.append(buf, n);
 			c.last_activity = time(NULL);
-			_logRecv(fd, n);
 			//--------temporary------//
+			_logRecv(fd, n);
 			_buildResponse(indx);
+			return;
 			//--------temporary------//
 			//this is the place to call http parser which read from in_buf <===============
 			//ParseResult result = HttpParser::feed(c.in_buf, c.request) (NEED_MORE, COMPLETE, ERROR(enum???)// do i realy need an reques here
@@ -157,14 +158,16 @@ void Server::_handleClientReadable(size_t indx)
 				//return;
 			//}
 		}
-		if(n == 0)
+		else if(n == 0)
 		{
+			std::cout << "fd " << fd << " closed by client" << std::endl;
 			_removeFd(indx);
 			return;
 		}
-		if(n < 0)
+		else
 		{
-			//_removeFd(indx);
+			std::cerr << "recv() error on fd " << fd << std::endl;
+			_removeFd(indx);
 			return;
 		}
 	}
@@ -200,14 +203,15 @@ void Server::_handleClientWritable(size_t indx)
 	}
 	c.out_buf.erase(0, n);
 	if (c.out_buf.empty())
-		return;
-	if(c.state == CLOSING || !c.keep_alive)
 	{
-		_removeFd(indx);
-		return;
+		if(c.state == CLOSING || !c.keep_alive)
+		{
+			_removeFd(indx);
+			return;
+		}
+		_resetConnection(c);
+		_pfds[indx].events = POLLIN;
 	}
-	_resetConnection(c);
-	_pfds[indx].events = POLLIN;
 }
 
 void Server::_resetConnection(Connection &c)
@@ -218,56 +222,108 @@ void Server::_resetConnection(Connection &c)
 	c.keep_alive = false;
 }
 
-int Server::start()
+void Server::_checkTimeout()
+{
+	time_t now = time(NULL);
+	for (size_t i = 0; i < _pfds.size(); )
+	{
+		if(_isListenFd(_pfds[i].fd))
+		{
+			i++;
+			continue;
+		}
+		Connection &c = _conns[_pfds[i].fd];
+		if (now - c.last_activity > 30) // 30 секунд без активності
+		{
+			std::cout << "timeout: closing fd " << _pfds[i].fd << std::endl;
+			_removeFd(i);
+			continue;
+		}
+		i++;
+	}
+}
+
+bool Server::_isListenFd(int fd) const
+{
+    for (size_t i = 0; i < _listen_fds.size(); i++)
+    {
+        if (_listen_fds[i] == fd)
+            return true;
+    }
+    return false;
+}
+
+int Server::start(const WebservConf &conf)
+{
+	_conf = conf;
+	_pfds.clear();
+	_conns.clear();
+
+	const std::vector<ENDPOINT> &endpoints = conf.getAvailableEndPoints();
+
+	for (size_t i = 0; i < endpoints.size(); i++)
+	{
+		int fd = _createListenSocket(endpoints[i].ip, endpoints[i].port);
+		if (fd < 0)
+			return (1);
+		_listen_fds.push_back(fd);
+		_addListenFd(fd);
+	}
+	return 0;
+}
+
+int Server::_createListenSocket(uint32_t ip, int port)
 {
 	int yes = 1;
-	_listen_fd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
+	int fd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
 	//add flag NONBLOCKING through fcntl??
-	if(_listen_fd < 0)
+	if(fd < 0)
 	{
 		std::cerr << "socket() failed: " << std::strerror(errno) << std::endl;//write handle error func
-		return (1);
+		return (-1);
 	}
-	if(setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
+	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
 	{
 		std::cerr << "setsockopt(SO_REUSEADDR) failed: " << std::strerror(errno) << std::endl;
-		return (1);
+		close(fd);
+		return (-1);
 	}
-
-	_addr.sin_family = AF_INET;
-	_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	_addr.sin_port = htons(8080);
+	sockaddr_in addr;
+	std::memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = htonl(ip);
+	addr.sin_port = htons(port);
 
 	//connect socket to IP:PORT
-	if(bind(_listen_fd, reinterpret_cast<sockaddr*>(&_addr), sizeof(_addr)) < 0)
+	if(bind(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0)
 	{
 		std::cerr << "bind() failed: " << std::strerror(errno) << std::endl;
-		return (1);
+		close(fd);
+		return (-1);
 	}
 	//this sfd can listen up to 128 client and put them in a queue before accept() and said that its a server not client
-	if(listen(_listen_fd, 128) < 0)// 128 - backlog
+	if(listen(fd, 128) < 0)// 128 - backlog
 	{
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
-		return (1);
+		close(fd);
+		return (-1);
 	}
 	//to make listen socket non-blocking
-	int flags = fcntl(_listen_fd,F_GETFL, 0);
+	int flags = fcntl(fd, F_GETFL, 0);
 	if(flags < 0)
 	{
 		std::cerr << "fcntl(F_GETFL) failed: " << std::strerror(errno) << std::endl;
-		return (1);
+		close(fd);
+		return (-1);
 	}
-	if (fcntl(_listen_fd, F_SETFL, flags | O_NONBLOCK) < 0)
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
 	{
 		std::cerr << "fcntl(F_SETFL) failed: " << std::strerror(errno) << std::endl;
-		return 1;
+		close(fd);
+		return -1;
 	}
-	_pfds.clear();
-	_conns.clear();
-	_addListenFd();
-	std::cout << "socket fd = " << _listen_fd << std::endl;
-	std::cout << "listening to fd = " << _listen_fd << std::endl;
-	return (0);
+	std::cout << "listening to fd = " << fd << std::endl;
+	return (fd);
 }
 
 void Server::run ()
@@ -277,7 +333,7 @@ void Server::run ()
 	while (true)
 	{
 		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
-		//check timeout here
+		//check every 5 sec max imit is 30 sec
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
@@ -285,23 +341,27 @@ void Server::run ()
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
 			return;
 		}
-		if (_pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
-			return;
-		if (_pfds[0].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
-			_handleListenReadable();
-		for (size_t i = 1; i < _pfds.size(); )
+		_checkTimeout();
+		if(ready == 0)//timeout
+			continue;
+		for (size_t i = 0; i < _pfds.size(); )
 		{
-			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL))
+			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			{
+				if(_isListenFd(_pfds[i].fd))
+					return;// have to stop poll cos it will always return an error for this fd
 				_handleClientError(i);
 				continue;
-			}
-			if(_pfds[i].revents & POLLIN)
+			}	
+			if (_pfds[i].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
 			{
-				_handleClientReadable(i);
+				if (_isListenFd(_pfds[i].fd))
+					_handleListenReadable(_pfds[i].fd);
+				else
+					_handleClientReadable(i);
 				i++;
 				continue;
-			}
+			}	
 			if(_pfds[i].revents & POLLOUT)
 			{
 				_handleClientWritable(i);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/09 14:49:46 by flima            ###   ########.fr       */
+/*   Updated: 2026/03/14 20:30:59 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <map>
 #include <string>
 #include <sstream>
+
+#include "../io/Server.hpp"
 
 //if you use enum it is anti-typo, so the compiler doesn't accept PST
 //also more memory & speed efficient
@@ -24,7 +26,8 @@ enum class feedReturn
 {
 	INCOMPLETE,
 	COMPLETE,
-	ERROR
+	ERROR,
+	NO_HOST_ERROR
 };
 
 enum class StatCode
@@ -53,7 +56,7 @@ class Headers
 	private:
 		std::map<std::string, std::string> _headerMap; // or maybe call it a map
 	public:
-		void		parseMap(std::string rawHeaderString);
+		feedReturn	parseMap(std::string rawHeaderString);
 		//std::string	getKeys();
 		std::string	getValue(std::string key);
 		void 		printHeader();
@@ -98,11 +101,24 @@ class HTTPrequests
 		void printHeader();
 		void printBody();
 
+		HTTPrequests::METHODS	getMethods() const;
+		std::string				getPath() const;
+		ProtocolV				getProtocol() const;
+		Headers					getHeader() const;
+		std::string				getBody() const;
+		size_t					getContLen() const;
+		size_t					getStatusCode() const;
+		int						getServerPort() const;
+		std::string				getServerIP() const;
+		std::string				getClientIP() const;
+
+		void	setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port);
+
 
 	private:
 		std::string _buffer;
-		COMPONENTS	_components; // zero at birth, maybe move it to constructor?
-	
+		COMPONENTS	_components;
+
 		METHODS		_methods;
 		std::string	_path;
 		ProtocolV	_protocolv;
@@ -111,9 +127,11 @@ class HTTPrequests
 		size_t		_contLen;
 		size_t		_statusCode;
 
+		int			_serverPort;
+		uint32_t	_serverIP;
+		uint32_t _clientIP;
+
 		// Request line parser
 		// header parser
 		// body parser
 };
-
-

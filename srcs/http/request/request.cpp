@@ -6,13 +6,14 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/25 21:38:59 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/13 16:26:10 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "request.hpp"
+#include "../../../include/http/request.hpp"
 
 HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body("")
+								, _serverIP(""), _clientIP("")
 {
 }
 

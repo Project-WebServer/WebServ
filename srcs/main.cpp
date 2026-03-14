@@ -48,10 +48,16 @@ int main(int argc, char **argv)
 	test.setVirtualServ(&serv);
 	test.setLocation(uri);
 	std::cout << test.handleHttpError(401) << std::endl;
+//---------------------------------------------------------------------//
+	const std::vector<ENDPOINT> &endpoints = Webserv.getAvailableEndPoints();
+    std::cout << "endpoints count: " << endpoints.size() << std::endl;
+    for (size_t i = 0; i < endpoints.size(); i++)
+		std::cout << "  ip=" << endpoints[i].ip << " port=" << endpoints[i].port << std::endl;
+//---------------------------------------------------------------------//
 
 	// Server s;
 
-	// if(s.start() != 0)
+	// if(s.start(Webserv) != 0)
 	// 	return (1);
 	// s.run();
 	// return 0;

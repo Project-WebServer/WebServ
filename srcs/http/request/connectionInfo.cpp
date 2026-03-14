@@ -1,13 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   error.cpp                                          :+:      :+:    :+:   */
+/*   connectionInfo.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/13 18:34:21 by yulpark           #+#    #+#             */
-/*   Updated: 2026/02/21 15:14:44 by yulpark          ###   ########.fr       */
+/*   Created: 2026/03/13 16:26:38 by yulpark           #+#    #+#             */
+/*   Updated: 2026/03/14 20:31:08 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "request.hpp"
+#include "../../../include/http/request.hpp"
+
+void HTTPrequests::setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port)
+{
+	_serverIP = ServerIP;
+	_clientIP = ClientIP;
+	_serverPort = Port;
+}

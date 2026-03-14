@@ -38,10 +38,10 @@ class Response
 		bool		isMethodAllowed(int);
 
 		void setVirtualServ(const ServerConf* serv);
-		void setLocation(std::string& uri);
+		void setLocation(std::string uri);
 
 		const ServerConf* getVirtualServ() const;
-		int Response::resolvePath(std::string& uri);
+		int Response::resolvePath(std::string uri);
 
 };
 

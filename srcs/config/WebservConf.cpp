@@ -30,7 +30,7 @@ int WebservConf::getNumberOfServers() const
 	return (int)this->virtual_servers.size();
 }
 
-const std::vector<ENDPOINT> &WebservConf::getAvailableEndPoints()
+const std::vector<ENDPOINT> &WebservConf::getAvailableEndPoints() const
 {
 	return this->available_endPoints;
 }
