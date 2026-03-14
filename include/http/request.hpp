@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/13 16:29:17 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/14 20:30:59 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ class HTTPrequests
 		std::string				getServerIP() const;
 		std::string				getClientIP() const;
 
-		void	setConectionInfo(std::string ServerIP, std::string ClientIP, int Port);
+		void	setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port);
 
 
 	private:
@@ -128,8 +128,8 @@ class HTTPrequests
 		size_t		_statusCode;
 
 		int			_serverPort;
-		std::string	_serverIP;
-		std::string _clientIP;
+		uint32_t	_serverIP;
+		uint32_t _clientIP;
 
 		// Request line parser
 		// header parser
