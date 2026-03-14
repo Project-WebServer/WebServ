@@ -2,7 +2,7 @@
 #include "Response.hpp"
 
 
-Response::Response(): realPath(""), virtualServer(nullptr), _Location(nullptr)
+Response::Response(): realPath(""), response(""), virtualServer(nullptr), _Location(nullptr)
 {
 }
 
@@ -121,9 +121,8 @@ std::string Response::buildHeader(int httpCode, size_t bodySize, std::string con
 	return header.str();
 }
 
-std::string Response::handleHttpError(int errorCode)
+void Response::handleHttpError(int errorCode)
 {
-	std::string response;
 	std::string body = getErrorFileBody(errorCode);
 	if (body.empty())
 	{
@@ -134,7 +133,6 @@ std::string Response::handleHttpError(int errorCode)
 	}
 	response = buildHeader(errorCode, body.size(), "text/html");
 	response += body;
-	return response;
 }
 
 bool	Response::isMethodAllowed(int Method)
@@ -184,7 +182,7 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 }
 
 
-std::string	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
+void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
 {
 	Response response;
 

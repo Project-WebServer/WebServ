@@ -23,6 +23,7 @@ class Response
 		const ServerConf*	virtualServer; 
 		const Location*		_Location;
 		std::string			realPath;
+		std::string         response;
 
 		std::string	getHttpCode(int code);
 		std::string getErrorFileBody(int errorCode);
@@ -32,7 +33,7 @@ class Response
 
 		Response();
 		~Response(){};
-		std::string handleHttpError(int errorCode);
+		void handleHttpError(int errorCode);
 		bool 		isLocationValid();
 		bool		isMethodAllowed(int);
 
@@ -44,7 +45,7 @@ class Response
 
 };
 
-std::string	responseHandler(HTTPrequests& request, WebservConf& servConf);
+void	responseHandler(HTTPrequests& request, WebservConf& servConf);
 
 
 
