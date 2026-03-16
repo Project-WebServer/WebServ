@@ -189,7 +189,6 @@ void Server::_handleClientWritable(size_t indx)
 		_pfds[indx].events = POLLIN;
 		return;
 	}
-	
 	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);//bytes
 	if(n < 0)
 	{
