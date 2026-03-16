@@ -1,7 +1,11 @@
 #include "../../include/handlers/Response.hpp"
+#include "Response.hpp"
 
 
-Response::Response(): realPath(""), response(""), virtualServer(nullptr), _Location(nullptr)
+Response::Response(): realPath(""), response(""), 
+	virtualServer(nullptr), 
+	_Location(nullptr), 
+	httpStatusCode(200)
 {
 }
 
@@ -19,9 +23,29 @@ const ServerConf *Response::getVirtualServ() const
 {
     return this->virtualServer;
 }
+
+std::string Response::getRealPath() const
+{
+	return realPath;
+}
+
 const std::string Response::getResponse() const
 {
     return this->response;
+}
+
+std::string Response::getIndexfile() const
+{
+	std::vector<std::string> indexFiles = _Location->getIndex_files();
+	
+	if (indexFiles.size() == 0)
+		return "";
+	for (size_t i = 0; i < indexFiles.size(); ++i)
+	{
+		std::string filePath = realPath;
+		filePath += indexFiles[i];
+		
+	}
 }
 int Response::resolvePath(std::string uri)
 {
@@ -29,19 +53,6 @@ int Response::resolvePath(std::string uri)
 
 	if (realPath.find("..") != std::string::npos)
 		return 403; // forbidden
-	struct stat fileStat;
-	if (stat(realPath.c_str(), &fileStat) == -1)
-		return 404; // file not found
-	if (S_ISDIR(fileStat.st_mode))
-	{
-		if (access(realPath.c_str(), X_OK) == -1)
-			return 403; // forbidden
-	}
-	else if(S_ISREG(fileStat.st_mode))
-	{
-		if (access(realPath.c_str(), R_OK) == -1)
-			return 403; // forbidden
-	}
     return 200;
 }
 std::string Response::getHttpCode(int code)
@@ -120,7 +131,7 @@ std::string Response::buildHeader(int httpCode, size_t bodySize, std::string con
 			<< "Content-Length: " << bodySize << "\r\n"
 			<< "Connection: keep-alive\r\n" //dynamic value??
 			<< "\r\n";
-
+	httpStatusCode = httpCode;
 	return header.str();
 }
 
@@ -191,13 +202,40 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main functi
 
 	if (!select_serv_n_location(request, servConf, response).success)
 		return response.handleHttpError(404);
-	if (!response.isMethodAllowed((int)request.getMethods()))
-		return response.handleHttpError(405);
-	if (request.getBody().size() > response.getVirtualServ()->getClientSize()) // create getter for body size in HTTPrequests
+	if (request.getBody().size() > response.getVirtualServ()->getClientSize())
 		return response.handleHttpError(413);
-	// if (request.getMethod() == HTTPrequests::METHODS::POST && request.getHeader().getValue("Content-Type").empty())
-	// 	return response.handleHttpError(400); // check if content type is valid for POST method, create getter for header in HTTPrequests
-	if (int status = response.resolvePath(request.getPath()); status != 200)
-		return response.handleHttpError(status);
+	if (request.getMethods() == HTTPrequests::METHODS::GET)
+	{
+		response.handleGETrequest(request);
+	}
+
 	return;
+}
+
+void Response::handleGETrequest(HTTPrequests& request)
+{
+	struct stat fileStat;
+	if (!isMethodAllowed((int)request.getMethods()))
+		return handleHttpError(405);
+	if (int status = resolvePath(request.getPath()); status != 200)
+		return handleHttpError(status);
+	
+	if (stat(realPath.c_str(), &fileStat) == -1)
+		return handleHttpError(404);
+	if (S_ISDIR(fileStat.st_mode))
+	{
+		if (access(realPath.c_str(), X_OK) == -1)
+			return handleHttpError(403);
+		std::_realpath = getIndexfile();
+	}
+	else if(S_ISREG(fileStat.st_mode))
+	{
+		if (access(realPath.c_str(), R_OK) == -1)
+			return handleHttpError(403);
+		std::string body;
+		if (!getFileContent(realPath, body).success);
+			return handleHttpError(403);
+		response = buildHeader(200, body.size(), "text/html");
+		response += body;
+	}
 }

@@ -24,25 +24,37 @@ class Response
 		const Location*		_Location;
 		std::string			realPath;
 		std::string         response;
+		int					httpStatusCode;
+
 
 		std::string	getHttpCode(int code);
 		std::string getErrorFileBody(int errorCode);
 		errmsg		getFileContent(std::string& filePath, std::string& content);
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
+
 	public:
 
 		Response();
 		~Response(){};
-		void handleHttpError(int errorCode);
 		bool 		isLocationValid();
 		bool		isMethodAllowed(int);
-
+		
+		
+		void 		handleHttpError(int errorCode);
+		int 		resolvePath(std::string uri);
+		
+		// setters 
 		void setVirtualServ(const ServerConf* serv);
 		void setLocation(std::string uri);
 
-		const ServerConf* getVirtualServ() const;
-		int resolvePath(std::string uri);
-		const std::string getResponse() const;
+		//getters 
+		const ServerConf*	getVirtualServ() const;
+		std::string			getRealPath() const;
+		const std::string	getResponse() const;
+		std::string			getIndexfile()const;
+
+		void	handleGETrequest(HTTPrequests& request);
+
 
 };
 
