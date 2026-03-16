@@ -100,7 +100,7 @@ std::string Location::resolvePath(std::string& uri) const
 	std::string _realPath = getRoot() + uri;
 	return _realPath;
 }
-	
+
 void Location::print() const
 {
     if (!this->root.empty())

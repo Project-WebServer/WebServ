@@ -1,5 +1,4 @@
 #include "../../include/handlers/Response.hpp"
-#include "Response.hpp"
 
 
 Response::Response(): realPath(""), response(""), virtualServer(nullptr), _Location(nullptr)
@@ -19,6 +18,10 @@ void Response::setLocation(std::string uri)
 const ServerConf *Response::getVirtualServ() const
 {
     return this->virtualServer;
+}
+const std::string Response::getResponse() const
+{
+    return this->response;
 }
 int Response::resolvePath(std::string uri)
 {

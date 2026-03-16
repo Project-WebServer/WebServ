@@ -41,7 +41,8 @@ class Response
 		void setLocation(std::string uri);
 
 		const ServerConf* getVirtualServ() const;
-		int Response::resolvePath(std::string uri);
+		int resolvePath(std::string uri);
+		const std::string getResponse() const;
 
 };
 

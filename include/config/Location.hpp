@@ -50,7 +50,7 @@ class Location
 			const std::vector<std::string>&	getIndex_files() const; // 
 			bool							getAutoindex() const; //
 
-			std::string Location::resolvePath(std::string& uri) const;
+			std::string resolvePath(std::string& uri) const;
 
 			void print() const;
 };
