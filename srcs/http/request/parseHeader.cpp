@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseHeader.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/13 15:51:17 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/14 20:56:23 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,11 +87,15 @@ feedReturn HTTPrequests::parseHeader(std::string header)
 	if (_header.parseMap(header) != feedReturn::COMPLETE)
 		_statusCode = 400; // only 400 or others too?
 	if (_header.getValue("host").empty())
+	{
+		//_statusCode = 400;
 		return feedReturn::NO_HOST_ERROR;
-
+	}
 	// content length tells you how much body to read
 	std::string contLen = _header.getValue("content-length");
 	std::stringstream stream(contLen);
 	stream >> _contLen;
+	// if no error
+	//_statusCode = 200;
 	return feedReturn::COMPLETE; // for now, later add other error cases
 }
