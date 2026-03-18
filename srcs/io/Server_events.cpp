@@ -37,8 +37,8 @@ void Server::_handleClientReadable(size_t indx)
             // {
             	// --- Pass to track C---
             	// Router::handle() return serialized answer as a string
-				// c.out_buf = Router::handle(c.request);
-				//c.keep_alive = c.request.isKeepAlive();
+				// c.out_buf = Router::handle(c.request, _conf);
+				//c.keep_alive = c.request.isKeepAlive();// http method
 				//c.state = SENDING_RESPONSE;
 				//_pfds[indx].events = POLLOUT;
 				//return;
