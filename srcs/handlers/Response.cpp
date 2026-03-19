@@ -57,6 +57,7 @@ int Response::resolvePath(std::string uri)
 
 	if (realPath.find("..") != std::string::npos)
 		return 403; // forbidden
+	realPath = "." + realPath; // need to check '/'?
     return 200;
 }
 std::string Response::getHttpCode(int code)
