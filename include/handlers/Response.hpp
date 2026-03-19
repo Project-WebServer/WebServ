@@ -8,6 +8,7 @@
 #include <sstream>
 #include <cerrno>
 #include <cstring>
+#include <dirent.h>
 #include "../config/WebservConf.hpp"
 #include "../http/request.hpp"
 
@@ -42,7 +43,7 @@ class Response
 		
 		void 		handleHttpError(int errorCode);
 		int 		resolvePath(std::string uri);
-		
+		 
 		// setters 
 		void setVirtualServ(const ServerConf* serv);
 		void setLocation(std::string uri);
@@ -54,6 +55,7 @@ class Response
 		std::string			getIndexfile()const;
 
 		void	handleGETrequest(HTTPrequests& request);
+		std::string Response::buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
 
 
 };

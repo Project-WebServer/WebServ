@@ -1,7 +1,6 @@
 #include "../../include/handlers/Response.hpp"
 #include "Response.hpp"
 
-
 Response::Response(): realPath(""), response(""), 
 	virtualServer(nullptr), 
 	_Location(nullptr), 
@@ -44,8 +43,13 @@ std::string Response::getIndexfile() const
 	{
 		std::string filePath = realPath;
 		filePath += indexFiles[i];
-		
+		struct stat fileStat;
+		if (stat(filePath.c_str(), &fileStat) == -1)
+			continue;
+		if (S_ISREG(fileStat.st_mode) && access(filePath.c_str(), R_OK) != -1)
+			return filePath;
 	}
+	return "";
 }
 int Response::resolvePath(std::string uri)
 {
@@ -226,16 +230,70 @@ void Response::handleGETrequest(HTTPrequests& request)
 	{
 		if (access(realPath.c_str(), X_OK) == -1)
 			return handleHttpError(403);
-		std::_realpath = getIndexfile();
+		std::string _realPath = getIndexfile();
+		if (_realPath.empty())
+		{
+			if (_Location->getAutoindex())
+			{
+				std::string autoindexPage = buildAutoindex(realPath, request.getPath());
+				response = buildHeader(200, autoindexPage.size(), "text/html");
+				response += autoindexPage;
+			}
+			else
+				return handleHttpError(403);
+		}
+		else
+		{
+			std::string body;
+			if (!getFileContent(_realPath, body).success)
+				return handleHttpError(403);
+			response = buildHeader(200, body.size(), "text/html");
+			response += body;
+		}
 	}
 	else if(S_ISREG(fileStat.st_mode))
 	{
 		if (access(realPath.c_str(), R_OK) == -1)
 			return handleHttpError(403);
 		std::string body;
-		if (!getFileContent(realPath, body).success);
+		if (!getFileContent(realPath, body).success)
 			return handleHttpError(403);
 		response = buildHeader(200, body.size(), "text/html");
 		response += body;
 	}
 }
+
+std::string Response::buildAutoindex(const std::string& dirPath, const std::string& urlPath) const
+{
+    DIR* dir = opendir(dirPath.c_str());
+    if (!dir)
+        return "";
+
+    std::string html;
+    html += "<html><head><title>Index of " + urlPath + "</title></head><body>";
+    html += "<h1>Index of " + urlPath + "</h1><hr><pre>";
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        std::string name = entry->d_name;
+        if (name == ".")
+            continue;
+
+        std::string fullPath = dirPath + "/" + name;
+        struct stat st;
+        if (stat(fullPath.c_str(), &st) == -1)
+            continue;
+
+        bool isDir = S_ISDIR(st.st_mode);
+        std::string displayName = isDir ? name + "/" : name;
+        std::string link = urlPath + name + (isDir ? "/" : "");
+
+        html += "<a href=\"" + link + "\">" + displayName + "</a>\n";
+    }
+
+    closedir(dir);
+    html += "</pre><hr></body></html>";
+    return html;
+}
+
