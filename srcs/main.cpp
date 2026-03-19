@@ -2,6 +2,34 @@
 #include "../include/handlers/Response.hpp"
 #include "../include/config/WebservConf.hpp"
 
+
+int testREQ(HTTPrequests& req)
+{
+	
+	std::string raw = "GET / HTTP/1.1\r\n"
+	"Host: example.com\r\n"
+	"Content-Type: application/x-www-form-urlencoded\r\n"
+	"Content-Length: 49\r\n"
+	"\r\n"
+	"name=FirstName+LastName&email=bsmth%40example.com";
+	feedReturn state;
+
+	state = req.feed(raw);
+	// std::string body = req.getBody();
+	// std::cout << body << std::endl;
+	if (state != feedReturn::COMPLETE)
+		std::cout << "ERROR" << std::endl;
+	// else
+	// {
+	// 	req.printRequest();
+	// 	std::cout << std::endl;
+	// 	req.printHeader();
+	// 	std::cout << std::endl;
+	// 	req.printBody();
+	// }
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	setupSignals();
@@ -40,16 +68,15 @@ int main(int argc, char **argv)
 	// 	ptr->front().print();
 	// }
 
-	uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
-	int port = Webserv.getAvailableEndPoints().front().port;
-	const std::vector<ServerConf> *test1= Webserv.matchServer(ip, port);
-	const ServerConf &serv = test1->front();
+	// uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
+	// int port = Webserv.getAvailableEndPoints().front().port;
+	// const std::vector<ServerConf> *test1= Webserv.matchServer(ip, port);
+	// const ServerConf &serv = test1->front();
 	std::string uri = "/";
-	Response test;
-	test.setVirtualServ(&serv);
-	test.setLocation(uri);
-	test.handleHttpError(400);
-	std::cout << test.getResponse() << std::endl;
+	HTTPrequests testRequest;
+	testREQ(testRequest);
+	responseHandler(testRequest, Webserv);
+
 //---------------------------------------------------------------------//
 // 	const std::vector<ENDPOINT> &endpoints = Webserv.getAvailableEndPoints();
 //     std::cout << "endpoints count: " << endpoints.size() << std::endl;

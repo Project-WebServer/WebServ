@@ -1,9 +1,9 @@
 #include "../../include/handlers/Response.hpp"
-#include "Response.hpp"
 
-Response::Response(): realPath(""), response(""), 
-	virtualServer(nullptr), 
-	_Location(nullptr), 
+Response::Response(): virtualServer(nullptr), 
+	_Location(nullptr),
+	realPath(""),
+	response(""), 
 	httpStatusCode(200)
 {
 }
@@ -212,7 +212,7 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main functi
 	{
 		response.handleGETrequest(request);
 	}
-
+	std::cout << response.getResponse() << std::endl;
 	return;
 }
 

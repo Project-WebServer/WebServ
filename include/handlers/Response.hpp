@@ -54,8 +54,8 @@ class Response
 		const std::string	getResponse() const;
 		std::string			getIndexfile()const;
 
-		void	handleGETrequest(HTTPrequests& request);
-		std::string Response::buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
+		void		handleGETrequest(HTTPrequests& request);
+		std::string	buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
 
 
 };
