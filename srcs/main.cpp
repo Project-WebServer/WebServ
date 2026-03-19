@@ -4,6 +4,7 @@
 
 int main(int argc, char **argv)
 {
+	setupSignals();
 	ConfToken 	confFile;
 	WebservConf	Webserv;
 	if (argc > 2)

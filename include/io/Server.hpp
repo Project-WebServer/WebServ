@@ -14,10 +14,13 @@
 # include <unistd.h>
 # include <poll.h>
 # include <fcntl.h>
+#include <csignal>
 
 # include "Connection.hpp"
  #include "../config/WebservConf.hpp"
 
+extern volatile sig_atomic_t g_running;
+void	setupSignals();
 
 class Server
 {

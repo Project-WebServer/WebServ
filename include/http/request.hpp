@@ -6,7 +6,7 @@
 /*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/14 20:30:59 by ypark            ###   ########.fr       */
+/*   Updated: 2026/03/16 21:56:35 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,8 +109,8 @@ class HTTPrequests
 		size_t					getContLen() const;
 		size_t					getStatusCode() const;
 		int						getServerPort() const;
-		std::string				getServerIP() const;
-		std::string				getClientIP() const;
+		u_int32_t				getServerIP() const;
+		u_int32_t				getClientIP() const;
 
 		void	setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port);
 
