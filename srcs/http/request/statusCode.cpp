@@ -3,43 +3,48 @@
 /*                                                        :::      ::::::::   */
 /*   statusCode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/13 16:30:28 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/19 17:24:53 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/http/request.hpp"
 
-// if no host error => 400
-// unsupported protocol version
-// use static keyword for the map
-//Now you need to make the server "speak".
+//parseHeader - feedReturn::NO_HOST_ERROR then 400
+//            - return feedReturn::COMPLETE; then 200
+//parseRL  - INCOMPLETE
+//         - feedReturn::ERROR then either 405 method not allowed or 505 http version unsupported
 
-//The Map: Inside a function (like getReasonPhrase), create a std::map<size_t, std::string>.
+void HTTPrequests::statusCode(feedReturn type)
+{
+	if (type == feedReturn::NO_HOST_ERROR)
+		_statusCode = 400;
+	else if (type == feedReturn::ERROR)
+		_statusCode = 405;
+	else 
+		_statusCode = 200;
+}
 
-//The Pairing: Add the standard codes:
-
-//200 -> "OK"
-
-//400 -> "Bad Request"
-
-//404 -> "Not Found"
-
-//500 -> "Internal Server Error"
-
-//The Static Trick: Use the static keyword for the map so that the "dictionary" is only built once in memory, rather than being recreated every time you have an error.
-
-//The Search: Use the .find() method of the map to look up the phrase. If it’s not found, return a default "Internal Server Error".
-
-
-//std::string getReasonPhrase(size_t code) {
-//    static std::map<size_t, std::string> codes; // The 'static' makes it live forever
-//    if (codes.empty()) {
-//        // Fill the map only ONCE the first time the function is called
-//        codes[200] = "OK";
-//        codes[404] = "Not Found";
-//    }
-//    // ... search and return ...
+//std::string Response::getHttpCode(int code)
+//{
+//	switch (code)
+//	{
+//		case 200: return " OK";                    // Request succeeded
+//		case 201: return " Created";               // Resource created successfully
+//		case 301: return " Moved Permanently";     // Resource moved to a new URL
+//		case 400: return " Bad Request";           // Malformed or invalid request
+//		case 403: return " Forbidden";             // No permission to access the resource
+//		case 404: return " Not Found";             // Resource does not exist
+//		case 405: return " Method Not Allowed";    // HTTP method not supported for this route
+//		case 408: return " Request Timeout";       // Client took too long to send the request
+//		case 409: return " Conflict";              // Request conflicts with current resource state
+//		case 413: return " Payload Too Large";     // Body exceeds client_max_body_size
+//		case 415: return " Unsupported Media Type"; // Content-Type not supported
+//		case 500: return " Internal Server Error"; // Unexpected server-side failure
+//		case 502: return " Bad Gateway";           // CGI returned an invalid response
+//		case 504: return " Gateway Timeout";       // CGI took too long to respond
+//	}
+//	return "";
 //}
