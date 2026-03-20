@@ -33,12 +33,14 @@ const std::string Response::getResponse() const
     return this->response;
 }
 
-std::string Response::getIndexfile() const
+std::string Response::getIndexfile()
 {
 	std::vector<std::string> indexFiles = _Location->getIndex_files();
 	
 	if (indexFiles.size() == 0)
 		return "";
+	if (realPath.back() != '/')
+		realPath = realPath + "/";
 	for (size_t i = 0; i < indexFiles.size(); ++i)
 	{
 		std::string filePath = realPath;
@@ -57,6 +59,8 @@ int Response::resolvePath(std::string uri)
 
 	if (realPath.find("..") != std::string::npos)
 		return 403; // forbidden
+	if (realPath.front() == '/')
+		realPath = "." + realPath;
     return 200;
 }
 std::string Response::getHttpCode(int code)
@@ -200,7 +204,7 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 }
 
 
-void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
+void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& _response) //main function to handle respponse
 {
 	Response response;
 
@@ -212,7 +216,7 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf) //main functi
 	{
 		response.handleGETrequest(request);
 	}
-	std::cout << response.getResponse() << std::endl;
+	_response = response.getResponse();
 	return;
 }
 

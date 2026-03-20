@@ -52,7 +52,7 @@ class Response
 		const ServerConf*	getVirtualServ() const;
 		std::string			getRealPath() const;
 		const std::string	getResponse() const;
-		std::string			getIndexfile()const;
+		std::string			getIndexfile();
 
 		void		handleGETrequest(HTTPrequests& request);
 		std::string	buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
@@ -60,7 +60,7 @@ class Response
 
 };
 
-void	responseHandler(HTTPrequests& request, WebservConf& servConf);
+void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& _response);
 
 
 
