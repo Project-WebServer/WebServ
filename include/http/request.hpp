@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/14 20:30:59 by ypark            ###   ########.fr       */
+/*   Updated: 2026/03/20 13:12:23 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,17 +29,6 @@ enum class feedReturn
 	ERROR,
 	NO_HOST_ERROR
 };
-
-enum class StatCode
-//indicates whether the HTTP request has been succesfully completed
-{
-	INFORM, //100-199    not relevant in HTTP1.0
-	SUCCESS, //200-299
-	REDIRECT, //300-399
-	CLIENT_ERR, //400-499
-	SERVER_ERR //500-599
-};
-//maybe a class for errors
 
 enum class ProtocolV
 {
@@ -113,6 +102,7 @@ class HTTPrequests
 		std::string				getClientIP() const;
 
 		void	setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port);
+		void	statusCode(feedReturn type);
 
 
 	private:
@@ -125,8 +115,7 @@ class HTTPrequests
 		Headers		_header;
 		std::string	_body;
 		size_t		_contLen;
-		size_t		_statusCode;
-
+		int			_statusCode;
 		int			_serverPort;
 		uint32_t	_serverIP;
 		uint32_t _clientIP;
