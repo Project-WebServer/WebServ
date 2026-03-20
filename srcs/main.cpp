@@ -75,7 +75,9 @@ int main(int argc, char **argv)
 	std::string uri = "/";
 	HTTPrequests testRequest;
 	testREQ(testRequest);
-	responseHandler(testRequest, Webserv);
+	std::string response;
+	responseHandler(testRequest, Webserv, response);
+	std::cout << response << std::endl;
 
 //---------------------------------------------------------------------//
 // 	const std::vector<ENDPOINT> &endpoints = Webserv.getAvailableEndPoints();
