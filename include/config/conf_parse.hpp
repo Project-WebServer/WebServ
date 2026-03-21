@@ -26,6 +26,8 @@ enum struct tokenType
 	INDEX,
 	AUTO_INDEX,
 	SERVER_NAME,
+	UPLOAD,
+	REDIR,
 	NEWLINE,
 	UNKNOWN,
 	ENDOF
@@ -80,7 +82,9 @@ void			setPrefixLocation(TokenLine &tokenLine, Location& loc);
 void			setRootLocation(TokenLine &tokenLine, Location& loc);
 void			setAllowed_methodsLocation(TokenLine &tokenLine, Location& loc);
 void			setIndex_filesLocation(TokenLine &tokenLine, Location& loc);
+void 			setUploadLocation(TokenLine &tokenLine, Location& loc);
 void 			setAutoindexLocation(TokenLine &tokenLine, Location& loc);
+void 			setRedirLocation(TokenLine &tokenLine, Location& loc);
 error_conf 		setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tokenLine);
 error_conf 		setWebservConf(WebservConf &webserv, ConfToken& confFile);
 

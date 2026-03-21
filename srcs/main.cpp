@@ -3,32 +3,32 @@
 #include "../include/config/WebservConf.hpp"
 
 
-int testREQ(HTTPrequests& req)
-{
+// int testREQ(HTTPrequests& req)
+// {
 	
-	std::string raw = "GET / HTTP/1.1\r\n"
-	"Host: example.com\r\n"
-	"Content-Type: application/x-www-form-urlencoded\r\n"
-	"Content-Length: 49\r\n"
-	"\r\n"
-	"name=FirstName+LastName&email=bsmth%40example.com";
-	feedReturn state;
+// 	std::string raw = "GET / HTTP/1.1\r\n"
+// 	"Host: example.com\r\n"
+// 	"Content-Type: application/x-www-form-urlencoded\r\n"
+// 	"Content-Length: 49\r\n"
+// 	"\r\n"
+// 	"name=FirstName+LastName&email=bsmth%40example.com";
+// 	feedReturn state;
 
-	state = req.feed(raw);
-	// std::string body = req.getBody();
-	// std::cout << body << std::endl;
-	if (state != feedReturn::COMPLETE)
-		std::cout << "ERROR" << std::endl;
-	// else
-	// {
-	// 	req.printRequest();
-	// 	std::cout << std::endl;
-	// 	req.printHeader();
-	// 	std::cout << std::endl;
-	// 	req.printBody();
-	// }
-	return 0;
-}
+// 	state = req.feed(raw);
+// 	// std::string body = req.getBody();
+// 	// std::cout << body << std::endl;
+// 	if (state != feedReturn::COMPLETE)
+// 		std::cout << "ERROR" << std::endl;
+// 	// else
+// 	// {
+// 	// 	req.printRequest();
+// 	// 	std::cout << std::endl;
+// 	// 	req.printHeader();
+// 	// 	std::cout << std::endl;
+// 	// 	req.printBody();
+// 	// }
+// 	return 0;
+// }
 
 int main(int argc, char **argv)
 {
@@ -60,6 +60,7 @@ int main(int argc, char **argv)
 		std::cout << status.error_msg + "\n";
 		return 1;
 	}
+	Webserv.print();
 	// const std::vector<ServerConf>* ptr = nullptr;
 	// ptr = Webserv.matchServer(0, 8080);
 	// if (ptr != nullptr)
@@ -68,16 +69,12 @@ int main(int argc, char **argv)
 	// 	ptr->front().print();
 	// }
 
-	// uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
-	// int port = Webserv.getAvailableEndPoints().front().port;
-	// const std::vector<ServerConf> *test1= Webserv.matchServer(ip, port);
-	// const ServerConf &serv = test1->front();
-	std::string uri = "/";
-	HTTPrequests testRequest;
-	testREQ(testRequest);
-	std::string response;
-	responseHandler(testRequest, Webserv, response);
-	std::cout << response << std::endl;
+	// std::string uri = "/";
+	// HTTPrequests testRequest;
+	// testREQ(testRequest);
+	// std::string response;
+	// responseHandler(testRequest, Webserv, response);
+	// std::cout << response << std::endl;
 
 //---------------------------------------------------------------------//
 // 	const std::vector<ENDPOINT> &endpoints = Webserv.getAvailableEndPoints();
