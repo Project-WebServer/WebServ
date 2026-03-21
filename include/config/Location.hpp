@@ -20,8 +20,8 @@ class Location
 		bool						autoindex;
 
 		// //upload
-		bool		upload_enable;
-		std::string upload_path;
+		// bool		upload_enable;
+		// std::string upload_path;
 
 		// //redirections 
 		// bool		has_redirection;
