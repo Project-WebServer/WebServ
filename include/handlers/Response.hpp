@@ -32,6 +32,7 @@ class Response
 		std::string getErrorFileBody(int errorCode);
 		errmsg		getFileContent(std::string& filePath, std::string& content);
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
+		std::string	buildStatusLine(std::string httpVersion, int httpCode);
 
 	public:
 
@@ -50,12 +51,15 @@ class Response
 
 		//getters 
 		const ServerConf*	getVirtualServ() const;
+		const Location*		getLocation() const;
 		std::string			getRealPath() const;
 		const std::string	getResponse() const;
 		std::string			getIndexfile();
 
 		void		handleGETrequest(HTTPrequests& request);
+		void		handlePOSTrequest(HTTPrequests& request);
 		std::string	buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
+		std::string	handleRedirect(); 
 
 
 };

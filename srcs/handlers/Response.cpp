@@ -1,4 +1,5 @@
 #include "../../include/handlers/Response.hpp"
+#include "Response.hpp"
 
 Response::Response(): virtualServer(nullptr), 
 	_Location(nullptr),
@@ -21,6 +22,11 @@ void Response::setLocation(std::string uri)
 const ServerConf *Response::getVirtualServ() const
 {
     return this->virtualServer;
+}
+
+const Location *Response::getLocation() const
+{
+	return this->_Location;
 }
 
 std::string Response::getRealPath() const
@@ -129,15 +135,22 @@ errmsg Response::getFileContent(std::string& filePath, std::string& content)
 	return errmsg{true, ""};
 }
 
+std::string	Response::buildStatusLine(std::string httpVersion, int httpCode)
+{
+	std::ostringstream line;
+
+	line << httpVersion << " " << httpCode << " " << getHttpCode(httpCode) << "\r\n";
+	return line.str();
+}
 //commom use 
 std::string Response::buildHeader(int httpCode, size_t bodySize, std::string contetType)
 {
 	std::ostringstream header;
 
-	header	<< "HTTP/1.1 " << httpCode << getHttpCode(httpCode) << "\r\n"
+	header	<< buildStatusLine("HTTP/1.1", httpCode)
 			<< "Content-Type: " <<  contetType << "\r\n" // content type (text/html; imagem, etc)
 			<< "Content-Length: " << bodySize << "\r\n"
-			<< "Connection: keep-alive\r\n" //dynamic value??
+			<< "Connection: keep-alive\r\n" //dynamic value?
 			<< "\r\n";
 	httpStatusCode = httpCode;
 	return header.str();
@@ -203,29 +216,43 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 	return {true, ""};
 }
 
-
+//update also an error conde int request??
 void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& _response) //main function to handle respponse
 {
 	Response response;
 
 	if (!select_serv_n_location(request, servConf, response).success)
-		return response.handleHttpError(404);
-
-	//check if has redirection 
-	// if (response.getLocation()->hasReturn())
-    //     return response.handleRedirect();
-
-	if (request.getMethods() == HTTPrequests::METHODS::GET)
 	{
-		response.handleGETrequest(request);
+		response.handleHttpError(404);
+		_response = response.getResponse();
+		return;
 	}
 
+	if (response.getLocation()->hasRedirection())
+	{
+		_response = response.getResponse();
+        return;
+	}
+	
 	//has CGI? 
 	// if (response.getLocation()->hasCgiPass())
     //     return response.handleCGI(request);
 
 	if (request.getBody().size() > response.getVirtualServ()->getClientSize())
 		return response.handleHttpError(413);
+
+	switch (request.getMethods())
+	{
+	case HTTPrequests::METHODS::GET:
+		response.handleGETrequest(request);
+		break;
+	case HTTPrequests::METHODS::POST:
+		response.handlePOSTrequest(request);
+		break;
+	default:
+		break;
+	}
+	
 
 	_response = response.getResponse();
 	return;
@@ -278,7 +305,37 @@ void Response::handleGETrequest(HTTPrequests& request)
 	}
 }
 
-std::string Response::buildAutoindex(const std::string& dirPath, const std::string& urlPath) const
+static std::string getBoundary(std::string& contentType)
+{
+	std::string token = "boundary=";
+	size_t start = contentType.find(token);
+	if (start == std::string::npos)
+		return "";
+	return "--" + contentType.substr(start + token.size());
+}
+
+static std::string getFilename(std::string& contentType)
+{
+	std::string token = "filename=\"";
+	size_t start = contentType.find(token);
+	if (start == std::string::npos)
+		return "";
+	start += token.size();
+	size_t end = contentType.find(start, "\"");
+	return contentType.substr(start, end - start);
+	
+}
+
+void Response::handlePOSTrequest(HTTPrequests &request)
+{
+	if (!isMethodAllowed((int)request.getMethods()))
+		return handleHttpError(405);
+	if (int status = resolvePath(request.getPath()); status != 200)
+		return handleHttpError(status);
+	
+	
+}
+std::string Response::buildAutoindex(const std::string &dirPath, const std::string &urlPath) const
 {
     DIR* dir = opendir(dirPath.c_str());
     if (!dir)
@@ -312,3 +369,11 @@ std::string Response::buildAutoindex(const std::string& dirPath, const std::stri
     return html;
 }
 
+std::string Response::handleRedirect()
+{
+	std::string url = getLocation()->getRedirUrl();
+	response = buildStatusLine("HTTP/1.1", 301) 
+		+ "Location: " + url + "\r\n"
+		+ "Content-Length: 0\r\n\r\n";
+	return getResponse();
+}

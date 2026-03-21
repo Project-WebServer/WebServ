@@ -18,9 +18,9 @@ class Location
 		std::vector<std::string>	index_files;
 		bool						autoindex;
 
-		//upload
+		//remove it 
 		bool		upload_enable;
-		std::string upload_path;
+		std::string upload_store;
 
 		// //redirections 
 		bool		has_redirection;

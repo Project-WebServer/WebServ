@@ -29,7 +29,7 @@ static tokenType _getTokenType(std::string token)
 	if (token == "index") return tokenType::INDEX;
 	if (token == "autoindex") return tokenType::AUTO_INDEX;
 	if (token == "server_name") return tokenType::SERVER_NAME;
-	if (token == "upload_path") return tokenType::UPLOAD;
+	if (token == "upload_store") return tokenType::UPLOAD;
 	if (token == "return") return tokenType::REDIR;
 	
 	return tokenType::UNKNOWN;

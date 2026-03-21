@@ -7,7 +7,7 @@ Location::Location(const std::string& servRoot): prefix(""),
     root(servRoot), 
     autoindex(false),
     upload_enable(false),
-	upload_path(""),
+	upload_store(""),
     has_redirection(false)
 {
 }
@@ -59,7 +59,7 @@ void Location::setAutoindex_On()
 void Location::setUpload(std::string upload_path)
 {
 	this->upload_enable = true;
-	this->upload_path = upload_path;
+	this->upload_store = upload_path;
 }
 void Location::setRedirection(std::string url, int code)
 {
@@ -115,7 +115,7 @@ bool Location::is_uploadEnable() const
 }
 std::string Location::getUploadPath() const
 {
-	return upload_path;
+	return upload_store;
 }
 int Location::getRedirCode() const
 {
