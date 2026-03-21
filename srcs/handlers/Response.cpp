@@ -210,12 +210,23 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 
 	if (!select_serv_n_location(request, servConf, response).success)
 		return response.handleHttpError(404);
-	if (request.getBody().size() > response.getVirtualServ()->getClientSize())
-		return response.handleHttpError(413);
+
+	//check if has redirection 
+	// if (response.getLocation()->hasReturn())
+    //     return response.handleRedirect();
+
 	if (request.getMethods() == HTTPrequests::METHODS::GET)
 	{
 		response.handleGETrequest(request);
 	}
+
+	//has CGI? 
+	// if (response.getLocation()->hasCgiPass())
+    //     return response.handleCGI(request);
+
+	if (request.getBody().size() > response.getVirtualServ()->getClientSize())
+		return response.handleHttpError(413);
+
 	_response = response.getResponse();
 	return;
 }

@@ -19,17 +19,19 @@ class Location
 		std::vector<std::string>	index_files;
 		bool						autoindex;
 
+		// //upload
+		bool		upload_enable;
+		std::string upload_path;
+
 		// //redirections 
 		// bool		has_redirection;
 		// std::string	redir_code;
 		// std::string	redir_url;
 
-		// //upload
-		// bool		upload_enable;
-		// std::string upload_path;
-		// size_t		client_max_body_size;
 
-
+		// bool        has_cgi;
+		// std::string cgi_pass;    // ex: /usr/bin/python3
+		// std::string cgi_ext;     // ex: .py
 
 		public:
 			Location(const std::string& servRoot);
