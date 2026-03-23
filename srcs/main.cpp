@@ -6,12 +6,22 @@
 int testREQ(HTTPrequests& req)
 {
 	
-	std::string raw = "GET / HTTP/1.1\r\n"
-	"Host: example.com\r\n"
-	"Content-Type: application/x-www-form-urlencoded\r\n"
-	"Content-Length: 49\r\n"
-	"\r\n"
-	"name=FirstName+LastName&email=bsmth%40example.com";
+	std::string raw = "DELETE /upload/test HTTP/1.1\r\n"
+    "Host: localhost:8082\r\n"
+    "Connection: keep-alive\r\n"
+    "Content-Length: 0\r\n"
+	"\r\n";
+
+	
+    // std::string body =  "Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4\r\n"
+    // "------WebKitFormBoundaryoJIXq9bnpRUnLLP4\r\n"
+    // "Content-Disposition: form-data; name=\"image\"; filename=\"test\"\r\n"
+    // "Content-Type: image/jpeg\r\n"
+    // "\r\n"
+    // "fake image content\r\n"
+    // "------WebKitFormBoundaryoJIXq9bnpRUnLLP4--";
+	// raw += body;
+
 	feedReturn state;
 
 	state = req.feed(raw);
@@ -60,6 +70,7 @@ int main(int argc, char **argv)
 		std::cout << status.error_msg + "\n";
 		return 1;
 	}
+	// Webserv.print();
 	// const std::vector<ServerConf>* ptr = nullptr;
 	// ptr = Webserv.matchServer(0, 8080);
 	// if (ptr != nullptr)
@@ -68,10 +79,6 @@ int main(int argc, char **argv)
 	// 	ptr->front().print();
 	// }
 
-	// uint32_t ip = Webserv.getAvailableEndPoints().front().ip;
-	// int port = Webserv.getAvailableEndPoints().front().port;
-	// const std::vector<ServerConf> *test1= Webserv.matchServer(ip, port);
-	// const ServerConf &serv = test1->front();
 	std::string uri = "/";
 	HTTPrequests testRequest;
 	testREQ(testRequest);

@@ -1,7 +1,6 @@
 #include "../../include/config/conf_parse.hpp"
 #include "../../include/config/WebservConf.hpp"
 
-
 ConfToken::~ConfToken()
 {
 	confFile.close();
@@ -30,6 +29,8 @@ static tokenType _getTokenType(std::string token)
 	if (token == "index") return tokenType::INDEX;
 	if (token == "autoindex") return tokenType::AUTO_INDEX;
 	if (token == "server_name") return tokenType::SERVER_NAME;
+	if (token == "upload_store") return tokenType::UPLOAD;
+	if (token == "return") return tokenType::REDIR;
 	
 	return tokenType::UNKNOWN;
 
@@ -321,6 +322,12 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& se
 			case tokenType::AUTO_INDEX:
 				setAutoindexLocation(loc_TokenLine, loc);
 				break;
+			case tokenType::UPLOAD:
+				setUploadLocation(loc_TokenLine, loc);
+				break;
+			case tokenType::REDIR:
+				setRedirLocation(loc_TokenLine, loc);
+				break;
 			default:
 				throw std::runtime_error("Error: UNKNOWN token type near " + confFile.catTokens(loc_TokenLine));
 			}
@@ -337,6 +344,7 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& se
 //no implementantion of modifiers (=, ~, ~*, ^~, '')
 void	setPrefixLocation(TokenLine &tokenLine, Location& loc)
 {
+	//detect here if has CGI
     std::vector<std::string> &location = tokenLine.second;
 	if (location.size() == 1 && location[0].size() > 1 && location[0].front() == '/' && location[0].back() == '{')
 	{
@@ -399,7 +407,20 @@ void	setIndex_filesLocation(TokenLine &tokenLine, Location& loc)
         loc.setIndex_files(index);
 }
 
-void setAutoindexLocation(TokenLine &tokenLine, Location& loc)
+void setUploadLocation(TokenLine &tokenLine, Location &loc)
+{
+	error_conf status;
+
+	status = isDirectiveValid(tokenLine);
+	if (!status.success)
+		throw std::runtime_error(status.error_msg);
+	std::vector<std::string> &token = tokenLine.second;
+	if (token.size() != 1)
+        throw std::runtime_error("Error: invalid directive near token " + ConfToken::catTokens(tokenLine));
+	loc.setUpload(token.front());
+}
+
+void setAutoindexLocation(TokenLine &tokenLine, Location &loc)
 {
 	error_conf status;
 
@@ -411,6 +432,41 @@ void setAutoindexLocation(TokenLine &tokenLine, Location& loc)
         throw std::runtime_error("Error: invalid directive near token " + ConfToken::catTokens(tokenLine));
 	if (token[0] == "on")
 		loc.setAutoindex_On();
+}
+
+void setRedirLocation(TokenLine &tokenLine, Location &loc)
+{
+	error_conf status;
+
+	status = isDirectiveValid(tokenLine);
+	if (!status.success)
+		throw std::runtime_error(status.error_msg);
+	std::vector<std::string> &token = tokenLine.second;
+	if (token.size() != 2)
+        throw std::runtime_error("Error: invalid directive near token " + ConfToken::catTokens(tokenLine));
+
+	int redirCode;
+	try
+	{
+		size_t pos;
+		redirCode = std::stoi(token.front(), &pos);
+		if (pos < token.front().size())
+			throw std::runtime_error("Error: invalid error code near token " + ConfToken::catTokens(tokenLine));
+	}
+	catch (std::exception &e)
+	{
+		throw std::runtime_error(e.what());
+	}
+
+	if (redirCode != 301)
+    	throw std::runtime_error("Error: invalid redirect code: " + token.front());
+	std::string url = token.back();
+	if (url.empty())
+		throw std::runtime_error("Error: missing redirect URL");
+	if (url[0] != '/' && url.find("http://") != 0 && url.find("https://") != 0)
+		throw std::runtime_error("Error: invalid redirect URL: " + url);
+	loc.setRedirection(url, redirCode);
+
 }
 
 error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tokenLine)
