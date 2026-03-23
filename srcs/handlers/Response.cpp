@@ -73,7 +73,8 @@ std::string Response::getHttpCode(int code)
 	switch (code)
 	{
 		case 200: return " OK";                    // Request succeeded
-		case 201: return " Created";               // Resource created successfully
+		case 201: return " Created";				// Resource created successfully
+		case 204: return " No Content";              // Resource deleted successfully
 		case 301: return " Moved Permanently";     // Resource moved to a new URL
 		case 400: return " Bad Request";           // Malformed or invalid request
 		case 403: return " Forbidden";             // No permission to access the resource
@@ -123,12 +124,9 @@ errmsg Response::getFileContent(std::string& filePath, std::string& content)
 	std::ifstream file(filePath);
 	
 	if(!file.is_open())
-	{
 		return errmsg{false, std::strerror(errno)};
-	}
 
 	std::ostringstream oss;
-
 	oss << file.rdbuf();
 	content = oss.str();
 	return errmsg{true, ""};
@@ -138,7 +136,7 @@ std::string	Response::buildStatusLine(std::string httpVersion, int httpCode)
 {
 	std::ostringstream line;
 
-	line << httpVersion << " " << httpCode << " " << getHttpCode(httpCode) << "\r\n";
+	line << httpVersion << " " << httpCode << getHttpCode(httpCode) << "\r\n";
 	return line.str();
 }
 // commom use
@@ -259,11 +257,13 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 	case HTTPrequests::METHODS::POST:
 		response.handlePOSTrequest(request);
 		break;
+	case HTTPrequests::METHODS::DELETE:
+		response.handleDELETErequest(request);
+		break;
 	default:
+		response.handleHttpError(405);
 		break;
 	}
-	
-
 	_response = response.getResponse();
 	return;
 }
@@ -381,6 +381,7 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 	response = buildSuccessResponse(uploadPath, 201);
 	return;
 }
+
 std::string Response::buildAutoindex(const std::string &dirPath, const std::string &urlPath) const
 {
     DIR* dir = opendir(dirPath.c_str());
@@ -422,4 +423,65 @@ std::string Response::handleRedirect()
 		+ "Location: " + url + "\r\n"
 		+ "Content-Length: 0\r\n\r\n";
 	return getResponse();
+}
+
+static	int handleDeleteDir_n_file(std::string realPath, int flag)
+{
+	if (flag == 0)
+	{
+		DIR* dir = opendir(realPath.c_str());
+		struct dirent* dirEntry;
+		int content = 0;
+
+		while ((dirEntry = readdir(dir)) != NULL)
+		{
+			if (strcmp(dirEntry->d_name, ".") == 0 || strcmp(dirEntry->d_name, "..") == 0)
+				continue;
+			content++;
+		}
+		closedir(dir);
+		if (content != 0)
+			return 409;
+	}
+	
+	char absPath[PATH_MAX];
+	if (realpath(realPath.c_str(), absPath) == NULL)
+		return 404;
+	char tmpPath[PATH_MAX];
+	strncpy(tmpPath, absPath, PATH_MAX);
+	std::string parentDir = dirname(tmpPath);
+	if (access(parentDir.c_str(), W_OK) != 0)
+		return 403;
+	if (flag == 0)
+	{
+		if (rmdir(absPath) != 0)
+			return 403;
+	}
+	else
+	{
+		if (unlink(absPath) != 0)
+   			return 403;
+	}
+	return 0;
+}
+void Response::handleDELETErequest(HTTPrequests &request)
+{
+	if (!isMethodAllowed((int)request.getMethods()))
+		return handleHttpError(405);
+	if (int status = resolvePath(request.getPath()); status != 200)
+		return handleHttpError(status);
+	struct stat fileStat;
+	if (stat(realPath.c_str(), &fileStat) == -1)
+		return handleHttpError(404);
+	if(S_ISDIR(fileStat.st_mode))
+	{
+		if (int i = handleDeleteDir_n_file(realPath, 0); i != 0)
+			return handleHttpError(i);
+		response = buildStatusLine("HTTP/1.1", 204);
+		return;
+	}
+	if (int i = handleDeleteDir_n_file(realPath, 1); i != 0)
+		return handleHttpError(i);
+	response = buildStatusLine("HTTP/1.1", 204) + "\r\n";
+	return;
 }

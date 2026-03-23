@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cstring>
 #include <dirent.h>
+#include <libgen.h>
 #include "../config/WebservConf.hpp"
 #include "../http/request.hpp"
 
@@ -59,6 +60,7 @@ class Response
 
 		void		handleGETrequest(HTTPrequests& request);
 		void		handlePOSTrequest(HTTPrequests& request);
+		void		handleDELETErequest(HTTPrequests& request);
 		std::string	buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
 		std::string	handleRedirect(); 
 
