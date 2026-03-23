@@ -1,5 +1,4 @@
 #include "../../include/handlers/Response.hpp"
-#include "Response.hpp"
 
 Response::Response(): virtualServer(nullptr), 
 	_Location(nullptr),
@@ -142,7 +141,21 @@ std::string	Response::buildStatusLine(std::string httpVersion, int httpCode)
 	line << httpVersion << " " << httpCode << " " << getHttpCode(httpCode) << "\r\n";
 	return line.str();
 }
-//commom use 
+// commom use
+std::string Response::buildSuccessResponse(std::string path, int httpCode)
+{
+	std::ostringstream header;
+
+	if (path.front() == '.')
+		path.erase(0,1);
+	header	<< buildStatusLine("HTTP/1.1", httpCode)
+			<< "Location: " <<  path << "\r\n"
+			<< "Content-Length: 0\r\n"
+			<< "\r\n";
+	httpStatusCode = httpCode;
+	return header.str();
+}
+
 std::string Response::buildHeader(int httpCode, size_t bodySize, std::string contetType)
 {
 	std::ostringstream header;
@@ -238,9 +251,6 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 	// if (response.getLocation()->hasCgiPass())
     //     return response.handleCGI(request);
 
-	if (request.getBody().size() > response.getVirtualServ()->getClientSize())
-		return response.handleHttpError(413);
-
 	switch (request.getMethods())
 	{
 	case HTTPrequests::METHODS::GET:
@@ -305,7 +315,7 @@ void Response::handleGETrequest(HTTPrequests& request)
 	}
 }
 
-static std::string getBoundary(std::string& contentType)
+static std::string getBoundary(const std::string& contentType)
 {
 	std::string token = "boundary=";
 	size_t start = contentType.find(token);
@@ -314,26 +324,62 @@ static std::string getBoundary(std::string& contentType)
 	return "--" + contentType.substr(start + token.size());
 }
 
-static std::string getFilename(std::string& contentType)
+static std::string getFilename(const std::string& body)
 {
 	std::string token = "filename=\"";
-	size_t start = contentType.find(token);
+	size_t start = body.find(token);
 	if (start == std::string::npos)
 		return "";
 	start += token.size();
-	size_t end = contentType.find(start, "\"");
-	return contentType.substr(start, end - start);
-	
+	size_t end = body.find('\"', start);
+	if (end == std::string::npos)
+		return "";
+	return body.substr(start, end - start);
 }
 
+static std::string getContent(const std::string& body, const std::string& boundary)
+{
+	size_t start = body.find("\r\n\r\n");
+	if (start == std::string::npos)
+		return "";
+	start += 4;
+	size_t end = body.rfind("\r\n" + boundary + "--");
+	if (end == std::string::npos)
+		return "";
+	return body.substr(start, end - start);
+}
 void Response::handlePOSTrequest(HTTPrequests &request)
 {
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
 	if (int status = resolvePath(request.getPath()); status != 200)
 		return handleHttpError(status);
-	
-	
+	// remove contentType after/ only for debug
+	std::string contentType = "multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4";
+	std::string fileName = getFilename(request.getBody());
+	std::string	boundary = getBoundary(contentType);
+	std::string fileContent = getContent(request.getBody(), boundary);
+	if (fileName == "" || boundary == "" || fileContent == "")
+		return handleHttpError(400);
+	if (request.getBody().size() > getVirtualServ()->getClientSize())
+		return handleHttpError(413);
+	std::string uploadPath = getRealPath();
+	struct stat fileStat;
+	if (stat(uploadPath.c_str(), &fileStat) == -1)
+		return handleHttpError(404);
+	if (S_ISDIR(fileStat.st_mode))
+	{
+		if (uploadPath.back() != '/')
+			uploadPath += "/";
+		uploadPath += fileName;
+	}
+	std::ofstream file(uploadPath, std::ios::binary);
+	if (!file.is_open())
+   		return handleHttpError(500);
+	file.write(fileContent.data(), fileContent.size());
+	file.close();
+	response = buildSuccessResponse(uploadPath, 201);
+	return;
 }
 std::string Response::buildAutoindex(const std::string &dirPath, const std::string &urlPath) const
 {
