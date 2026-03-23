@@ -87,11 +87,13 @@ void Server::_buildResponse(size_t indx)
     Connection &c = _conns[fd];
 
     if (c.state != READING_REQUEST)
-        return;
-    if (c.in_buf.find("\r\n\r\n") == std::string::npos)
-        return;
+		return;
+	
+	std::string body = "path: " + c.request.getPath();
+    // if (c.in_buf.find("\r\n\r\n") == std::string::npos)
+    //     return;
 
-    std::string body = "received " + c.in_buf;
+    // std::string body = "received " + c.in_buf;
 
     std::ostringstream oss;
     oss << "HTTP/1.1 200 OK\r\n"

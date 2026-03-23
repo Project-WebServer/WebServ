@@ -86,12 +86,12 @@ int main(int argc, char **argv)
 // 		std::cout << "  ip=" << endpoints[i].ip << " port=" << endpoints[i].port << std::endl;
 // //---------------------------------------------------------------------//
 
-	// Server s;
+	Server s;
 
-	// if(s.start(Webserv) != 0)
-	// 	return (1);
-	// s.run();
-	// return 0;
+	if(s.start(Webserv) != 0)
+		return (1);
+	s.run();
+	return 0;
 }
 
 // Webserv.getAvailablePorts(); return a vector<int> with all port we have available to listen to

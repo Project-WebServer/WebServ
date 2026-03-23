@@ -1,4 +1,6 @@
 #include "../../include/io/Server.hpp"
+#include "../../include/http/request.hpp"
+#include "../../include/handlers/Response.hpp"
 
 void Server::_handleClientReadable(size_t indx)
 {
@@ -10,12 +12,14 @@ void Server::_handleClientReadable(size_t indx)
 		ssize_t n = recv(fd, buf, sizeof(buf), 0);
 		if(n > 0)
 		{
-			_conns[fd].in_buf.append(buf, n);
+			//_conns[fd].in_buf.append(buf, n);
 			c.last_activity = time(NULL);
 			//--------temporary------//
 			_logRecv(fd, n);
-			_buildResponse(indx);
-			return;
+			feedReturn result = c.request.feed(std::string(buf, n));
+			(void)result;
+			// _buildResponse(indx);
+			// return;
 			//--------temporary------//
 			//this is the place to call http parser which read from in_buf <===============
 			//size_t consumed = 0;
@@ -33,16 +37,20 @@ void Server::_handleClientReadable(size_t indx)
             //     _pfds[indx].events = POLLOUT;
             //     return;
             // }
-			// if (result == COMPLETE)
-            // {
+			if (result == feedReturn::COMPLETE)
+            {
             	// --- Pass to track C---
-            	// Router::handle() return serialized answer as a string
-				// c.out_buf = Router::handle(c.request, _conf);
+				std::cout << "=== REQUEST COMPLETE ===" << std::endl;
+				c.request.printMethod();
+				std::cout << "path: " << c.request.getPath() << std::endl;
+				// _buildResponse(indx);
+            	//return serialized answer as a string
+				responseHandler(c.request, _conf, c.out_buf);
 				//c.keep_alive = c.request.isKeepAlive();// http method
-				//c.state = SENDING_RESPONSE;
-				//_pfds[indx].events = POLLOUT;
-				//return;
-			//}
+				c.state = SENDING_RESPONSE;
+				_pfds[indx].events = POLLOUT;
+				return;
+			}
 		}
 		else if(n == 0)
 		{

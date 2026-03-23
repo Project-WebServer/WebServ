@@ -3,19 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/16 21:56:35 by ypark            ###   ########.fr       */
+/*   Updated: 2026/03/23 19:03:35 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 #include <iostream>
 #include <map>
 #include <string>
 #include <sstream>
 
-#include "../io/Server.hpp"
+// #include "../io/Server.hpp"
 
 //if you use enum it is anti-typo, so the compiler doesn't accept PST
 //also more memory & speed efficient
@@ -135,3 +137,6 @@ class HTTPrequests
 		// header parser
 		// body parser
 };
+
+
+#endif

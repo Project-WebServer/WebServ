@@ -1,9 +1,9 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
+# include "../http/request.hpp"
 # include <string>
 # include <ctime>
-// # include "src/http/request.hpp "
 
 enum ParseState
 {
@@ -28,7 +28,7 @@ struct Connection
 	ParseState	state;
 	bool		keep_alive;// weather we nne dto keep connection after response
 	time_t		last_activity;//unix timestamp (never hang indefinitely)
-	//HTTPrequests request;
+	HTTPrequests request;
 	// Трек C отримує request, повертає response.
    	// Трек A серіалізує response у out_buf.
 
