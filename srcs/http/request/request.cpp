@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/23 19:51:59 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/03/24 14:34:43 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/http/request.hpp"
 
-HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body("")
+HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body(""), _contType("")
 {
 }
 

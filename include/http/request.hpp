@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/23 19:03:35 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/03/24 14:34:19 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,7 @@ class HTTPrequests
 		std::string	_body;
 		size_t		_contLen;
 		size_t		_statusCode;
+		std::string _contType;
 
 		int			_serverPort;
 		uint32_t	_serverIP;
