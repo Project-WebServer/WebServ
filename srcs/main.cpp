@@ -79,12 +79,12 @@ int main(int argc, char **argv)
 	// 	ptr->front().print();
 	// }
 
-	std::string uri = "/";
-	HTTPrequests testRequest;
-	testREQ(testRequest);
-	std::string response;
-	responseHandler(testRequest, Webserv, response);
-	std::cout << response << std::endl;
+	// std::string uri = "/";
+	// HTTPrequests testRequest;
+	// testREQ(testRequest);
+	// std::string response;
+	// responseHandler(testRequest, Webserv, response);
+	// std::cout << response << std::endl;
 
 //---------------------------------------------------------------------//
 // 	const std::vector<ENDPOINT> &endpoints = Webserv.getAvailableEndPoints();

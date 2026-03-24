@@ -27,6 +27,8 @@ void Server::run ()
 	{
 		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
 		//check every 5 sec max imit is 30 sec
+		if(!g_running)
+			break;
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
@@ -67,6 +69,12 @@ void Server::run ()
 			i++;
 		}
 	}
+
+	std::cout << "server shutting down..." << std::endl;
+	for (size_t i = 0; i < _pfds.size(); i++)
+	    close(_pfds[i].fd);
+	_pfds.clear();
+	_conns.clear();
 	//managr cgi fds somewhere here in run
 }
 
