@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/24 14:34:43 by ypark            ###   ########.fr       */
+/*   Updated: 2026/03/24 18:03:54 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,9 @@ feedReturn	HTTPrequests::feed(std::string newChunk)
 			std::string body = _buffer.substr(0, _contLen);
 			_body = body;
 			_buffer.erase(0, _contLen);
+			_components = COMPONENTS::COMPLETED;
 		}
 		// only when actually done
-		_components = COMPONENTS::COMPLETED;
 	}
 	else
 		return feedReturn::INCOMPLETE;

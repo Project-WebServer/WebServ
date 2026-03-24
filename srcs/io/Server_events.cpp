@@ -16,6 +16,7 @@ void Server::_handleClientReadable(size_t indx)
 			c.last_activity = time(NULL);
 			_logRecv(fd, n);
 			feedReturn result = c.request.feed(std::string(buf, n));
+			// std::cout << "parser buffer size = " << c.request.bufferSize() << std::end;
 			//this is the place to call http parser which read from in_buf <===============
 			//c.in_buf.erase(0, consumed);// delete consumed by parser bytes
 			if (result == feedReturn::COMPLETE)
@@ -45,8 +46,12 @@ void Server::_handleClientReadable(size_t indx)
 			_removeFd(indx);
 			return;
 		}
-		else
+		else if(n < 0)
 		{
+			if(errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				return;
+			}
 			std::cerr << "recv() error on fd " << fd << std::endl;
 			_removeFd(indx);
 			return;

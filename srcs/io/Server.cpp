@@ -85,7 +85,7 @@ void Server::_logRecv(int fd, ssize_t n) const
 {
 	std::cout << "---- fd " << fd 
 			<< " | received " << n << " bytes"
-			<< " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
+			// << " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
 			<< " ----" << std::endl;
 }
 
