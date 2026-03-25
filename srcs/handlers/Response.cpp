@@ -212,6 +212,11 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 {
 	//get from HTTPrequests the (uint32_t)ip and (int)port
 	//temporaly
+	
+	// uint32_t ip1 = request.getServerIP();
+	// int port1 = request.getServerPort();
+	// (void) ip1;
+	// (void)port1;
 	uint32_t ip = servConf.getAvailableEndPoints().front().ip;
 	int port = servConf.getAvailableEndPoints().front().port;
 	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
@@ -354,10 +359,8 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 		return handleHttpError(405);
 	if (int status = resolvePath(request.getPath()); status != 200)
 		return handleHttpError(status);
-	// remove contentType after/ only for debug
-	std::string contentType = "multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4";
 	std::string fileName = getFilename(request.getBody());
-	std::string	boundary = getBoundary(contentType);
+	std::string	boundary = getBoundary(request.getContType());
 	std::string fileContent = getContent(request.getBody(), boundary);
 	if (fileName == "" || boundary == "" || fileContent == "")
 		return handleHttpError(400);
