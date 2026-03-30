@@ -207,18 +207,39 @@ bool Response::isLocationValid()
 }
 
 // turn into methods ----------------------------
-
-errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Response& response)
+static int convert_host(std::string& ip, uint32_t& ipv4, int& port)
 {
-	//get from HTTPrequests the (uint32_t)ip and (int)port
-	//temporaly
-	
-	// uint32_t ip1 = request.getServerIP();
-	// int port1 = request.getServerPort();
-	// (void) ip1;
-	// (void)port1;
-	uint32_t ip = servConf.getAvailableEndPoints().front().ip;
-	int port = servConf.getAvailableEndPoints().front().port;
+	std::string		host;
+
+	if (ip.empty())
+	{
+		ipv4 = INADDR_ANY;
+		port = 80;
+		return 0;
+	}
+	size_t colonPos = ip.find(':');
+	try
+	{
+		host = ip.substr(0, colonPos);
+		port = stoi(ip.substr(colonPos + 1));
+	}
+	catch (std::exception &e)
+	{
+		return -1;
+	}
+	if (!convert_ipv4(host, ipv4))
+		return -1;
+	return 0;
+}
+static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Response& response)
+{
+	std::string host = request.getHeader().getValue("Host");
+	uint32_t ip;
+	int port;
+	if (convert_host(host, ip, port) == -1)
+		return 500;
+	// uint32_t ip = servConf.getAvailableEndPoints().front().ip;
+	// int port = servConf.getAvailableEndPoints().front().port;
 	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
 	const ServerConf &virtualServ = virtualServers->front();
 
@@ -227,9 +248,9 @@ errmsg		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Res
 	if (!response.isLocationValid())
 	{
 		std::cout << "Error: request`s uri not found.\n";
-		return {false, ""};
+		return 404;
 	}
-	return {true, ""};
+	return 0;
 }
 
 //update also an error conde int request??
@@ -237,15 +258,15 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 {
 	Response response;
 
-	if (!select_serv_n_location(request, servConf, response).success)
+	if (int i = select_serv_n_location(request, servConf, response); i != 0)
 	{
-		response.handleHttpError(404);
+		response.handleHttpError(i);
 		_response = response.getResponse();
 		return;
 	}
-
 	if (response.getLocation()->hasRedirection())
 	{
+		response.handleRedirect();
 		_response = response.getResponse();
         return;
 	}
