@@ -233,7 +233,7 @@ static int convert_host(std::string& ip, uint32_t& ipv4, int& port)
 }
 static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Response& response)
 {
-	std::string host = request.getHeader().getValue("Host");
+	std::string host = request.getHeader().getValue("host");
 	uint32_t ip;
 	int port;
 	if (convert_host(host, ip, port) == -1)
@@ -241,6 +241,8 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 	// uint32_t ip = servConf.getAvailableEndPoints().front().ip;
 	// int port = servConf.getAvailableEndPoints().front().port;
 	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
+	if (virtualServers == nullptr)
+        return 500;
 	const ServerConf &virtualServ = virtualServers->front();
 
 	response.setVirtualServ(&virtualServ);
