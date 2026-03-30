@@ -6,13 +6,13 @@
 /*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/24 18:03:54 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/03/30 20:17:51 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/http/request.hpp"
 
-HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body(""), _contType("")
+HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body(""), _contLen(0), _statusCode(0), _contType("")
 {
 }
 
@@ -20,60 +20,51 @@ HTTPrequests::~HTTPrequests()
 {
 }
 
-feedReturn	HTTPrequests::feed(std::string newChunk)
+feedReturn HTTPrequests::feed(std::string newChunk)
 {
-	feedReturn status;
+    feedReturn status;
 
-	_buffer += newChunk;
-	if (_components == COMPONENTS::REQUEST)
-	{
-		size_t end = _buffer.find("\r\n");
-		if (end != std::string::npos)
-		{
-			std::string request = _buffer.substr(0, end);
-			status = parseRequest(request);
-			if (status != feedReturn::COMPLETE)
-				return (status);
-			_buffer.erase(0, end + 2);
-		}
-		_components = COMPONENTS::HEADERS;
-	}
-	else
-		return feedReturn::INCOMPLETE;
-	if (_components == COMPONENTS::HEADERS)
-	{
-		size_t end = _buffer.find("\r\n\r\n");
-		if (end != std::string::npos)
-		{
-			std::string header = _buffer.substr(0, end + 4);
-			status = parseHeader(header);
-			if (status != feedReturn::COMPLETE)
-				return (status);
-			_buffer.erase(0, end + 4);
-			if (_contLen == 0)
-				_components = COMPONENTS::COMPLETED;
-			else
-				_components = COMPONENTS::BODY;
-		}
-	}
-	else
-		return feedReturn::INCOMPLETE;
-	if (_components == COMPONENTS::BODY)
-	{
-		if (_buffer.length() >= _contLen)
-		{
-			std::string body = _buffer.substr(0, _contLen);
-			_body = body;
-			_buffer.erase(0, _contLen);
-			_components = COMPONENTS::COMPLETED;
-		}
-		// only when actually done
-	}
-	else
-		return feedReturn::INCOMPLETE;
-	if (!_buffer.empty())
-		std::cout << "Buffer not empty though reached the end :(" << std::endl;
-	return feedReturn::COMPLETE;
+    _buffer += newChunk;
+    if (_components == COMPONENTS::REQUEST)
+    {
+        size_t end = _buffer.find("\r\n");
+        if (end == std::string::npos)
+			return feedReturn::INCOMPLETE;
+        std::string request = _buffer.substr(0, end);
+        status = parseRequest(request);
+        if (status != feedReturn::COMPLETE)
+            return (status);
+        _buffer.erase(0, end + 2);
+        _components = COMPONENTS::HEADERS;
+    }
+
+    if (_components == COMPONENTS::HEADERS)
+    {
+        size_t end = _buffer.find("\r\n\r\n");
+        if (end == std::string::npos)
+			return feedReturn::INCOMPLETE;
+        std::string header = _buffer.substr(0, end + 4);
+        status = parseHeader(header);
+        if (status != feedReturn::COMPLETE)
+            return (status);
+        _buffer.erase(0, end + 4);
+        if (_contLen == 0)
+            _components = COMPONENTS::COMPLETED;
+        else
+            _components = COMPONENTS::BODY;
+    }
+    if (_components == COMPONENTS::BODY)
+    {
+        if (_buffer.length() < _contLen)
+			return feedReturn::INCOMPLETE;
+        _body = _buffer.substr(0, _contLen);
+        _buffer.erase(0, _contLen);
+        _components = COMPONENTS::COMPLETED;
+    }
+
+    if (!_buffer.empty())
+        std::cout << "Buffer not empty though reached the end :(" << std::endl;
+    return feedReturn::COMPLETE;
 }
 
 //when _components == COMPONENTS::COMPLETED check what is left in the buffer. WJAT IF SOMETHING LEFT IN THERE???

@@ -355,11 +355,12 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 	if (int status = resolvePath(request.getPath()); status != 200)
 		return handleHttpError(status);
 	// remove contentType after/ only for debug
-	std::string contentType = "multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4";
+	// std::string contentType = "multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4";
+	std::string contentType = request.getContType();
 	std::string fileName = getFilename(request.getBody());
 	std::string	boundary = getBoundary(contentType);
 	std::string fileContent = getContent(request.getBody(), boundary);
-	if (fileName == "" || boundary == "" || fileContent == "")
+	if (fileName == "" || boundary == "")
 		return handleHttpError(400);
 	if (request.getBody().size() > getVirtualServ()->getClientSize())
 		return handleHttpError(413);
