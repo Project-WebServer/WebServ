@@ -6,7 +6,7 @@
 /*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/14 20:56:23 by ypark            ###   ########.fr       */
+/*   Updated: 2026/03/24 15:04:49 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,7 @@ feedReturn HTTPrequests::parseHeader(std::string header)
 	}
 	// content length tells you how much body to read
 	std::string contLen = _header.getValue("content-length");
+	_contType = _header.getValue("content-type");
 	std::stringstream stream(contLen);
 	stream >> _contLen;
 	// if no error

@@ -6,7 +6,7 @@
 /*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 16:28:26 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/16 21:56:12 by ypark            ###   ########.fr       */
+/*   Updated: 2026/03/24 15:10:32 by ypark            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,11 @@ std::string HTTPrequests::getBody() const
 size_t	HTTPrequests::getContLen() const
 {
 	return (_contLen);
+}
+
+std::string	HTTPrequests::getContType() const
+{
+	return (_contType);
 }
 
 size_t HTTPrequests::getStatusCode() const

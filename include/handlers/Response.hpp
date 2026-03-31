@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cstring>
 #include <dirent.h>
+#include <libgen.h>
 #include "../config/WebservConf.hpp"
 #include "../http/request.hpp"
 
@@ -32,6 +33,8 @@ class Response
 		std::string getErrorFileBody(int errorCode);
 		errmsg		getFileContent(std::string& filePath, std::string& content);
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
+		std::string	buildStatusLine(std::string httpVersion, int httpCode);
+		std::string buildSuccessResponse(std::string httpVersion, int httpCode);
 
 	public:
 
@@ -50,17 +53,21 @@ class Response
 
 		//getters 
 		const ServerConf*	getVirtualServ() const;
+		const Location*		getLocation() const;
 		std::string			getRealPath() const;
 		const std::string	getResponse() const;
-		std::string			getIndexfile()const;
+		std::string			getIndexfile();
 
 		void		handleGETrequest(HTTPrequests& request);
+		void		handlePOSTrequest(HTTPrequests& request);
+		void		handleDELETErequest(HTTPrequests& request);
 		std::string	buildAutoindex(const std::string& dirPath, const std::string& urlPath) const;
+		std::string	handleRedirect(); 
 
 
 };
 
-void	responseHandler(HTTPrequests& request, WebservConf& servConf);
+void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& _response);
 
 
 

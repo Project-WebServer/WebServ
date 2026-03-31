@@ -27,6 +27,8 @@ void Server::run ()
 	{
 		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
 		//check every 5 sec max imit is 30 sec
+		if(!g_running)
+			break;
 		if(ready < 0) // > 0 number of fd on which we have events; == 0 if timeout(not in -1 case)
 		{
 			if(errno == EINTR)
@@ -67,6 +69,12 @@ void Server::run ()
 			i++;
 		}
 	}
+
+	std::cout << "server shutting down..." << std::endl;
+	for (size_t i = 0; i < _pfds.size(); i++)
+	    close(_pfds[i].fd);
+	_pfds.clear();
+	_conns.clear();
 	//managr cgi fds somewhere here in run
 }
 
@@ -77,7 +85,7 @@ void Server::_logRecv(int fd, ssize_t n) const
 {
 	std::cout << "---- fd " << fd 
 			<< " | received " << n << " bytes"
-			<< " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
+			// << " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
 			<< " ----" << std::endl;
 }
 
@@ -87,11 +95,13 @@ void Server::_buildResponse(size_t indx)
     Connection &c = _conns[fd];
 
     if (c.state != READING_REQUEST)
-        return;
-    if (c.in_buf.find("\r\n\r\n") == std::string::npos)
-        return;
+		return;
+	
+	std::string body = "path: " + c.request.getPath();
+    // if (c.in_buf.find("\r\n\r\n") == std::string::npos)
+    //     return;
 
-    std::string body = "received " + c.in_buf;
+    // std::string body = "received " + c.in_buf;
 
     std::ostringstream oss;
     oss << "HTTP/1.1 200 OK\r\n"

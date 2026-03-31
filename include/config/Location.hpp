@@ -9,7 +9,6 @@
 #include <set>
 
 enum struct httpMethod;
-//store the servers 
 class Location
 {
 	private:
@@ -19,17 +18,19 @@ class Location
 		std::vector<std::string>	index_files;
 		bool						autoindex;
 
+		//remove it 
+		bool		upload_enable;
+		std::string upload_store;
+
 		// //redirections 
-		// bool		has_redirection;
-		// std::string	redir_code;
-		// std::string	redir_url;
-
-		// //upload
-		// bool		upload_enable;
-		// std::string upload_path;
-		// size_t		client_max_body_size;
+		bool		has_redirection;
+		int			redir_code;
+		std::string	redir_url;
 
 
+		// bool        has_cgi;
+		// std::string cgi_pass;    // ex: /usr/bin/python3
+		// std::string cgi_ext;     // ex: .py
 
 		public:
 			Location(const std::string& servRoot);
@@ -43,12 +44,19 @@ class Location
 			void	setAllowed_methods(std::string method);
 			void	setIndex_files(std::string index_file);
 			void	setAutoindex_On();
+			void	setUpload(std::string upload_path);
+			void	setRedirection(std::string url, int code);
 
 			std::string						getPrefix() const; 
 			std::string						getRoot() const; 
 			std::vector<httpMethod> 		getAllowed_methods() const; // for debug 
 			const std::vector<std::string>&	getIndex_files() const; // 
 			bool							getAutoindex() const; //
+			bool							hasRedirection() const;
+			bool							is_uploadEnable() const;
+			std::string						getUploadPath() const;
+			int								getRedirCode() const;
+			std::string						getRedirUrl() const;
 
 			std::string resolvePath(std::string& uri) const;
 

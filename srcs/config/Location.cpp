@@ -1,16 +1,14 @@
 #include "../../include/config/Location.hpp"
 #include "../../include/config/conf_parse.hpp"
 
-
-
 //set default values for root. shoult it be srcs?? or what
 // matching path = root + uri
 Location::Location(const std::string& servRoot): prefix(""), 
     root(servRoot), 
-    autoindex(false) 
-    // has_redirection(false),
-    // upload_enable(false)
-	
+    autoindex(false),
+    upload_enable(false),
+	upload_store(""),
+    has_redirection(false)
 {
 }
 
@@ -58,6 +56,18 @@ void Location::setAutoindex_On()
 	this->autoindex = true;
 }
 
+void Location::setUpload(std::string upload_path)
+{
+	this->upload_enable = true;
+	this->upload_store = upload_path;
+}
+void Location::setRedirection(std::string url, int code)
+{
+	this->has_redirection = true;
+	this->redir_code = code;
+	this->redir_url = url;
+}
+
 std::string Location::getPrefix() const
 {
 	return this->prefix;
@@ -95,7 +105,27 @@ bool Location::getAutoindex() const
 	return autoindex;
 }
 
-std::string Location::resolvePath(std::string& uri) const
+bool Location::hasRedirection() const
+{
+	return has_redirection;
+}
+bool Location::is_uploadEnable() const
+{
+	return upload_enable;
+}
+std::string Location::getUploadPath() const
+{
+	return upload_store;
+}
+int Location::getRedirCode() const
+{
+	return redir_code;
+}
+std::string Location::getRedirUrl() const
+{
+	return redir_url;
+}
+std::string Location::resolvePath(std::string &uri) const
 {
 	std::string _realPath = getRoot() + uri;
 	return _realPath;
@@ -103,26 +133,49 @@ std::string Location::resolvePath(std::string& uri) const
 
 void Location::print() const
 {
-    if (!this->root.empty())
-        std::cout << "\t\troot " << this->root << ";" << std::endl;
 
-    if (!this->index_files.empty())
+    if (!this->getRoot().empty())
+        std::cout << "\t\troot " << this->getRoot() << ";" << std::endl;
+
+    if (!this->getIndex_files().empty())
     {
         std::cout << "\t\tindex";
-        for (size_t i = 0; i < this->index_files.size(); i++)
-            std::cout << " " << this->index_files[i];
+        const std::vector<std::string>& files = this->getIndex_files();
+        for (size_t i = 0; i < files.size(); i++)
+            std::cout << " " << files[i];
         std::cout << ";" << std::endl;
     }
 
-    // if (!this->allowed_methods.empty())
-    // {
-	// 	std::vector<std::string> methods = getAllowed_methods();
-    //     std::cout << "\t\tallowed_methods";
-    //     for (size_t i = 0; i < methods.size(); i++)
-    //         std::cout << " " << methods[i];
-    //     std::cout << ";" << std::endl;
-    // }
+    if (!this->getAllowed_methods().empty())
+{
+    std::vector<httpMethod> methods = this->getAllowed_methods();
+    std::cout << "\t\tallowed_methods";
+    for (size_t i = 0; i < methods.size(); i++)
+    {
+        if (methods[i] == httpMethod::GET)
+            std::cout << " GET";
+        else if (methods[i] == httpMethod::POST)
+            std::cout << " POST";
+        else if (methods[i] == httpMethod::DELETE)
+            std::cout << " DELETE";
+    }
+    std::cout << ";" << std::endl;
+}
 
-    std::cout << "\t\tautoindex " << (this->autoindex ? "on" : "off") << ";" << std::endl;
+    std::cout << "\t\tautoindex " << (this->getAutoindex() ? "on" : "off") << ";" << std::endl;
+
+    if (this->hasRedirection())
+    {
+        std::cout << "\t\treturn " << this->getRedirCode()
+                  << " " << this->getRedirUrl() << ";" << std::endl;
+    }
+
+    if (this->is_uploadEnable())
+    {
+        std::cout << "\t\tupload_enable on;" << std::endl;
+        if (!this->getUploadPath().empty())
+            std::cout << "\t\tupload_path " << this->getUploadPath() << ";" << std::endl;
+    }
+
 }
 
