@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 17:48:12 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/31 23:34:44 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/31 23:56:22 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,17 @@
 // check if has status line, header, empty line, body all together
 // put the string into buffer
 
-HTTPresponse::HTTPresponse() : _protocolv(ProtocolV::ERR), _statusPhrase(""), _httpHeaders(""),  _msgbody(""), _response("")
+HTTPresponse::HTTPresponse() : _protocolV(ProtocolV::ERR), _statusPhrase(""), _msgBody(""), _response("")
 {
 }
 
-HTTPrequests::~HTTPrequests()
+HTTPresponse::~HTTPresponse()
 {
 }
 
-std::string serialise(HTTPresponse response)
+std::string HTTPresponse::serialise(HTTPresponse response)
 {
+	(void)response; //temporarily
 	return (_response);
 }
 

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   reponse.hpp                                        :+:      :+:    :+:   */
+/*   response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 17:48:05 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/31 15:17:46 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/31 23:57:21 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,19 @@
 class HTTPresponse
 {
 	public:
-
+		HTTPresponse();
+		~HTTPresponse();
+		
+		std::string serialise(HTTPresponse response);
+		ProtocolV	getProtocolV();
+		int			getStatCode();
+		std::string getStatPhrase();
+		std::string getMsgBody();
+		
+		
 	private:
 		// status line
-		ProtocolV	_protocol_v;
+		ProtocolV	_protocolV;
 		int			_statusCode;
 		std::string	_statusPhrase;
 
