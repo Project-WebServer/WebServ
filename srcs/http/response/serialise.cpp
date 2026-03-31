@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 17:48:12 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/27 11:32:10 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/31 15:19:19 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,4 +27,7 @@ HTTPrequests::~HTTPrequests()
 std::string serialise(HTTPresponse response)
 {
 	
+	return (_response);
 }
+
+// version -> status code -> status msg -> headers-> body

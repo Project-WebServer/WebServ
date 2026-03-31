@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   reponse.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 17:48:05 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/04 18:44:22 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/05 18:28:07 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class HTTPresponse
 		std::string	_statusPhrase;
 
 		//headers
-		std::string	_httpHeaders; // requires separation?
+		std::map<std::string, std::string> _headerMap;
 
 		//msg body
 		std::string	_msgBody;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/04 18:44:27 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/05 18:27:18 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,7 +121,8 @@ class HTTPrequests
 		int			_statusCode;
 		int			_serverPort;
 		uint32_t	_serverIP;
-		uint32_t _clientIP;
+		uint32_t	_clientIP;
+		std::string _contType;
 
 		// Request line parser
 		// header parser
