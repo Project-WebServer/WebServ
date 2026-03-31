@@ -3,14 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2026/03/20 15:49:19 by yulpark          ###   ########.fr       */
-=======
-/*   Updated: 2026/03/24 15:10:44 by ypark            ###   ########.fr       */
->>>>>>> 4594afe279bf2f63bb7a54ccd958e0708de7f422
+/*   Updated: 2026/03/31 14:27:45 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,14 +100,9 @@ class HTTPrequests
 		size_t					getContLen() const;
 		size_t					getStatusCode() const;
 		int						getServerPort() const;
-<<<<<<< HEAD
-		std::string				getServerIP() const;
-		std::string				getClientIP() const;
-=======
 		u_int32_t				getServerIP() const;
 		u_int32_t				getClientIP() const;
 		std::string				getContType() const;
->>>>>>> 4594afe279bf2f63bb7a54ccd958e0708de7f422
 
 		void	setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port);
 		void	statusCode(feedReturn type);
@@ -127,13 +118,7 @@ class HTTPrequests
 		Headers		_header;
 		std::string	_body;
 		size_t		_contLen;
-<<<<<<< HEAD
 		int			_statusCode;
-=======
-		size_t		_statusCode;
-		std::string _contType;
-
->>>>>>> 4594afe279bf2f63bb7a54ccd958e0708de7f422
 		int			_serverPort;
 		uint32_t	_serverIP;
 		uint32_t _clientIP;
