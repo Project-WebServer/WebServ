@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 17:48:05 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/27 11:29:59 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/03/31 15:17:46 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,12 @@ class HTTPresponse
 		std::string	_statusPhrase;
 
 		//headers
-		std::string	_httpHeaders; // requires separation?
+		std::map<std::string, std::string> _headerMap;
 
 		//msg body
 		std::string	_msgBody;
 		// exception for msg body is when the server responds to the HEAD method but not part of the methods..
 		
-		std::string response;
+		std::string _response;
 		
 };
