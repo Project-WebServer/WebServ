@@ -385,7 +385,7 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 	std::string fileName = getFilename(request.getBody());
 	std::string	boundary = getBoundary(request.getContType());
 	std::string fileContent = getContent(request.getBody(), boundary);
-	if (fileName == "" || boundary == "" || fileContent == "")
+	if (fileName == "" || boundary == "")
 		return handleHttpError(400);
 	if (request.getBody().size() > getVirtualServ()->getClientSize())
 		return handleHttpError(413);
