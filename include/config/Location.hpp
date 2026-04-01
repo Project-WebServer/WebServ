@@ -29,8 +29,8 @@ class Location
 
 
 		// bool        has_cgi;
-		// std::string cgi_pass;    // ex: /usr/bin/python3
-		// std::string cgi_ext;     // ex: .py
+		// std::string cgiPass;    // ex: /usr/bin/python3
+		// std::string cgiExt;     // ex: .py
 
 		public:
 			Location(const std::string& servRoot);

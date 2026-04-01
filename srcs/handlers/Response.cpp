@@ -91,31 +91,42 @@ std::string Response::getHttpCode(int code)
 	return "";
 }
 
-std::string Response::getErrorFileBody(int errorCode)
+void Response::getDefErrorPage(std::string& body, int errorCode)
 {
-	std::map<int,std::string> errorMap = virtualServer->getErrorPage();
-
-	if (errorMap.size() != 0 && errorMap.find(errorCode) != errorMap.end())
-	{
-		std::string errorPath = "." +  virtualServer->getRoot() + errorMap.find(errorCode)->second; //need check '/'?
-		std::string body;
-
-		errmsg status = getFileContent(errorPath, body);
-		if (status.success)
-			return body;
-	}
-
-	std::map<int,std::string> DefErrorMap = virtualServer->getDefaultErrorPage();
+	std::map<int,std::string> DefErrorMap;
+	ServerConf tmp;
+	DefErrorMap = tmp.getDefaultErrorPage();
 	if (DefErrorMap.size() != 0 && DefErrorMap.find(errorCode) != DefErrorMap.end())
 	{
 		std::string DefErrorPath = DefErrorMap.find(errorCode)->second;
-		std::string body;
-
 		errmsg status = getFileContent(DefErrorPath, body);
 		if (status.success)
-			return body;
+			return;
 	}
-	return "";
+	return;
+}
+
+std::string Response::getErrorFileBody(int errorCode)
+{
+	std::map<int,std::string> errorMap;
+	std::string body;
+
+	if (virtualServer)
+	{
+		errorMap = virtualServer->getErrorPage();
+
+		if (errorMap.size() != 0 && errorMap.find(errorCode) != errorMap.end())
+		{
+			std::string errorPath = "." +  virtualServer->getRoot() + errorMap.find(errorCode)->second; //need check '/'?
+
+			errmsg status = getFileContent(errorPath, body);
+			return body;
+		}
+		getDefErrorPage(body, errorCode);
+		return body;
+	}
+	getDefErrorPage(body, errorCode);
+	return body;
 }
 
 //commom use 
@@ -222,6 +233,7 @@ static int convert_host(std::string& ip, uint32_t& ipv4, int& port)
 	{
 		host = ip.substr(0, colonPos);
 		port = stoi(ip.substr(colonPos + 1));
+		return -1;
 	}
 	catch (std::exception &e)
 	{
@@ -238,8 +250,6 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 	int port;
 	if (convert_host(host, ip, port) == -1)
 		return 500;
-	// uint32_t ip = servConf.getAvailableEndPoints().front().ip;
-	// int port = servConf.getAvailableEndPoints().front().port;
 	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
 	if (virtualServers == nullptr)
         return 500;
@@ -273,6 +283,8 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
         return;
 	}
 	
+	if (int status = response.resolvePath(request.getPath()); status != 200)
+		return response.handleHttpError(status);
 	//has CGI? 
 	// if (response.getLocation()->hasCgiPass())
     //     return response.handleCGI(request);
@@ -301,8 +313,6 @@ void Response::handleGETrequest(HTTPrequests& request)
 	struct stat fileStat;
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
-	if (int status = resolvePath(request.getPath()); status != 200)
-		return handleHttpError(status);
 	
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);
@@ -380,8 +390,6 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 {
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
-	if (int status = resolvePath(request.getPath()); status != 200)
-		return handleHttpError(status);
 	std::string fileName = getFilename(request.getBody());
 	std::string	boundary = getBoundary(request.getContType());
 	std::string fileContent = getContent(request.getBody(), boundary);
@@ -494,8 +502,6 @@ void Response::handleDELETErequest(HTTPrequests &request)
 {
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
-	if (int status = resolvePath(request.getPath()); status != 200)
-		return handleHttpError(status);
 	struct stat fileStat;
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);

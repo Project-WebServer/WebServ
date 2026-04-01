@@ -127,8 +127,21 @@ std::string Location::getRedirUrl() const
 }
 std::string Location::resolvePath(std::string &uri) const
 {
-	std::string _realPath = getRoot() + uri;
-	return _realPath;
+	std::string root = getRoot();
+	std::string prefix = getPrefix();
+
+
+	if (!root.empty() && root.back() == '/')
+		root.erase(root.size() - 1);
+
+	std::string relativePath = uri;
+	size_t pos = uri.find(prefix);
+	if (pos == 0)
+		relativePath = uri.substr(prefix.size());
+	if (relativePath.empty() || relativePath.front() != '/')
+		relativePath = "/" + relativePath;
+	
+	return root + relativePath;
 }
 
 void Location::print() const

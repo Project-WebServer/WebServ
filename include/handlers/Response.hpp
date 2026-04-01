@@ -35,6 +35,7 @@ class Response
 		std::string buildHeader(int httpCode, size_t bodySize, std::string contetType);
 		std::string	buildStatusLine(std::string httpVersion, int httpCode);
 		std::string buildSuccessResponse(std::string httpVersion, int httpCode);
+		void		getDefErrorPage(std::string& body, int errorCode);
 
 	public:
 

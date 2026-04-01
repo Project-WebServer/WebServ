@@ -23,11 +23,8 @@ class ServerConf
 		std::map<int, std::string>			error_pages;
 		std::map<int, std::string>			error_pages_default;
 		std::vector<Location> 				locations;
-		//implemente index 
 
 		
-
-
 		public:
 			ServerConf();
 			ServerConf& operator=(const ServerConf& other);
