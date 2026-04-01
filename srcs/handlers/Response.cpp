@@ -249,7 +249,6 @@ static int convert_host(std::string& ip, uint32_t& ipv4, int& port)
 	{
 		host = ip.substr(0, colonPos);
 		port = stoi(ip.substr(colonPos + 1));
-		return -1;
 	}
 	catch (std::exception &e)
 	{
@@ -304,7 +303,11 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 	
 	if(response.hasCGI())
 	{
-		_response = "<h1>CGI is working!</h1>";
+		_response = _response = "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: 22\r\n"
+            "\r\n"
+            "<h1>CGI is working!</h1>";
 		return;
 	}
 
