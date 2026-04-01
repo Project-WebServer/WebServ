@@ -28,6 +28,7 @@ enum struct tokenType
 	SERVER_NAME,
 	UPLOAD,
 	REDIR,
+	CGIPASS,
 	NEWLINE,
 	UNKNOWN,
 	ENDOF
@@ -85,6 +86,7 @@ void			setIndex_filesLocation(TokenLine &tokenLine, Location& loc);
 void 			setUploadLocation(TokenLine &tokenLine, Location& loc);
 void 			setAutoindexLocation(TokenLine &tokenLine, Location& loc);
 void 			setRedirLocation(TokenLine &tokenLine, Location& loc);
+void 			setCGILocation(TokenLine &tokenLine, Location& loc);
 error_conf 		setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tokenLine);
 error_conf 		setWebservConf(WebservConf &webserv, ConfToken& confFile);
 

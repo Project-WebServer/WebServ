@@ -58,6 +58,22 @@ std::string Response::getIndexfile()
 	}
 	return "";
 }
+
+bool Response::hasCGI() const
+{
+	return _Location->hasCGI();
+}
+
+std::string Response::getCGIext() const
+{
+	return _Location->getCGIext();
+}
+
+std::string Response::getCgiInterpreter() const
+{
+	return _Location->getCgiInterpreter();
+}
+
 int Response::resolvePath(std::string uri)
 {
 	realPath = _Location->resolvePath(uri);
@@ -285,9 +301,12 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 	
 	if (int status = response.resolvePath(request.getPath()); status != 200)
 		return response.handleHttpError(status);
-	//has CGI? 
-	// if (response.getLocation()->hasCgiPass())
-    //     return response.handleCGI(request);
+	
+	if(response.hasCGI())
+	{
+		_response = "<h1>CGI is working!</h1>";
+		return;
+	}
 
 	switch (request.getMethods())
 	{

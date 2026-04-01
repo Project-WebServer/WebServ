@@ -28,9 +28,9 @@ class Location
 		std::string	redir_url;
 
 
-		// bool        has_cgi;
-		// std::string cgiPass;    // ex: /usr/bin/python3
-		// std::string cgiExt;     // ex: .py
+		bool        has_cgi;
+		std::string cgiInterpreter;    // ex: /usr/bin/python3
+		std::string cgiExt;     // ex: .py
 
 		public:
 			Location(const std::string& servRoot);
@@ -46,6 +46,7 @@ class Location
 			void	setAutoindex_On();
 			void	setUpload(std::string upload_path);
 			void	setRedirection(std::string url, int code);
+			void	setCgiPass(std::vector<std::string>& pass);
 
 			std::string						getPrefix() const; 
 			std::string						getRoot() const; 
@@ -57,6 +58,9 @@ class Location
 			std::string						getUploadPath() const;
 			int								getRedirCode() const;
 			std::string						getRedirUrl() const;
+			bool							hasCGI() const;
+			std::string						getCGIext() const;
+			std::string						getCgiInterpreter() const;
 
 			std::string resolvePath(std::string& uri) const;
 

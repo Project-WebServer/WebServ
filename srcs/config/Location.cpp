@@ -8,7 +8,10 @@ Location::Location(const std::string& servRoot): prefix(""),
     autoindex(false),
     upload_enable(false),
 	upload_store(""),
-    has_redirection(false)
+    has_redirection(false),
+	has_cgi(false),
+	cgiInterpreter(""),
+	cgiExt("")
 {
 }
 
@@ -53,7 +56,8 @@ void	Location::setIndex_files(std::string index_file)
 
 void Location::setAutoindex_On()
 {
-	this->autoindex = true;
+	if (!has_cgi)
+		this->autoindex = true;
 }
 
 void Location::setUpload(std::string upload_path)
@@ -66,6 +70,15 @@ void Location::setRedirection(std::string url, int code)
 	this->has_redirection = true;
 	this->redir_code = code;
 	this->redir_url = url;
+}
+
+void Location::setCgiPass(std::vector<std::string> &pass)
+{
+	this->has_cgi = true;
+	if (this->autoindex)
+		this->autoindex = false;
+	this->cgiExt = pass.front();
+	this->cgiInterpreter = pass.back();
 }
 
 std::string Location::getPrefix() const
@@ -109,22 +122,42 @@ bool Location::hasRedirection() const
 {
 	return has_redirection;
 }
+
 bool Location::is_uploadEnable() const
 {
 	return upload_enable;
 }
+
 std::string Location::getUploadPath() const
 {
 	return upload_store;
 }
+
 int Location::getRedirCode() const
 {
 	return redir_code;
 }
+
 std::string Location::getRedirUrl() const
 {
 	return redir_url;
 }
+
+bool Location::hasCGI() const
+{
+	return has_cgi;
+}
+
+std::string Location::getCGIext() const
+{
+	return cgiExt;
+}
+
+std::string Location::getCgiInterpreter() const
+{
+	return cgiInterpreter;
+}
+
 std::string Location::resolvePath(std::string &uri) const
 {
 	std::string root = getRoot();

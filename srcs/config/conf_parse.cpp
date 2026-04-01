@@ -30,6 +30,7 @@ static tokenType _getTokenType(std::string token)
 	if (token == "autoindex") return tokenType::AUTO_INDEX;
 	if (token == "server_name") return tokenType::SERVER_NAME;
 	if (token == "upload_store") return tokenType::UPLOAD;
+	if (token == "cgi_pass") return tokenType::CGIPASS;
 	if (token == "return") return tokenType::REDIR;
 	
 	return tokenType::UNKNOWN;
@@ -44,15 +45,18 @@ std::string ConfToken::_convertTokenType(tokenType type)
         case tokenType::BLOCK_CLOSE:     return "}";
         case tokenType::LOCATION:        return "location";
         case tokenType::ERROR_PAGE:      return "error_page";
-        case tokenType::LISTEN:            return "listen";
+        case tokenType::LISTEN:          return "listen";
         case tokenType::MAX_CLIENT_SIZE: return "client_max_body_size";
         case tokenType::ROOT:            return "root";
         case tokenType::ALLOWED_METHODS: return "allowed_methods";
         case tokenType::INDEX:           return "index";
         case tokenType::AUTO_INDEX:      return "autoindex";
         case tokenType::SERVER_NAME:     return "server_name";
+		case tokenType::UPLOAD:			 return "upload";
+		case tokenType::REDIR:			 return "return";
+		case tokenType::CGIPASS:		 return "cgi_pass";		
         case tokenType::UNKNOWN:         return "";
-		default: 						break;	
+		default: 						 break;	
     }
 	return "Undefined";
 }
@@ -328,6 +332,9 @@ void setLocationServer(TokenLine &tokenLine, ConfToken& confFile, ServerConf& se
 			case tokenType::REDIR:
 				setRedirLocation(loc_TokenLine, loc);
 				break;
+			case tokenType::CGIPASS:
+				setCGILocation(loc_TokenLine, loc);
+				break;
 			default:
 				throw std::runtime_error("Error: UNKNOWN token type near " + confFile.catTokens(loc_TokenLine));
 			}
@@ -469,7 +476,21 @@ void setRedirLocation(TokenLine &tokenLine, Location &loc)
 
 }
 
-error_conf setServerConf(ServerConf& server, ConfToken& confFile, TokenLine& tokenLine)
+void setCGILocation(TokenLine &tokenLine, Location &loc)
+{
+	error_conf status;
+
+	status = isDirectiveValid(tokenLine);
+	if (!status.success)
+		throw std::runtime_error(status.error_msg);
+	std::vector<std::string> &token = tokenLine.second;
+	if (token.size() != 2)
+		throw std::runtime_error("Error: missing CGI directive near token " + ConfToken::catTokens(tokenLine));
+	if (token.front() != ".py")
+		throw std::runtime_error("Error: invalid CGI extension near token " + ConfToken::catTokens(tokenLine));
+	loc.setCgiPass(token);
+}
+error_conf setServerConf(ServerConf &server, ConfToken &confFile, TokenLine &tokenLine)
 {
 	if (tokenLine.second.size() != 1 || tokenLine.second[0] != "{")
 		return {false, "Erro: Invalid syntax in configuration file " + confFile.catTokens(tokenLine)};
