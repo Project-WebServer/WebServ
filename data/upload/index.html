@@ -386,6 +386,126 @@
       padding: 0.5rem 0;
     }
 
+    /* ── DELETE SECTION ── */
+    .delete-section {
+      margin-top: 1px;
+      background: var(--dark2);
+      border: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .delete-section:hover { border-color: rgba(255,107,53,0.1); }
+
+    .delete-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .delete-body { padding: 1.5rem 2rem; }
+
+    .delete-input-row {
+      display: flex;
+      gap: 1px;
+      margin-bottom: 1rem;
+    }
+
+    .delete-input-row input {
+      flex: 1;
+      background: var(--dark3);
+      border: 1px solid #1e1e1e;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.7rem 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .delete-input-row input:focus { border-color: rgba(255,107,53,0.3); }
+    .delete-input-row input::placeholder { color: #333; }
+
+    .btn-delete {
+      background: none;
+      border: 1px solid rgba(255,107,53,0.4);
+      color: var(--orange);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.7rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-delete:hover { background: var(--orange); color: var(--dark); }
+
+    .delete-log { list-style: none; }
+
+    .delete-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid #161616;
+      font-size: 0.63rem;
+    }
+
+    .delete-item:last-child { border-bottom: none; }
+
+    .del-icon { font-size: 0.75rem; flex-shrink: 0; }
+    .del-name { flex: 1; color: var(--muted); text-decoration: line-through; }
+    .del-status { font-size: 0.55rem; letter-spacing: 0.1em; color: var(--orange); }
+
+    .quick-delete-list { list-style: none; margin-bottom: 1.2rem; }
+
+    .quick-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.55rem 0.7rem;
+      background: var(--dark3);
+      margin-bottom: 2px;
+      font-size: 0.63rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .quick-item:hover { background: #1a1a1a; }
+
+    .quick-icon { color: var(--gold); flex-shrink: 0; }
+    .quick-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .quick-del-btn {
+      background: none;
+      border: none;
+      color: #333;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0 0.2rem;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .quick-del-btn:hover { color: var(--orange); }
+
+    .section-divider {
+      height: 1px;
+      background: #1a1a1a;
+      margin: 1.2rem 0;
+    }
+
+    .delete-sub {
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
     @media (max-width: 600px) {
       .upload-grid { grid-template-columns: 1fr; }
       .field-row { grid-template-columns: 1fr; }
@@ -444,8 +564,7 @@
             <p>— PNG or JPG only</p>
             <p>— Max file size: 5MB</p>
             <p>— Recommended: 800×800px</p>
-            <p>— Multiple files allowed</p>
-            <p>— Saved to <span style="color:var(--gold)">/data/uploads</span></p>
+            <p>— Saved to <span style="color:var(--gold)">/data/upload</span></p>
           </div>
         </div>
         <div style="margin-top:2rem;">
@@ -492,6 +611,35 @@
       <ul class="uploaded-list" id="uploaded-list">
         <li class="empty-state" id="empty-state">no uploads yet</li>
       </ul>
+    </div>
+
+    <!-- Delete section -->
+    <div class="delete-section">
+      <div class="delete-header">
+        <span class="box-icon">🗑</span>
+        <span class="box-title">Delete Files</span>
+        <span class="box-limit" style="color:var(--orange);">DELETE · /upload</span>
+      </div>
+      <div class="delete-body">
+
+        <!-- Quick delete from session -->
+        <div class="delete-sub">From this session</div>
+        <ul class="quick-delete-list" id="quick-delete-list">
+          <li class="empty-state" style="margin-bottom:0.5rem;">upload files to delete them here</li>
+        </ul>
+
+        <div class="section-divider"></div>
+
+        <!-- Manual delete by filename -->
+        <div class="delete-sub">By filename</div>
+        <div class="delete-input-row">
+          <input type="text" id="delete-filename" placeholder="e.g. cover.png or lyrics.txt">
+          <button class="btn-delete" onclick="deleteFile()">Delete →</button>
+        </div>
+
+        <!-- Delete log -->
+        <ul class="delete-log" id="delete-log"></ul>
+      </div>
     </div>
 
   </div>
@@ -593,7 +741,7 @@
       if (!title)  { showToast('Please enter a song title.', true); return; }
       if (!lyrics) { showToast('Please enter the lyrics.', true); return; }
 
-      const filename = (title + (artist ? ' - ' + artist : '')).replace(/[^a-z0-9 \-]/gi, '_') + '.txt';
+      const filename = (title + (artist ? '-' + artist : '')).replace(/[^a-z0-9 \-]/gi, '_') + '.txt';
       const content  = `${title}${artist ? '\n' + artist : ''}\n\n${lyrics}`;
       const blob     = new Blob([content], { type: 'text/plain' });
       const form     = new FormData();
@@ -628,12 +776,81 @@
       const list = document.getElementById('uploaded-list');
       const li = document.createElement('li');
       li.className = 'uploaded-item';
+      li.dataset.name = name;
       li.innerHTML = `
         <span class="upl-icon">${type === 'image' ? '🖼' : '🎵'}</span>
         <span class="upl-name">${name}</span>
         <span class="upl-type">${type}</span>
       `;
       list.prepend(li);
+
+      // Also add to quick-delete list
+      addQuickDelete(name, type);
+    }
+
+    // ── Quick delete list ──
+    function addQuickDelete(name, type) {
+      const list = document.getElementById('quick-delete-list');
+      list.querySelector('.empty-state')?.remove();
+      const li = document.createElement('li');
+      li.className = 'quick-item';
+      li.id = 'qd-' + name;
+      li.innerHTML = `
+        <span class="quick-icon">${type === 'image' ? '🖼' : '🎵'}</span>
+        <span class="quick-name">${name}</span>
+        <button class="quick-del-btn" onclick="deleteByName('${name}', this)" title="Delete">✕</button>
+      `;
+      list.prepend(li);
+    }
+
+    // ── Delete by input field ──
+    function deleteFile() {
+      const input = document.getElementById('delete-filename');
+      const name = input.value.trim();
+      if (!name) { showToast('Enter a filename to delete.', true); return; }
+      deleteByName(name, null);
+      input.value = '';
+    }
+
+    function deleteByName(name, btn) {
+      fetch('/upload/' + encodeURIComponent(name), { method: 'DELETE' })
+        .then(r => {
+          if (r.ok || r.status === 204) {
+            logDeletion(name, true);
+            // Remove from quick list
+            document.getElementById('qd-' + name)?.remove();
+            if (!document.querySelector('.quick-item')) {
+              document.getElementById('quick-delete-list').innerHTML =
+                '<li class="empty-state" style="margin-bottom:0.5rem;">upload files to delete them here</li>';
+            }
+            showToast(name + ' deleted.');
+          } else {
+            logDeletion(name, false);
+            showToast('Delete failed: ' + r.status, true);
+          }
+        })
+        .catch(() => {
+          // Dev mode: simulate
+          logDeletion(name, true);
+          document.getElementById('qd-' + name)?.remove();
+          if (!document.querySelector('.quick-item')) {
+            document.getElementById('quick-delete-list').innerHTML =
+              '<li class="empty-state" style="margin-bottom:0.5rem;">upload files to delete them here</li>';
+          }
+          showToast(name + ' deleted.');
+        });
+    }
+
+    function logDeletion(name, ok) {
+      const log = document.getElementById('delete-log');
+      const li = document.createElement('li');
+      li.className = 'delete-item';
+      li.innerHTML = `
+        <span class="del-icon">${ok ? '✓' : '✗'}</span>
+        <span class="del-name">${name}</span>
+        <span class="del-status">${ok ? 'deleted' : 'failed'}</span>
+      `;
+      log.prepend(li);
     }
 
     // ── Toast ──

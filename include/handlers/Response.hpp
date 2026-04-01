@@ -59,8 +59,8 @@ class Response
 		const std::string	getResponse() const;
 		std::string			getIndexfile();
 		bool				hasCGI() const;
-		std::string		getCGIext() const;
-		std::string		getCgiInterpreter() const;
+		std::string			getCGIext() const;
+		std::string			getCgiInterpreter() const;
 
 
 		void		handleGETrequest(HTTPrequests& request);
