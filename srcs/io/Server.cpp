@@ -25,7 +25,7 @@ void Server::run ()
 
 	while (g_running)
 	{
-		ready = poll(_pfds.data(), _pfds.size(), 5000);//timeout -1 - wait forewer(later 1000 in mcsec)
+		ready = poll(_pfds.data(), _pfds.size(), 1000);//timeout -1 - wait forewer(later 1000 in mcsec)
 		//check every 5 sec max imit is 30 sec
 		if(!g_running)
 			break;

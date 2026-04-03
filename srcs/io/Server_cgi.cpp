@@ -1,5 +1,9 @@
 #include "../../include/io/Server.hpp"
 #include <sys/wait.h>
+#include <sys/resource.h>
+
+// обмежуємо CPU час для CGI процесу
+
 
 static std::string buildCgiResponse(const std::string &cgi_buf);
 static std::string normalizeCgiOutput(const std::string &raw);
@@ -46,6 +50,10 @@ void Server::_launchCgi(size_t indx)
 		close(pipe_out[0]);
 		close(pipe_out[1]);
 
+		struct rlimit rl;
+		rl.rlim_cur = 10; // 10 секунд CPU
+		rl.rlim_max = 10;
+		setrlimit(RLIMIT_CPU, &rl);
 		
 		char *argv[] = {
 			(char *)c.cgi.cgi_path.c_str(),

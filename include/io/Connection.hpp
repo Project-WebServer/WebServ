@@ -34,7 +34,12 @@ struct Connection
 	HTTPrequests request;
 	bool		is_cgi;
 	CgiState	cgi;
-	Connection() : state(READING_REQUEST), keep_alive(false), last_activity(0), is_cgi(false) {}
+	Connection() : state(READING_REQUEST), keep_alive(false), last_activity(0), is_cgi(false)
+	{
+		cgi.pid = -1;
+		cgi.pipe_read_fd = -1;
+		cgi.started_at = 0;
+	}
 	
 	size_t bytesReceived() const
 	{
