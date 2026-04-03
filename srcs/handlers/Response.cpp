@@ -546,11 +546,28 @@ static	int handleDeleteDir_n_file(std::string realPath, int flag)
 	}
 	return 0;
 }
+
+static std::string decodeUri(std::string& path)
+{
+	std::string decodPath;
+	for (size_t i = 0; i < path.size(); ++i)
+	{
+		if (path.compare(i, 3, "%20") == 0)
+		{
+			decodPath += ' ';
+			i += 2;
+		}
+		else
+			decodPath += path[i];
+	}
+	return decodPath;
+}
 void Response::handleDELETErequest(HTTPrequests &request)
 {
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
 	struct stat fileStat;
+	realPath = decodeUri(realPath);
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);
 	if(S_ISDIR(fileStat.st_mode))
