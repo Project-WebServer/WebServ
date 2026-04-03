@@ -103,3 +103,12 @@ int main(int argc, char **argv)
 
 // Webserv.getAvailablePorts(); return a vector<int> with all port we have available to listen to
 	//for now just vector[0] = 8080;
+
+//GET
+// curl -v http://localhost:8080/
+
+//POST
+// curl -v -X POST http://localhost:8080/upload -F "file=@/etc/hostname"
+
+//DELETE
+// curl -v -X DELETE http://localhost:8080/upload/hostname

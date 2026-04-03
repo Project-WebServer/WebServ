@@ -10,7 +10,8 @@ enum ParseState
 	READING_REQUEST,//keep readinng
 	REQUEST_COMPLETE,//parser said that request is ready
 	SENDING_RESPONSE,//??
-	CLOSING//close fd
+	CLOSING,//close fd
+	CGI_READING
 };
 
 struct CgiState
@@ -19,6 +20,8 @@ struct CgiState
 	pid_t		pid;// for waitpid()
 	std::string	cgi_buf;//collect CGI output
 	time_t		started_at;//for CGI timeout
+	std::string cgi_path;
+	std::string cgi_script;
 };
 
 struct Connection
@@ -29,10 +32,6 @@ struct Connection
 	bool		keep_alive;// weather we nne dto keep connection after response
 	time_t		last_activity;//unix timestamp (never hang indefinitely)
 	HTTPrequests request;
-	// Трек C отримує request, повертає response.
-   	// Трек A серіалізує response у out_buf.
-
-   	//HttpResponse response; // можна зберігати тут або одразу серіалізувати
 	bool		is_cgi;
 	CgiState	cgi;
 	Connection() : state(READING_REQUEST), keep_alive(false), last_activity(0), is_cgi(false) {}

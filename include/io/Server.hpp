@@ -12,7 +12,7 @@
 # include <sys/types.h>
 # include <netinet/in.h>
 # include <unistd.h>
-# include <poll.h>
+# include <poll.h>// for pollfd struct
 # include <fcntl.h>
 #include <csignal>
 
@@ -32,6 +32,7 @@ class Server
 		std::vector<pollfd>			_pfds; //listen fd
 		std::map<int, Connection>	_conns; //key = client fd
 		WebservConf					_conf;
+		std::map<int, int>			_pipe_to_client;
 
 		void _addListenFd(int fd);
 		void _acceptClients(int listen_fd);
@@ -49,7 +50,8 @@ class Server
 		void _handleClientReadable(size_t indx);
 		void _handleClientWritable(size_t indx);
 		void _handleClientError(size_t indx);
-		
+		void _launchCgi(size_t indx);
+		void _handleCgiReadable(size_t indx);
 		
 
 	public:

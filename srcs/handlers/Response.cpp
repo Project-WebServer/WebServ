@@ -281,34 +281,38 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 }
 
 //update also an error conde int request??
-void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& _response) //main function to handle respponse
+HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
 {
+	HandlerResult result;
+	result.is_cgi = false;
 	Response response;
 
 	if (int i = select_serv_n_location(request, servConf, response); i != 0)
 	{
 		response.handleHttpError(i);
-		_response = response.getResponse();
-		return;
+		result.response = response.getResponse();
+		return result;
 	}
 	if (response.getLocation()->hasRedirection())
 	{
 		response.handleRedirect();
-		_response = response.getResponse();
-        return;
+		result.response = response.getResponse();
+        return result;
 	}
 	
 	if (int status = response.resolvePath(request.getPath()); status != 200)
-		return response.handleHttpError(status);
+	{
+		response.handleHttpError(status);
+		result.response = response.getResponse();
+		return result;
+	}
 	
 	if(response.hasCGI())
 	{
-		_response = _response = "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 22\r\n"
-            "\r\n"
-            "<h1>CGI is working!</h1>";
-		return;
+		result.is_cgi = true;
+        result.cgi_path = response.getCgiInterpreter();
+        result.cgi_script = response.getRealPath();
+        return result;
 	}
 
 	switch (request.getMethods())
@@ -326,8 +330,8 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 		response.handleHttpError(405);
 		break;
 	}
-	_response = response.getResponse();
-	return;
+	result.response = response.getResponse();
+	return result;
 }
 
 void Response::handleGETrequest(HTTPrequests& request)
