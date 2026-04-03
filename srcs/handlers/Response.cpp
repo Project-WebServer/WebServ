@@ -212,6 +212,7 @@ bool	Response::isMethodAllowed(int Method)
 {
 	std::vector<httpMethod> methods = this->_Location->getAllowed_methods();
 
+	std::cout << realPath << std::endl;
 	if (methods.size() == 0)
 	{
 		std::cout << "Error: method not allowed.\n";
@@ -434,11 +435,13 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 		return handleHttpError(405);
 	if (request.getBody().size() > getVirtualServ()->getClientSize())
 		return handleHttpError(413);
-	// std::cout << request.getHeader().getValue("content-type") << std::endl;
-	// std::cout << request.getBody() << std::endl;
 	std::string	boundary = getBoundary(request.getContType());
 	if (boundary == "")
+	{
+		if (request.getContType().find("muiltpart/forma-data") == std::string::npos)
+			return handleHttpError(415);
 		return handleHttpError(400);
+	}
 	std::string uploadPath = getRealPath();
 	struct stat fileStat;
 	if (stat(uploadPath.c_str(), &fileStat) == -1)
