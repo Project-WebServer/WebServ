@@ -49,6 +49,11 @@ void Server::run ()
 			{
 				if(_isListenFd(_pfds[i].fd))
 					return;// have to stop poll cos it will always return an error for this fd
+				if(_pipe_to_client.count(_pfds[i].fd))
+				{
+					_handleCgiReadable(i);
+					continue;
+				}
 				_handleClientError(i);
 				continue;
 			}	
@@ -56,6 +61,10 @@ void Server::run ()
 			{
 				if (_isListenFd(_pfds[i].fd))
 					_handleListenReadable(_pfds[i].fd);
+				else if (_pipe_to_client.count(_pfds[i].fd))
+				{
+					_handleCgiReadable(i);
+				}
 				else
 					_handleClientReadable(i);
 				i++;

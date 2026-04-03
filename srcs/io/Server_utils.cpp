@@ -69,6 +69,11 @@ void Server::_checkTimeout()
 			i++;
 			continue;
 		}
+		if (_pipe_to_client.count(_pfds[i].fd))
+		{
+			i++;
+			continue;
+		}
 		Connection &c = _conns[_pfds[i].fd];
 		if (now - c.last_activity > 30) // 30 секунд без активності
 		{
