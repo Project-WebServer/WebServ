@@ -72,7 +72,15 @@ class Response
 
 };
 
-void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& _response);
+struct HandlerResult
+{
+    bool        is_cgi;
+    std::string cgi_path;
+    std::string cgi_script;
+    std::string response;
+};
+
+HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf);
 
 
 

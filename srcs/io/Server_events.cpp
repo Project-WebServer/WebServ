@@ -15,26 +15,34 @@ void Server::_handleClientReadable(size_t indx)
 			//_conns[fd].in_buf.append(buf, n);
 			c.last_activity = time(NULL);
 			_logRecv(fd, n);
-			feedReturn result = c.request.feed(std::string(buf, n));
+			feedReturn parseResult = c.request.feed(std::string(buf, n));
 			// std::cout << "parser buffer size = " << c.request.bufferSize() << std::end;
 			//this is the place to call http parser which read from in_buf <===============
 			//c.in_buf.erase(0, consumed);// delete consumed by parser bytes
-			if (result == feedReturn::COMPLETE)
+			if (parseResult == feedReturn::COMPLETE)
             {
-				// _buildResponse(indx);
-            	//return serialized answer as a string
-				responseHandler(c.request, _conf, c.out_buf);
-				c.state = SENDING_RESPONSE;
-				_pfds[indx].events = POLLOUT;
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
+				if(handlerResult.is_cgi)
+				{
+					c.cgi.cgi_path = handlerResult.cgi_path;
+					c.cgi.cgi_script = handlerResult.cgi_script;
+					c.state = CGI_READING;
+					_launchCgi(indx);
+				}
+				else
+				{
+					c.out_buf = handlerResult.response;
+					c.state = SENDING_RESPONSE;
+					_pfds[indx].events = POLLOUT;
+				}
 				return;
 			}
-			if(result == feedReturn::INCOMPLETE)
-			{
+			if(parseResult == feedReturn::INCOMPLETE)
 				continue;
-			}
-			if(result == feedReturn::ERROR)
+			if(parseResult == feedReturn::ERROR)
 			{
-				responseHandler(c.request, _conf, c.out_buf);
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
+				c.out_buf = handlerResult.response;
 				c.state = CLOSING;
 				_pfds[indx].events = POLLOUT;
 				return;

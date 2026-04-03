@@ -1,4 +1,5 @@
 #include "../../include/io/Server.hpp"
+#include <sys/wait.h>
 
 void Server::_acceptClients(int listen_fd)
 {
@@ -68,6 +69,37 @@ void Server::_checkTimeout()
 		{
 			i++;
 			continue;
+		}
+		if (_pipe_to_client.count(_pfds[i].fd))
+		{
+			int client_fd = _pipe_to_client[_pfds[i].fd];
+    		Connection &c = _conns[client_fd];
+    		if (now - c.cgi.started_at > 30)
+    		{
+    		    std::cout << "CGI timeout: killing pid " << c.cgi.pid << std::endl;
+    		    kill(c.cgi.pid, SIGKILL);
+    		    waitpid(c.cgi.pid, NULL, 0);
+    		    c.out_buf = "HTTP/1.1 504 Gateway Timeout\r\nContent-Length: 0\r\n\r\n";
+				std::cerr << "[TIMEOUT] out_buf size=" << c.out_buf.size() << std::endl;
+    		    c.state = SENDING_RESPONSE;
+    		    _pipe_to_client.erase(_pfds[i].fd);
+    		    _removeFd(i);
+    		    for (size_t j = 0; j < _pfds.size(); j++)
+    		    {
+					std::cerr << "[TIMEOUT] _pfds[" << j << "].fd=" << _pfds[j].fd << std::endl;
+    		        if (_pfds[j].fd == client_fd)
+    		        {
+						std::cerr << "[TIMEOUT] found! setting POLLOUT" << std::endl;
+    		            _pfds[j].events = POLLOUT;
+    		            break;
+    		        }
+    		    }
+    		    continue;
+    		}
+    		i++;
+    		continue;
+			// i++;
+			// continue;
 		}
 		Connection &c = _conns[_pfds[i].fd];
 		if (now - c.last_activity > 30) // 30 секунд без активності
