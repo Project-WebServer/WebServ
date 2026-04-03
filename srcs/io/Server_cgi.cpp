@@ -54,10 +54,18 @@ void Server::_launchCgi(size_t indx)
 		rl.rlim_cur = 10; // 10 секунд CPU
 		rl.rlim_max = 10;
 		setrlimit(RLIMIT_CPU, &rl);
-		
+
+		std::string script_dir = script.substr(0, script.rfind('/'));
+		std::string script_name = script.substr(script.rfind('/') + 1);
+		if (chdir(script_dir.c_str()) == -1)
+		{
+		    std::cerr << "[CHILD] chdir failed: " << strerror(errno) << std::endl;
+		    exit(1);
+		}
+
 		char *argv[] = {
 			(char *)c.cgi.cgi_path.c_str(),
-			(char *)script.c_str(),
+			(char *)script_name.c_str(),
 			NULL
 		};
 		char *env[] = { NULL };
