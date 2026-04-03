@@ -384,41 +384,61 @@ static std::string getBoundary(const std::string& contentType)
 	return "--" + contentType.substr(start + token.size());
 }
 
-static std::string getFilename(const std::string& body)
+static std::string getFilename(const std::string& body, size_t& pos)
 {
 	std::string token = "filename=\"";
-	size_t start = body.find(token);
+	size_t start = body.find(token, pos);
 	if (start == std::string::npos)
 		return "";
 	start += token.size();
 	size_t end = body.find('\"', start);
 	if (end == std::string::npos)
 		return "";
+	pos = end + 1;
 	return body.substr(start, end - start);
 }
 
-static std::string getContent(const std::string& body, const std::string& boundary)
+static std::string getContent(const std::string& body, const std::string& boundary, size_t& pos)
 {
-	size_t start = body.find("\r\n\r\n");
+	size_t start = body.find("\r\n\r\n", pos);
 	if (start == std::string::npos)
 		return "";
 	start += 4;
-	size_t end = body.rfind("\r\n" + boundary + "--");
+	std::string delimiter = boundary + "--";
+	size_t end = body.find("\r\n" + boundary + "\r\n", start);
+	if (end != std::string::npos)
+	{
+		pos = end + 1;
+		return body.substr(start, end - start);
+	}
+	end = body.find("\r\n" + delimiter, start);
 	if (end == std::string::npos)
 		return "";
+	pos = std::string::npos;
 	return body.substr(start, end - start);
+	
+}
+
+static int uploadFile(std::string& fileContent,std::string& uploadPath)
+{
+	std::ofstream file(uploadPath, std::ios::binary);
+	if (!file.is_open())
+   		return 500;
+	file.write(fileContent.data(), fileContent.size());
+	file.close();
+	return 200;
 }
 void Response::handlePOSTrequest(HTTPrequests &request)
 {
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
-	std::string fileName = getFilename(request.getBody());
-	std::string	boundary = getBoundary(request.getContType());
-	std::string fileContent = getContent(request.getBody(), boundary);
-	if (fileName == "" || boundary == "")
-		return handleHttpError(400);
 	if (request.getBody().size() > getVirtualServ()->getClientSize())
 		return handleHttpError(413);
+	// std::cout << request.getHeader().getValue("content-type") << std::endl;
+	// std::cout << request.getBody() << std::endl;
+	std::string	boundary = getBoundary(request.getContType());
+	if (boundary == "")
+		return handleHttpError(400);
 	std::string uploadPath = getRealPath();
 	struct stat fileStat;
 	if (stat(uploadPath.c_str(), &fileStat) == -1)
@@ -427,13 +447,19 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 	{
 		if (uploadPath.back() != '/')
 			uploadPath += "/";
-		uploadPath += fileName;
 	}
-	std::ofstream file(uploadPath, std::ios::binary);
-	if (!file.is_open())
-   		return handleHttpError(500);
-	file.write(fileContent.data(), fileContent.size());
-	file.close();
+	size_t pos = 0;
+	std::string body = request.getBody();
+	while (pos != std::string::npos)
+	{
+		std::string fileName = getFilename(body, pos);
+		if (fileName == "")
+			return handleHttpError(400);
+		std::string fileContent = getContent(body, boundary, pos);
+		std::string path = uploadPath + fileName;
+		if (int i = uploadFile(fileContent, path); i != 200)
+			return handleHttpError(i);
+	}
 	response = buildSuccessResponse(uploadPath, 201);
 	return;
 }
