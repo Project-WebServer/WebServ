@@ -49,4 +49,23 @@ void Server::_launchCgi(size_t indx)
 	}
 	close(pipe_in[0]);
 	close(pipe_out[1]);
+
+	if(!c.request.getBody().empty())
+		write(pipe_in[1], c.request.getBody().data(), c.request.getBody().size());
+	close(pipe_in[1]);
+
+	c.is_cgi = true;
+	c.state = CGI_READING;
+	c.cgi.pid = pid;
+	c.cgi.pipe_read_fd = pipe_out[0];
+	c.cgi.started_at = time(NULL);
+	c.cgi.cgi_buf = "";
+
+	pollfd pfd;
+	pfd.events = POLLIN;
+	pfd.fd = pipe_out[0];;
+	pfd.revents = 0;
+
+	_pfds.push_back(pfd);
+	_pipe_to_client[pipe_out[0]] = fd;//map client socket iin poll pool with actuall end of pipe with cgi info
 }

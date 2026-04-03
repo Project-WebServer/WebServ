@@ -27,6 +27,7 @@ void Server::_handleClientReadable(size_t indx)
 					c.cgi.cgi_path = handlerResult.cgi_path;
 					c.cgi.cgi_script = handlerResult.cgi_script;
 					c.state = CGI_READING;
+					_launchCgi(fd);
 				}
 				else
 				{

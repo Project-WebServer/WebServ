@@ -16,10 +16,10 @@ enum ParseState
 
 struct CgiState
 {
-	int			pipe_read_fd;//fd from which read stdout CGI
 	pid_t		pid;// for waitpid()
-	std::string	cgi_buf;//collect CGI output
+	int			pipe_read_fd;//fd from which read stdout CGI
 	time_t		started_at;//for CGI timeout
+	std::string	cgi_buf;//collect CGI output
 	std::string cgi_path;
 	std::string cgi_script;
 };
