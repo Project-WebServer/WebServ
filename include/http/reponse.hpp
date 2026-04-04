@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   reponse.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/19 17:48:05 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/27 11:29:59 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/04 18:44:22 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,15 @@
 class HTTPresponse
 {
 	public:
+		HTTPresponse();
+		~HTTPresponse();
+
+		std::string serialise(HTTPresponse response);
+		ProtocolV	getProtocolV();
+		int			getStatCode();
+		std::string getStatPhrase();
+		std::string getMsgBody();
+
 
 	private:
 		// status line
@@ -34,7 +43,6 @@ class HTTPresponse
 		//msg body
 		std::string	_msgBody;
 		// exception for msg body is when the server responds to the HEAD method but not part of the methods..
-		
-		std::string response;
-		
+
+		std::string _response;
 };

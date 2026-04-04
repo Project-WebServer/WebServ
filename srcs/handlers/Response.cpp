@@ -1,9 +1,9 @@
 #include "../../include/handlers/Response.hpp"
 
-Response::Response(): virtualServer(nullptr), 
+Response::Response(): virtualServer(nullptr),
 	_Location(nullptr),
 	realPath(""),
-	response(""), 
+	response(""),
 	httpStatusCode(200)
 {
 }
@@ -41,7 +41,7 @@ const std::string Response::getResponse() const
 std::string Response::getIndexfile()
 {
 	std::vector<std::string> indexFiles = _Location->getIndex_files();
-	
+
 	if (indexFiles.size() == 0)
 		return "";
 	if (realPath.back() != '/')
@@ -118,11 +118,11 @@ std::string Response::getErrorFileBody(int errorCode)
 	return "";
 }
 
-//commom use 
+//commom use
 errmsg Response::getFileContent(std::string& filePath, std::string& content)
 {
 	std::ifstream file(filePath);
-	
+
 	if(!file.is_open())
 		return errmsg{false, std::strerror(errno)};
 
@@ -201,7 +201,7 @@ bool	Response::isMethodAllowed(int Method)
 
 bool Response::isLocationValid()
 {
-	if (!_Location) 
+	if (!_Location)
 		return false;
 	return true;
 }
@@ -272,10 +272,21 @@ void	responseHandler(HTTPrequests& request, WebservConf& servConf, std::string& 
 		_response = response.getResponse();
         return;
 	}
-	
-	//has CGI? 
-	// if (response.getLocation()->hasCgiPass())
-    //     return response.handleCGI(request);
+
+	if (int status = response.resolvePath(request.getPath()); status != 200)
+	{
+		response.handleHttpError(status);
+		result.response = response.getResponse();
+		return result;
+	}
+
+	if(response.hasCGI())
+	{
+		result.is_cgi = true;
+        result.cgi_path = response.getCgiInterpreter();
+        result.cgi_script = response.getRealPath();
+        return result;
+	}
 
 	switch (request.getMethods())
 	{
@@ -301,9 +312,7 @@ void Response::handleGETrequest(HTTPrequests& request)
 	struct stat fileStat;
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
-	if (int status = resolvePath(request.getPath()); status != 200)
-		return handleHttpError(status);
-	
+
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);
 	if (S_ISDIR(fileStat.st_mode))
@@ -375,6 +384,17 @@ static std::string getContent(const std::string& body, const std::string& bounda
 	if (end == std::string::npos)
 		return "";
 	return body.substr(start, end - start);
+
+}
+
+static int uploadFile(std::string& fileContent,std::string& uploadPath)
+{
+	std::ofstream file(uploadPath, std::ios::binary);
+	if (!file.is_open())
+   		return 500;
+	file.write(fileContent.data(), fileContent.size());
+	file.close();
+	return 200;
 }
 void Response::handlePOSTrequest(HTTPrequests &request)
 {
@@ -445,7 +465,7 @@ std::string Response::buildAutoindex(const std::string &dirPath, const std::stri
 std::string Response::handleRedirect()
 {
 	std::string url = getLocation()->getRedirUrl();
-	response = buildStatusLine("HTTP/1.1", 301) 
+	response = buildStatusLine("HTTP/1.1", 301)
 		+ "Location: " + url + "\r\n"
 		+ "Content-Length: 0\r\n\r\n";
 	return getResponse();
@@ -469,7 +489,7 @@ static	int handleDeleteDir_n_file(std::string realPath, int flag)
 		if (content != 0)
 			return 409;
 	}
-	
+
 	char absPath[PATH_MAX];
 	if (realpath(realPath.c_str(), absPath) == NULL)
 		return 404;
