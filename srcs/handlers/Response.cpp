@@ -1,9 +1,9 @@
 #include "../../include/handlers/Response.hpp"
 
-Response::Response(): virtualServer(nullptr), 
+Response::Response(): virtualServer(nullptr),
 	_Location(nullptr),
 	realPath(""),
-	response(""), 
+	response(""),
 	httpStatusCode(200)
 {
 }
@@ -41,7 +41,7 @@ const std::string Response::getResponse() const
 std::string Response::getIndexfile()
 {
 	std::vector<std::string> indexFiles = _Location->getIndex_files();
-	
+
 	if (indexFiles.size() == 0)
 		return "";
 	if (realPath.back() != '/')
@@ -145,11 +145,11 @@ std::string Response::getErrorFileBody(int errorCode)
 	return body;
 }
 
-//commom use 
+//commom use
 errmsg Response::getFileContent(std::string& filePath, std::string& content)
 {
 	std::ifstream file(filePath);
-	
+
 	if(!file.is_open())
 		return errmsg{false, std::strerror(errno)};
 
@@ -229,7 +229,7 @@ bool	Response::isMethodAllowed(int Method)
 
 bool Response::isLocationValid()
 {
-	if (!_Location) 
+	if (!_Location)
 		return false;
 	return true;
 }
@@ -508,7 +508,7 @@ std::string Response::buildAutoindex(const std::string &dirPath, const std::stri
 std::string Response::handleRedirect()
 {
 	std::string url = getLocation()->getRedirUrl();
-	response = buildStatusLine("HTTP/1.1", 301) 
+	response = buildStatusLine("HTTP/1.1", 301)
 		+ "Location: " + url + "\r\n"
 		+ "Content-Length: 0\r\n\r\n";
 	return getResponse();
@@ -532,7 +532,7 @@ static	int handleDeleteDir_n_file(std::string realPath, int flag)
 		if (content != 0)
 			return 409;
 	}
-	
+
 	char absPath[PATH_MAX];
 	if (realpath(realPath.c_str(), absPath) == NULL)
 		return 404;

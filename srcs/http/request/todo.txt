@@ -5,3 +5,13 @@ The Rule: Field-Name ":" [Field-Value]. There is zero space allowed between the 
 
 The Fix: In your while loop that reads the name, if you encounter a space ' ' before you find the ':', the request is malformed.
 
+Chuncked Transfer Encoding
+=>Body is sent in two ways: content-length/ Chuncked
+If big data, it will be sent in chunks -> Transfer Encoding: Chuncked
+Trailer & Expires???
+
+https://42seoul.gitbook.io/webserv/or-17
+
+get rid of response
+server ip also get rid of
+test edge cases for request to throw errors

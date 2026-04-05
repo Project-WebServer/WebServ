@@ -96,3 +96,75 @@ The Entry: The request enters your program through the socket that was set up fo
 The Labeling: IO part sees this and should tell your HTTPrequests object: "Hey, this request belongs to Port 9090" (This is your Step 1 setter).
 The Choice: When The Handler receives your completed request object, he calls req.getServerPort(). He sees 9090.
 The Mapping: Because he knows it’s 9090, he goes to the config and finds Server Block 2. He now knows the "Destination" for this request is the /www/siteB folder.
+
+
+-----------------------------------------
+Notes about General HTTP
+
+# Overall Flow of Client & Server
+"Application": a UI and the functional state of the software that a person sees and ineracts in the browser
+				when you enter the applicaton the browser loads the structure of the website, which is "empty" until the data arrives
+	-> Data: e.g. If you open a banking ap, the "app" is the dashboard layout and the data is the specific account balance
+
+As web-apps are dynamic, the application is more like a digital frame which calles out the server
+	to retrieve the latest pic (data) to show the current version
+
+
+How to retrieve data from the server
+1. (the client identifies!) Identify the location of the server where the data exists. (IP address of the server)
+2. Once the loc identified, a connection (via TCP/IP) b/w client & server required
+	-> Host listens to the incoming requests, when the connecton established, the host "serves" the application data back to the client
+3. Once connection made, request what you want from the server
+	to do that, a lang. that both server and client understands is needed. The agreed-upon rules are
+	used to exchange messages and send requests that adhere to the rules (HTTP protocol).
+4. Client must know the location and type of data regarding what was sent/received to interpret the request/response.
+	e.g. PDF, music files, video files and so on.
+5. Sometimes, other elements are needed for communication -> Content-type, URI
+
+URI (Uniform Resource Identifier): unique str of char used to identify the resource on a network
+common types - URL(Uniform Resource Locator): tells where the resource is and how to get it
+	         - URN(Uniform Resource Name): Identifies a resouce by a unique name regardless of its location. Just tells where, not how to get
+
+# Concept of HTTP
+: protocol that enables exchange of info over WWW. Primarily used for exchanging HTML docs, uses TCP & UDP and port 80.
+
+- TCP (Transmission Control Product): most common protocol used for web. Designed for reliability & accuracy
+- UDP (User Datagram Protocol): designed for speed, thus best for live video streaming and online games. Sender blasts the data towards receiver without checkin if all caught
+- port 80: A single server can do many things at once e.g. send emal, host website,... to keep task separate, server  uses diferent ports.
+		   port 80 is an industry stnd. "apartment number" for encrypted HTTP traffic. Modern web uses port 443(https) - more secure
+
+# Components of HTTP-based systems that are installed all over the internet!
+: proxy, cache, gateway, tunnel, agent
+1. Proxy
+located b/w client & server. Act of performing communication on behalf of a server and a client as an intermediary iis called a proxy.
+the entitiy communicating is called a proxy server.
+It receives all HTTP requests from th client & forwards to the server. Primarily used for security as it is reliable.
+e.g. block adult content for kids, detect viruses.
+
+2. Cache
+Like a warehouse that stores frequently visited web pages close to the client
+stores copies of a frequently accessed docs among those passing through it.
+HTTP also defines features that enables cache to operate eficinetly.
+
+3. Gateway
+Special webserver connected to other apps - intermediary to other servers
+primiarily used to convert HTTP traffic into other protocols e.g. HTTP gateway accepts HTTP request and retrieves the doc using FTP protocol
+
+4. Tunnel (often using the CONNECT method)
+HTTP application that transmits raw data between two 2connections without opening.
+wraps one type of traffic inside another to trick firewall to thinking that it is seeing a stnd. web browsing.
+-> bypasses restrictive firewalls
+-> privacy & security as the firewall can't see what is inside
+
+e.g. if the client's HTTP request is as follows:
+CONNECT destination-server.com:443 HTTP/1.1
+the proxy then understands to open the direct tunnel b/w the client and the server
+
+5. Agent
+makes automated HTTP requests
+- user agent makes HTTP requests for the user
+
+# From client's perspective
+there are four things that must happen:
+1. know the location of the server that is containing the desired data
+2. once location identified
