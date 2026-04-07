@@ -302,11 +302,9 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
         return result;
 	}
 	if (request.getMethods() == HTTPrequests::METHODS::POST)
-	{
 		uri = response.getLocation()->getUploadPath();
-		if (uri == "")
-			uri = request.getPath();
-	}
+	if (uri == "")
+		uri = request.getPath();
 	{
 	if (int status = response.resolvePath(uri); status != 200)
 		{
@@ -579,6 +577,9 @@ static std::string decodeUri(std::string& path)
 }
 void Response::handleDELETErequest(HTTPrequests &request)
 {
+
+	std::cout << "trying delete " + realPath << std::endl;
+	std::cout << "Uri request " + request.getPath() << std::endl;
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
 	struct stat fileStat;
