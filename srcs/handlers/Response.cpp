@@ -301,7 +301,8 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 		result.response = response.getResponse();
         return result;
 	}
-	if (request.getMethods() == HTTPrequests::METHODS::POST)
+	if (request.getMethods() == HTTPrequests::METHODS::POST
+		&& !response.getLocation()->hasCGI())
 		uri = response.getLocation()->getUploadPath();
 	if (uri == "")
 		uri = request.getPath();
@@ -463,17 +464,20 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 	}
 	size_t pos = 0;
 	std::string body = request.getBody();
+	std::string path;
 	while (pos != std::string::npos)
 	{
 		std::string fileName = getFilename(body, pos);
 		if (fileName == "")
 			return handleHttpError(400);
 		std::string fileContent = getContent(body, boundary, pos);
-		std::string path = uploadPath + fileName;
+		path = uploadPath + fileName;
 		if (int i = uploadFile(fileContent, path); i != 200)
 			return handleHttpError(i);
 	}
-	response = buildSuccessResponse(uploadPath, 201);
+	// response = buildSuccessResponse(uploadPath, 201);
+	response = buildSuccessResponse(path, 201);
+
 	return;
 }
 
