@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webserv · virtual host test</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0e14;
+      --surface: #13171f;
+      --border: #1e2530;
+      --accent: #00e5a0;
+      --accent2: #0088ff;
+      --warn: #ffcc00;
+      --text: #c8d0e0;
+      --muted: #4a5568;
+      --mono: 'DM Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+      padding: 0 2rem;
+    }
+
+    /* ── TOP BAR ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .logo {
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #fff;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .badge {
+      margin-left: auto;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2.5rem;
+      padding: 3rem 0;
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .headline {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.05;
+      color: #fff;
+    }
+
+    .headline .hi { color: var(--accent); }
+    .headline .host { color: var(--accent2); }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ── INFO GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1px;
+      border: 1px solid var(--border);
+      background: var(--border);
+    }
+
+    .cell {
+      background: var(--surface);
+      padding: 1.2rem 1.4rem;
+    }
+
+    .cell-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .cell-value {
+      font-size: 0.95rem;
+      color: #fff;
+    }
+
+    .cell-value.ok  { color: var(--accent); }
+    .cell-value.inf { color: var(--accent2); }
+    .cell-value.wrn { color: var(--warn); }
+
+    /* ── TERMINAL BLOCK ── */
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .terminal-bar::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    pre {
+      padding: 1.2rem 1.4rem;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .c-green  { color: var(--accent); }
+    .c-blue   { color: var(--accent2); }
+    .c-yellow { color: var(--warn); }
+    .c-white  { color: #fff; }
+    .c-dim    { color: var(--muted); }
+
+    /* ── ENDPOINTS TABLE ── */
+    .section-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th {
+      text-align: left;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td:first-child { color: #fff; font-weight: 500; }
+
+    .method {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 0.15rem 0.4rem;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+
+    .m-get    { background: #00e5a022; color: var(--accent); border: 1px solid #00e5a044; }
+    .m-post   { background: #0088ff22; color: var(--accent2); border: 1px solid #0088ff44; }
+    .m-delete { background: #ff444422; color: #ff6666; border: 1px solid #ff444444; }
+
+    /* ── FOOTER ── */
+    footer {
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    footer span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="dot"></div>
+  <div class="logo">web<span>serv</span></div>
+  <div class="badge">42 · test page</div>
+</header>
+
+<main>
+
+  <div>
+    <div class="headline">
+      <div class="hi">200 OK</div>
+      <div>virtual host <span class="host">online</span></div>
+    </div>
+    <div class="subtitle">Serving from location / · default virtual server</div>
+  </div>
+
+  <!-- Info Grid -->
+  <div class="grid">
+    <div class="cell">
+      <div class="cell-label">Server</div>
+      <div class="cell-value ok">webserv/1.0</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Host</div>
+      <div class="cell-value inf" id="js-host">—</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Location</div>
+      <div class="cell-value wrn">/</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Method</div>
+      <div class="cell-value ok">GET</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Path</div>
+      <div class="cell-value inf">/index.html</div>
+    </div>
+    <div class="cell">
+      <div class="cell-label">Status</div>
+      <div class="cell-value ok">200 OK</div>
+    </div>
+  </div>
+
+  <!-- Terminal block -->
+  <div class="terminal">
+    <div class="terminal-bar">REQUEST RECEIVED</div>
+    <pre><span class="c-green">GET</span> <span class="c-white">/index.html</span> <span class="c-dim">HTTP/1.1</span>
+<span class="c-blue">Host:</span> <span class="c-white" id="pre-host">localhost:8080</span>
+<span class="c-blue">Accept:</span> <span class="c-dim">text/html</span>
+<span class="c-blue">Connection:</span> <span class="c-dim">keep-alive</span>
+
+<span class="c-dim">→ matched vhost:</span>  <span class="c-yellow" id="pre-vhost">default</span>
+<span class="c-dim">→ matched route:</span> <span class="c-green">/</span>
+<span class="c-dim">→ resolved file:</span> <span class="c-white">./data/web2/index.html</span>
+<span class="c-dim">→ response:</span>      <span class="c-green">200 OK</span></pre>
+
+
+</main>
+
+<footer>
+  <div>École 42 · webserv project</div>
+  <div>served by <span>webserv/1.0</span></div>
+</footer>
+
+<script>
+  // Populate host dynamically from window.location
+  const host = window.location.host || 'localhost:8080';
+  document.getElementById('js-host').textContent = host;
+  document.getElementById('pre-host').textContent = host;
+
+  // Try to guess vhost from hostname
+  const vhost = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? window.location.hostname
+    : 'default';
+  document.getElementById('pre-vhost').textContent = vhost;
+</script>
+
+</body>
+</html>
