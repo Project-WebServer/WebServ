@@ -285,6 +285,7 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
 {
 	HandlerResult result;
+	std::string uri;
 	result.is_cgi = false;
 	Response response;
 
@@ -300,12 +301,19 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 		result.response = response.getResponse();
         return result;
 	}
-	
-	if (int status = response.resolvePath(request.getPath()); status != 200)
+	if (request.getMethods() == HTTPrequests::METHODS::POST)
 	{
-		response.handleHttpError(status);
-		result.response = response.getResponse();
-		return result;
+		uri = response.getLocation()->getUploadPath();
+		if (uri == "")
+			uri = request.getPath();
+	}
+	{
+	if (int status = response.resolvePath(uri); status != 200)
+		{
+			response.handleHttpError(status);
+			result.response = response.getResponse();
+			return result;
+		}
 	}
 	
 	if(response.hasCGI())
