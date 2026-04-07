@@ -49,6 +49,7 @@ class ServerConf
 			const std::vector<Location>& getLocation() const;
 
 			const Location* matchLocation(std::string& uri) const;
+			bool			isServValid() const;
 			void print() const;
 			
 };

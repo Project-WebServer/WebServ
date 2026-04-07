@@ -536,6 +536,8 @@ error_conf setServerConf(ServerConf &server, ConfToken &confFile, TokenLine &tok
 		}
 			
 	}
+	if (!server.isServValid())
+		return {false, "Error: Invalid/missing virtual server configuration."};
 	return {true, "Success"};
 }
 
@@ -563,5 +565,7 @@ error_conf setWebservConf(WebservConf &webserv, ConfToken& confFile)
 
 	}
 	confFile.~ConfToken();
+	if (webserv.getAvailableEndPoints().size() == 0)
+		return {false, "Error: Invalid configuration file"};
 	return {true, "Success"};
 }

@@ -2,17 +2,17 @@
 #include <cstring> 
 
 
-
 //set default value 
 //host = 0.0.0.0 
 //port = 80 by default
 //server_name = ""
 //client_max_body_size = 1m
-ServerConf::ServerConf(): listen("0.0.0.0", 80),
+ServerConf::ServerConf(): listen("0.0.0.0", 8080),
 	client_max_body_size(1024*1024),
 	root("")
 {
 	server_name.push_back("");
+	convert_listen();
 	error_pages_default[400] = "./error_pages/400.html";
 	error_pages_default[403] = "./error_pages/403.html";
 	error_pages_default[404] = "./error_pages/404.html";
@@ -152,6 +152,14 @@ const Location *ServerConf::matchLocation(std::string &uri) const
 	return bestLoc;
 }
 
+bool	ServerConf::isServValid() const
+{
+	if (getLocation().size() == 0)
+		return false;
+	// if (getLocation().front().getRoot() == "")
+	// 	return false;
+	return true;
+}
 void ServerConf::print() const
 {
 	std::cout << this->listen_ip << " " << this->listen_port << std::endl;
