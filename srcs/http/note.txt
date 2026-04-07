@@ -168,3 +168,68 @@ makes automated HTTP requests
 there are four things that must happen:
 1. know the location of the server that is containing the desired data
 2. once location identified
+
+
+------------------------------------
+1. Siege
+Siege is a HTTP load testing tool by bombarding web server with multiple concurrent requests to test how it handles the load, timeout, connection limit
+
+```
+for i in $(seq 1 100); do curl -s http://127.0.0.1:8080/ & done
+wait
+
+curl http://127.0.0.1:8080/
+```
+
+&: runs the curl in the background, so it runs 100 curls simultaneously
+curl: command-line tool used to transfer data to or from server.
+	  curl + url is GET by default.
+
+2. Explanations about HTTP server
+ A program that listens for incoming TCP connections, reads HTTP requests, and sends back HTTP responses. That's it at its core.
+
+Flow: Client connects → Server accepts → Client sends request → Server reads it → Server sends response → Connection closes (or stays open)
+HTTP: text-based protocol that defines how requess and resopnses should be formatted. Runs on top of TCP which handles the data transport.
+
+The request looks like this:
+GET /index.html HTTP/1.1\r\n	<= request line with method path, version
+Host: 127.0.0.1:8080\r\n        <= headers: key-value pairs
+Accept: */*\r\n
+\r\n
+								<= optionally a body
+The response looks like this:
+HTTP/1.1 200 OK\r\n             <= status line: version, status code, reason
+Content-Type: text/html\r\n     <= headers
+Content-Length: 13\r\n
+\r\n
+Hello, World!                   <= body
+
+What your webserv does at the socket level:
+
+1. Creates a socket — a file descriptor representing a network endpoint
+2. Binds it to an address and port (127.0.0.1:8080)
+3. Listens for incoming connections
+4. Accepts a connection — gets a new fd for that specific client
+5. Reads bytes from that fd — that's the raw HTTP request
+6. Parses it — extracts method, path, headers, body
+7. Builds a response
+8. Writes it back to the fd
+9. Closes or keeps the connection
+
+What is a socket?
+fd that represents a network connection
+
+Why select/poll/epoll?
+Your server needs to handle multiple clients at once without using threads. These system calls let you monitor multiple file descriptors simultaneously and only act on ones that are ready, so you never block waiting for one slow client while others are waiting. This is the event loop at the heart of your server.
+
+## Methods:
+GET - request to retrieve a resource, gives whatever is at the URL.
+POST
+DELETE
+
+3. I/O Multiplexing
+
+IO Multiplexing is a way by which a single thread can serve multiple application requests without compromising on the performance. There could be multiple operations involved in the serving of a client request. These operations can be input/output operations or it could involve processing by the CPU.
+
+https://www.42evalhub.com/common/webserv
+

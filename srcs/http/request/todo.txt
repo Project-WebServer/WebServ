@@ -12,6 +12,4 @@ Trailer & Expires???
 
 https://42seoul.gitbook.io/webserv/or-17
 
-get rid of response
-server ip also get rid of
 test edge cases for request to throw errors

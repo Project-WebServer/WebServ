@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/05 18:35:59 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/07 20:24:57 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,12 +99,10 @@ class HTTPrequests
 		std::string				getBody() const;
 		size_t					getContLen() const;
 		size_t					getStatusCode() const;
-		int						getServerPort() const;
-		u_int32_t				getServerIP() const;
 		u_int32_t				getClientIP() const;
 		std::string				getContType() const;
 
-		void	setConectionInfo(uint32_t ServerIP, uint32_t ClientIP, int Port);
+		void	setConectionInfo(uint32_t ClientIP);
 		void	statusCode(feedReturn type);
 
 
@@ -119,8 +117,6 @@ class HTTPrequests
 		std::string	_body;
 		size_t		_contLen;
 		int			_statusCode;
-		int			_serverPort;
-		uint32_t	_serverIP;
 		uint32_t	_clientIP;
 		std::string _contType;
 
