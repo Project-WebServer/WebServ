@@ -23,7 +23,7 @@ void Server::_acceptClients(int listen_fd)
 			_conns[c_fd] = Connection();
 			_conns[c_fd].request.setMaxBodySize(_fd_to_max_body[listen_fd]);
 			_conns[c_fd].last_activity = time(NULL);
-			std::cout << "accepted cient fd"<< c_fd << std::endl;
+			std::cout << "accepted client fd"<< c_fd << std::endl;
 			continue;
 		}
 		else if(errno == EAGAIN || errno == EWOULDBLOCK)
