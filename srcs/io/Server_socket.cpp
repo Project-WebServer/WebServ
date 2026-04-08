@@ -14,6 +14,9 @@ int Server::start(const WebservConf &conf)
 		if (fd < 0)
 			return (1);
 		_listen_fds.push_back(fd);
+		const std::vector<ServerConf> *servers = conf.matchServer(endpoints[i].ip, endpoints[i].port);
+		if (servers && !servers->empty())
+		    _fd_to_max_body[fd] = servers->front().getClientSize();
 		_addListenFd(fd);
 	}
 	return 0;

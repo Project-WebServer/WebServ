@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/31 23:56:16 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/08 18:34:59 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/http/request.hpp"
 
-HTTPrequests::HTTPrequests() : _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body(""), _contLen(0), _statusCode(0), _contType("")
+HTTPrequests::HTTPrequests() : _maxBodySize(0), _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body(""), _contLen(0), _statusCode(0), _contType("")
 {
 }
 
@@ -48,6 +48,8 @@ feedReturn HTTPrequests::feed(std::string newChunk)
         if (status != feedReturn::COMPLETE)
             return (status);
         _buffer.erase(0, end + 4);
+		if (_maxBodySize > 0 && _contLen > _maxBodySize)
+			return feedReturn::MAX_BODY_SIZE;
         if (_contLen == 0)
             _components = COMPONENTS::COMPLETED;
         else
@@ -65,6 +67,11 @@ feedReturn HTTPrequests::feed(std::string newChunk)
     if (!_buffer.empty())
         std::cout << "Buffer not empty though reached the end :(" << std::endl;
     return feedReturn::COMPLETE;
+}
+
+void HTTPrequests::setMaxBodySize(size_t limit)
+{
+    _maxBodySize = limit;
 }
 
 //when _components == COMPONENTS::COMPLETED check what is left in the buffer. WJAT IF SOMETHING LEFT IN THERE???

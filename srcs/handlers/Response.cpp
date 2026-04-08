@@ -295,6 +295,12 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 		result.response = response.getResponse();
 		return result;
 	}
+	if (request.getContLen() > response.getVirtualServ()->getClientSize())
+	{
+	    response.handleHttpError(413);
+	    result.response = response.getResponse();
+	    return result;
+	}
 	if (response.getLocation()->hasRedirection())
 	{
 		response.handleRedirect();

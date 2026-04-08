@@ -26,13 +26,12 @@ class Server
 {
 	private:
 
-		// int _listen_fd;
 		std::vector<int>			_listen_fds;
-		// sockaddr_in					_addr;//register socket by its address (IP + port)
 		std::vector<pollfd>			_pfds; //listen fd
 		std::map<int, Connection>	_conns; //key = client fd
 		WebservConf					_conf;
 		std::map<int, int>			_pipe_to_client;
+		std::map<int, size_t>		_fd_to_max_body;
 
 		void _addListenFd(int fd);
 		void _acceptClients(int listen_fd);

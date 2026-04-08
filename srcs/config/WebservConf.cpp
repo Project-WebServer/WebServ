@@ -7,12 +7,12 @@ void WebservConf::pushServer(const ServerConf &serv, const ENDPOINT &endPoint)
 	this->available_endPoints.push_back(endPoint);
 }
 
-const std::vector<ServerConf> *WebservConf::matchServer(const uint32_t ipv4, const int port)
+const std::vector<ServerConf> *WebservConf::matchServer(const uint32_t ipv4, const int port) const
 {
 	ENDPOINT endpoint{ipv4,port};
-	std::vector<ServerConf> *ptr = nullptr;
+	const std::vector<ServerConf> *ptr = nullptr;
 
-	std::map<ENDPOINT,std::vector<ServerConf>,ENDPOINTCOMP>::iterator it = virtual_servers.find(endpoint);
+	std::map<ENDPOINT,std::vector<ServerConf>,ENDPOINTCOMP>::const_iterator it = virtual_servers.find(endpoint);
 	if (it != this->virtual_servers.end())
 		ptr = &it->second;
 	else

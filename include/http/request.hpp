@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/07 20:24:57 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/08 16:49:28 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ enum class feedReturn
 	INCOMPLETE,
 	COMPLETE,
 	ERROR,
-	NO_HOST_ERROR
+	NO_HOST_ERROR,
+	MAX_BODY_SIZE // if we recieve bigger file then limits in config
 };
 
 enum class ProtocolV
@@ -104,9 +105,11 @@ class HTTPrequests
 
 		void	setConectionInfo(uint32_t ClientIP);
 		void	statusCode(feedReturn type);
+		void	setMaxBodySize(size_t limit);
 
 
 	private:
+		size_t		_maxBodySize;
 		std::string _buffer;
 		COMPONENTS	_components;
 

@@ -6,7 +6,7 @@
 /*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/25 20:54:24 by flima             #+#    #+#             */
-/*   Updated: 2026/02/26 20:23:24 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/08 19:16:16 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class WebservConf
 			WebservConf(){};
 			~WebservConf(){};
 			
-			const std::vector<ServerConf>* matchServer(const uint32_t ipv4,const int port);
+			const std::vector<ServerConf>* matchServer(const uint32_t ipv4,const int port) const;
 			void 	pushServer(const ServerConf& serv, const ENDPOINT& endPoint);
 			int		getNumberOfServers() const;
 			const std::vector<ENDPOINT>& getAvailableEndPoints() const;  

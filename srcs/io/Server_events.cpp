@@ -16,11 +16,19 @@ void Server::_handleClientReadable(size_t indx)
 			c.last_activity = time(NULL);
 			_logRecv(fd, n);
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
+			if (parseResult == feedReturn::MAX_BODY_SIZE)
+			{
+			    c.out_buf = "HTTP/1.1 413 Payload Too Large\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+			    c.state = CLOSING;
+			    _pfds[indx].events = POLLOUT;
+			    return;
+			}
 			// std::cout << "parser buffer size = " << c.request.bufferSize() << std::end;
 			//this is the place to call http parser which read from in_buf <===============
 			//c.in_buf.erase(0, consumed);// delete consumed by parser bytes
 			if (parseResult == feedReturn::COMPLETE)
             {
+				//chekc for the limits
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
 				if(handlerResult.is_cgi)
 				{
