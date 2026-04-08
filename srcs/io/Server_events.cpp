@@ -65,7 +65,7 @@ void Server::_handleClientReadable(size_t indx)
 		else if(n < 0)
 		{
 			std::cerr << "recv() error on fd " << fd << std::endl;
-			_removeFd(indx);
+			// _removeFd(indx);
 			return;
 		}
 	}
