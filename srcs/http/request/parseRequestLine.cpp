@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseRequestLine.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/23 19:50:20 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/08 20:12:52 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 HTTPrequests::METHODS HTTPrequests::findMethods(std::string first)
 {
+	_statusCode = 200;
 	if (first == "GET")
 		_methods = METHODS::GET;
 	else if (first == "POST")
@@ -21,7 +22,10 @@ HTTPrequests::METHODS HTTPrequests::findMethods(std::string first)
 	else if (first == "DELETE")
 		_methods = METHODS::DELETE;
 	else
+	{
+		_statusCode = 405;
 		_methods = METHODS::ERR;
+	}
 	return (_methods);
 }
 

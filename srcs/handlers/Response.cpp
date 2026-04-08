@@ -261,6 +261,8 @@ static int convert_host(std::string& ip, uint32_t& ipv4, int& port)
 }
 static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf, Response& response)
 {
+	if (request.getStatusCode() != 200)
+		return request.getStatusCode();
 	std::string host = request.getHeader().getValue("host");
 	uint32_t ip;
 	int port;

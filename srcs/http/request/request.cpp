@@ -3,16 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/08 18:34:59 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/08 20:10:26 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/http/request.hpp"
 
-HTTPrequests::HTTPrequests() : _maxBodySize(0), _buffer(""), _components(COMPONENTS::REQUEST), _methods(METHODS::ERR), _path(""), _protocolv(ProtocolV::ERR),  _body(""), _contLen(0), _statusCode(0), _contType("")
+HTTPrequests::HTTPrequests() : _maxBodySize(0), _buffer(""), 
+	_components(COMPONENTS::REQUEST), 
+	_methods(METHODS::ERR), _path(""), 
+	_protocolv(ProtocolV::ERR),  
+	_body(""), _contLen(0), 
+	_statusCode(0), 
+	_contType("")
 {
 }
 
