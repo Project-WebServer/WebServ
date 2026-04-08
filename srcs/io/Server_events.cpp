@@ -56,10 +56,6 @@ void Server::_handleClientReadable(size_t indx)
 		}
 		else if(n < 0)
 		{
-			if(errno == EAGAIN || errno == EWOULDBLOCK)
-			{
-				return;
-			}
 			std::cerr << "recv() error on fd " << fd << std::endl;
 			_removeFd(indx);
 			return;
