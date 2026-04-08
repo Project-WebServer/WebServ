@@ -451,8 +451,6 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 {
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
-	if (request.getBody().size() > getVirtualServ()->getClientSize())
-		return handleHttpError(413);
 	std::string	boundary = getBoundary(request.getContType());
 	if (boundary == "")
 	{
