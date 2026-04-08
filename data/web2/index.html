@@ -1,331 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>webserv · virtual host test</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<!-- ── METHOD TESTER ── -->
+<div style="max-width:760px;margin:0 auto;width:100%;padding:2rem 0 0;">
+  <div class="section-title">http method tester</div>
 
-    :root {
-      --bg: #0b0e14;
-      --surface: #13171f;
-      --border: #1e2530;
-      --accent: #00e5a0;
-      --accent2: #0088ff;
-      --warn: #ffcc00;
-      --text: #c8d0e0;
-      --muted: #4a5568;
-      --mono: 'DM Mono', monospace;
-      --display: 'Syne', sans-serif;
-    }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    body {
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      min-height: 100vh;
-      padding: 0 2rem;
-    }
-
-    /* ── TOP BAR ── */
-    header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.2rem 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .logo {
-      font-family: var(--display);
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      color: #fff;
-    }
-
-    .logo span { color: var(--accent); }
-
-    .badge {
-      margin-left: auto;
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 0.2rem 0.6rem;
-      border-radius: 2px;
-    }
-
-    /* ── MAIN ── */
-    main {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 2.5rem;
-      padding: 3rem 0;
-      max-width: 760px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .headline {
-      font-family: var(--display);
-      font-size: clamp(2.2rem, 6vw, 4rem);
-      font-weight: 800;
-      line-height: 1.05;
-      color: #fff;
-    }
-
-    .headline .hi { color: var(--accent); }
-    .headline .host { color: var(--accent2); }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin-top: 0.5rem;
-    }
-
-    /* ── INFO GRID ── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1px;
-      border: 1px solid var(--border);
-      background: var(--border);
-    }
-
-    .cell {
-      background: var(--surface);
-      padding: 1.2rem 1.4rem;
-    }
-
-    .cell-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.4rem;
-    }
-
-    .cell-value {
-      font-size: 0.95rem;
-      color: #fff;
-    }
-
-    .cell-value.ok  { color: var(--accent); }
-    .cell-value.inf { color: var(--accent2); }
-    .cell-value.wrn { color: var(--warn); }
-
-    /* ── TERMINAL BLOCK ── */
-    .terminal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-    }
-
-    .terminal-bar {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.7rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-    }
-
-    .terminal-bar::before {
-      content: '';
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    pre {
-      padding: 1.2rem 1.4rem;
-      font-size: 0.82rem;
-      line-height: 1.8;
-      overflow-x: auto;
-      white-space: pre;
-    }
-
-    .c-green  { color: var(--accent); }
-    .c-blue   { color: var(--accent2); }
-    .c-yellow { color: var(--warn); }
-    .c-white  { color: #fff; }
-    .c-dim    { color: var(--muted); }
-
-    /* ── ENDPOINTS TABLE ── */
-    .section-title {
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0.6rem;
-      margin-bottom: 1.2rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
-
-    th {
-      text-align: left;
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 0.5rem 0.8rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    td {
-      padding: 0.6rem 0.8rem;
-      border-bottom: 1px solid var(--border);
-      color: var(--text);
-    }
-
-    tr:last-child td { border-bottom: none; }
-
-    td:first-child { color: #fff; font-weight: 500; }
-
-    .method {
-      display: inline-block;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      padding: 0.15rem 0.4rem;
-      border-radius: 2px;
-      font-weight: 500;
-    }
-
-    .m-get    { background: #00e5a022; color: var(--accent); border: 1px solid #00e5a044; }
-    .m-post   { background: #0088ff22; color: var(--accent2); border: 1px solid #0088ff44; }
-    .m-delete { background: #ff444422; color: #ff6666; border: 1px solid #ff444444; }
-
-    /* ── FOOTER ── */
-    footer {
-      font-size: 0.72rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      padding: 1rem 0;
-      display: flex;
-      justify-content: space-between;
-      max-width: 760px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    footer span { color: var(--accent); }
-  </style>
-</head>
-<body>
-
-<header>
-  <div class="dot"></div>
-  <div class="logo">web<span>serv</span></div>
-  <div class="badge">42 · test page</div>
-</header>
-
-<main>
-
-  <div>
-    <div class="headline">
-      <div class="hi">200 OK</div>
-      <div>virtual host <span class="host">online</span></div>
-    </div>
-    <div class="subtitle">Serving from location / · default virtual server</div>
+  <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;" id="method-btns">
+    <button class="method mbtn-get active" data-method="GET">GET</button>
+    <button class="method mbtn-post" data-method="POST">POST</button>
+    <button class="method mbtn-delete" data-method="DELETE">DELETE</button>
+    <button class="method mbtn-put" data-method="PUT">PUT</button>
+    <button class="method mbtn-patch" data-method="PATCH">PATCH</button>
+    <button class="method mbtn-head" data-method="HEAD">HEAD</button>
+    <button class="method mbtn-options" data-method="OPTIONS">OPTIONS</button>
+    <button class="method mbtn-trace" data-method="TRACE">TRACE</button>
+    <button class="method mbtn-custom" data-method="CUSTOM">CUSTOM ✎</button>
   </div>
 
-  <!-- Info Grid -->
-  <div class="grid">
-    <div class="cell">
-      <div class="cell-label">Server</div>
-      <div class="cell-value ok">webserv/1.0</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Host</div>
-      <div class="cell-value inf" id="js-host">—</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Location</div>
-      <div class="cell-value wrn">/</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Method</div>
-      <div class="cell-value ok">GET</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Path</div>
-      <div class="cell-value inf">/index.html</div>
-    </div>
-    <div class="cell">
-      <div class="cell-label">Status</div>
-      <div class="cell-value ok">200 OK</div>
-    </div>
+  <div id="custom-row" style="display:none;margin-bottom:0.8rem;">
+    <input id="custom-method" placeholder="FOOBAR"
+      style="background:var(--surface);border:1px solid var(--border);color:#fff;
+             font-family:var(--mono);font-size:0.8rem;padding:0.3rem 0.7rem;
+             border-radius:2px;text-transform:uppercase;outline:none;width:140px;" />
   </div>
 
-  <!-- Terminal block -->
-  <div class="terminal">
-    <div class="terminal-bar">REQUEST RECEIVED</div>
-    <pre><span class="c-green">GET</span> <span class="c-white">/index.html</span> <span class="c-dim">HTTP/1.1</span>
-<span class="c-blue">Host:</span> <span class="c-white" id="pre-host">localhost:8080</span>
-<span class="c-blue">Accept:</span> <span class="c-dim">text/html</span>
-<span class="c-blue">Connection:</span> <span class="c-dim">keep-alive</span>
+  <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
+    <input id="tester-path" value="/"
+      style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;
+             font-family:var(--mono);font-size:0.8rem;padding:0.3rem 0.8rem;
+             border-radius:2px;outline:none;" />
+    <button id="tester-send"
+      style="font-family:var(--mono);font-size:0.75rem;letter-spacing:0.1em;
+             background:var(--accent);color:#0b0e14;border:none;padding:0.35rem 1rem;
+             border-radius:2px;cursor:pointer;font-weight:500;text-transform:uppercase;">
+      ▶ SEND
+    </button>
+  </div>
 
-<span class="c-dim">→ matched vhost:</span>  <span class="c-yellow" id="pre-vhost">default</span>
-<span class="c-dim">→ matched route:</span> <span class="c-green">/</span>
-<span class="c-dim">→ resolved file:</span> <span class="c-white">./data/web2/index.html</span>
-<span class="c-dim">→ response:</span>      <span class="c-green">200 OK</span></pre>
+  <div class="terminal" style="margin-top:0.8rem;">
+    <div class="terminal-bar" id="tester-bar">RESPONSE</div>
+    <pre id="tester-out"><span style="color:var(--muted)">pressione SEND para disparar</span></pre>
+  </div>
+</div>
 
-
-</main>
-
-<footer>
-  <div>École 42 · webserv project</div>
-  <div>served by <span>webserv/1.0</span></div>
-</footer>
+<style>
+  .method {
+    font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;font-weight:500;
+    padding:0.25rem 0.6rem;border-radius:2px;cursor:pointer;border:1px solid;
+    text-transform:uppercase;
+  }
+  .mbtn-get    {background:#00e5a022;color:var(--accent);border-color:#00e5a044;}
+  .mbtn-post   {background:#0088ff22;color:var(--accent2);border-color:#0088ff44;}
+  .mbtn-delete {background:#ff444422;color:#ff6666;border-color:#ff444444;}
+  .mbtn-put    {background:#ffcc0022;color:var(--warn);border-color:#ffcc0044;}
+  .mbtn-patch  {background:#ff880022;color:#ff9944;border-color:#ff880044;}
+  .mbtn-head   {background:#aa44ff22;color:#cc77ff;border-color:#aa44ff44;}
+  .mbtn-options{background:#ff44aa22;color:#ff77cc;border-color:#ff44aa44;}
+  .mbtn-trace  {background:#44aaff22;color:#77ccff;border-color:#44aaff44;}
+  .mbtn-custom {background:#ffffff11;color:#fff;border-color:#ffffff33;}
+  .method.active{box-shadow:0 0 0 1px currentColor;}
+</style>
 
 <script>
-  // Populate host dynamically from window.location
-  const host = window.location.host || 'localhost:8080';
-  document.getElementById('js-host').textContent = host;
-  document.getElementById('pre-host').textContent = host;
-
-  // Try to guess vhost from hostname
-  const vhost = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-    ? window.location.hostname
-    : 'default';
-  document.getElementById('pre-vhost').textContent = vhost;
+(function(){
+  let sel = 'GET';
+  document.querySelectorAll('[data-method]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('[data-method]').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); sel=b.dataset.method;
+      document.getElementById('custom-row').style.display=sel==='CUSTOM'?'block':'none';
+    });
+  });
+  document.getElementById('tester-send').addEventListener('click', async()=>{
+    let m=sel==='CUSTOM'?document.getElementById('custom-method').value.trim().toUpperCase():sel;
+    if(!m)return;
+    const path=document.getElementById('tester-path').value||'/';
+    const out=document.getElementById('tester-out');
+    const bar=document.getElementById('tester-bar');
+    out.innerHTML='<span style="color:var(--muted)">aguardando...</span>';
+    const t0=Date.now();
+    try{
+      const r=await fetch(path,{method:m,headers:{'X-Test-Tool':'webserv-tester'}});
+      const ms=Date.now()-t0;
+      const body=await r.text().catch(()=>'');
+      const sc=r.status<300?'var(--accent)':r.status<500?'var(--warn)':'#ff6666';
+      bar.textContent=m+' '+path+' → '+r.status+' ('+ms+'ms)';
+      out.innerHTML=`<span style="color:${sc}">${r.status} ${r.statusText}</span>  <span style="color:var(--muted)">${ms}ms</span>\n\n`
+        +`<span style="color:var(--muted)">body (${body.length}b):\n${body.slice(0,400).replace(/</g,'&lt;')}</span>`;
+    }catch(e){
+      bar.textContent=m+' '+path+' → ERRO';
+      out.innerHTML=`<span style="color:#ff6666">${e.message}</span>`;
+    }
+  });
+})();
 </script>
-
-</body>
-</html>

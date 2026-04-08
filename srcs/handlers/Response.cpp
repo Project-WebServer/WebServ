@@ -266,6 +266,7 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 	int port;
 	if (convert_host(host, ip, port) == -1)
 		return 500;
+	
 	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
 	if (virtualServers == nullptr)
         return 500;
