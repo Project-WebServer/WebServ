@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/08 16:49:28 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/08 19:36:00 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,7 @@ class HTTPrequests
 		void	setConectionInfo(uint32_t ClientIP);
 		void	statusCode(feedReturn type);
 		void	setMaxBodySize(size_t limit);
+		bool	isHostValid();
 
 
 	private:

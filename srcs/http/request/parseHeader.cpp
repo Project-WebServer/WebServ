@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseHeader.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ypark <ypark@student.42.fr>                +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/24 15:04:49 by ypark            ###   ########.fr       */
+/*   Updated: 2026/04/08 19:35:45 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,17 @@ feedReturn Headers::parseMap(std::string rawHeaderString)
 
 std::string Headers::getValue(std::string key)
 {
-	return (_headerMap[key]);
+	auto it = _headerMap.find(key);
+	if (it != _headerMap.end())
+		return it->second;
+	return ("");
+}
+
+bool	HTTPrequests::isHostValid()
+{
+	if (getHeader().getValue("host") != "")
+		return true;
+	return false;
 }
 
 feedReturn HTTPrequests::parseHeader(std::string header)
