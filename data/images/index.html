@@ -127,7 +127,7 @@
 
     .btn-main:hover { background: var(--orange); transform: translateY(-2px); }
 
-    /* COLLECTION */
+    /* IMAGES / COLLECTION */
     #collection { flex-direction: column; }
 
     .page-title {
@@ -140,33 +140,129 @@
     .page-title em { font-style: italic; color: var(--gold); }
     .page-sub { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 3rem; }
 
-    .albums-grid {
+    /* PHOTO GALLERY */
+    .photo-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 4px;
     }
 
-    .album {
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
       background: var(--dark2);
-      padding: 1.8rem;
+      border: 1px solid #1a1a1a;
       cursor: pointer;
-      transition: background 0.2s;
-      border: 1px solid transparent;
     }
 
-    .album:hover { background: #161616; border-color: rgba(232,197,71,0.15); }
-
-    .album-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
-
-    .album-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease, filter 0.4s ease;
+      filter: grayscale(20%);
     }
 
-    .album-artist { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; }
-    .album-meta { font-size: 0.6rem; color: var(--muted); }
+    .photo-item:hover img {
+      transform: scale(1.05);
+      filter: grayscale(0%);
+    }
+
+    .photo-item .photo-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.8rem;
+      background: linear-gradient(transparent, rgba(8,8,8,0.85));
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      color: var(--text);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .photo-item:hover .photo-overlay { opacity: 1; }
+
+    /* Gallery status states */
+    .gallery-loading,
+    .gallery-empty,
+    .gallery-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 1rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px dashed #1f1f1f;
+    }
+
+    .gallery-loading::before { content: '⟳'; font-size: 2rem; color: var(--gold); animation: spin 1.2s linear infinite; }
+    .gallery-empty::before  { content: '⬚'; font-size: 2.5rem; color: #333; }
+    .gallery-error::before  { content: '⚠'; font-size: 2rem; color: var(--orange); }
+
+    .gallery-retry {
+      margin-top: 0.5rem;
+      background: none;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.5rem 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .gallery-retry:hover { background: var(--gold); color: var(--dark); }
+
+    /* LIGHTBOX */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .lightbox.open { display: flex; }
+
+    .lightbox img {
+      max-width: 88vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border: 1px solid #222;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem; right: 2rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .lightbox-close:hover { color: var(--gold); }
+
+    .lightbox-name {
+      position: absolute;
+      bottom: 2rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
 
     /* PLAYER */
     #player { flex-direction: column; justify-content: center; align-items: center; }
@@ -317,7 +413,7 @@
     <a href="/" class="logo" style="text-decoration:none;">SOUND<span>WAVE</span></a>
     <div class="nav-buttons">
       <button class="nav-btn active" onclick="show('discover', this)">Discover</button>
-      <button class="nav-btn" onclick="show('collection', this)">Collection</button>
+      <button class="nav-btn" onclick="showImages(this)">Images</button>
       <button class="nav-btn" onclick="show('player', this)">Player</button>
       <button class="nav-btn" onclick="show('about', this)">About</button>
     </div>
@@ -334,66 +430,26 @@
     <p class="subtitle">
       A curated journey through music — where every note tells a story and every beat carries a memory.
     </p>
-    <button class="btn-main" onclick="show('collection', document.querySelectorAll('.nav-btn')[1])">
-      Browse Collection →
+    <button class="btn-main" onclick="showImages(document.querySelectorAll('.nav-btn')[1])">
+      Browse Images →
     </button>
   </section>
 
-  <!-- COLLECTION -->
+  <!-- IMAGES (ex-Collection) -->
   <section class="page" id="collection">
-    <div class="page-title">Our <em>Collection</em></div>
-    <div class="page-sub">8 albums · handpicked</div>
-    <div class="albums-grid">
-      <div class="album" onclick="goPlayer('Midnight Sessions', 'The Velvet Ensemble')">
-        <span class="album-icon">🎷</span>
-        <div class="album-name">Midnight Sessions</div>
-        <div class="album-artist">The Velvet Ensemble</div>
-        <div class="album-meta">Jazz · 2024 · 8 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Golden Hour', 'Luna Park')">
-        <span class="album-icon">🎸</span>
-        <div class="album-name">Golden Hour</div>
-        <div class="album-artist">Luna Park</div>
-        <div class="album-meta">Indie · 2023 · 11 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Neon Dreams', 'Axiom')">
-        <span class="album-icon">🎹</span>
-        <div class="album-name">Neon Dreams</div>
-        <div class="album-artist">Axiom</div>
-        <div class="album-meta">Electronic · 2024 · 9 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Deep Blue', 'Oceanic')">
-        <span class="album-icon">🎺</span>
-        <div class="album-name">Deep Blue</div>
-        <div class="album-artist">Oceanic</div>
-        <div class="album-meta">Ambient · 2023 · 7 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Concrete Jungle', 'Rook')">
-        <span class="album-icon">🥁</span>
-        <div class="album-name">Concrete Jungle</div>
-        <div class="album-artist">Rook</div>
-        <div class="album-meta">Hip-Hop · 2024 · 12 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Resonance', 'Wren')">
-        <span class="album-icon">🎻</span>
-        <div class="album-name">Resonance</div>
-        <div class="album-artist">Wren</div>
-        <div class="album-meta">Classical · 2022 · 6 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Soul Fire', 'The Marquis')">
-        <span class="album-icon">🎤</span>
-        <div class="album-name">Soul Fire</div>
-        <div class="album-artist">The Marquis</div>
-        <div class="album-meta">Soul · 2024 · 10 tracks</div>
-      </div>
-      <div class="album" onclick="goPlayer('Bossa Noite', 'Café Trio')">
-        <span class="album-icon">🎶</span>
-        <div class="album-name">Bossa Noite</div>
-        <div class="album-artist">Café Trio</div>
-        <div class="album-meta">Bossa Nova · 2023 · 9 tracks</div>
-      </div>
+    <div class="page-title">Our <em>Images</em></div>
+    <div class="page-sub" id="gallery-sub">loading...</div>
+    <div class="photo-grid" id="photo-grid">
+      <div class="gallery-loading">fetching uploads</div>
     </div>
   </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-name" id="lightbox-name"></div>
+  </div>
 
   <!-- PLAYER -->
   <section class="page" id="player">
@@ -461,6 +517,7 @@
   </section>
 
   <script>
+    /* ── PAGE NAVIGATION ── */
     function show(id, btn) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -468,25 +525,92 @@
       btn.classList.add('active');
     }
 
-    function goPlayer(name, artist) {
-      show('player', document.querySelectorAll('.nav-btn')[2]);
-      document.getElementById('track-name').textContent = name;
-      document.getElementById('track-artist').textContent = artist + ' · 2024';
+    /* ── FETCH IMAGES VIA CGI ── */
+    async function fetchUploadedImages() {
+      const grid = document.getElementById('photo-grid');
+      const sub  = document.getElementById('gallery-sub');
+
+      grid.innerHTML = '<div class="gallery-loading">fetching uploads</div>';
+      sub.textContent = 'loading...';
+
+      let files = [];
+
+      try {
+        const res = await fetch('/cgi-bin/list_images.py');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        files = await res.json();
+      } catch (err) {
+        console.error('[gallery] cgi error:', err);
+        grid.innerHTML = `
+          <div class="gallery-error">
+            cgi error
+            <button class="gallery-retry" onclick="fetchUploadedImages()">retry</button>
+          </div>`;
+        sub.textContent = 'error';
+        return;
+      }
+
+      if (files.length === 0) {
+        grid.innerHTML = '<div class="gallery-empty">no images uploaded yet</div>';
+        sub.textContent = '0 images';
+        return;
+      }
+
+      sub.textContent = `${files.length} image${files.length !== 1 ? 's' : ''} · uploaded`;
+      grid.innerHTML = '';
+
+      files.forEach(filename => {
+        const url  = '/upload/' + encodeURIComponent(filename);
+        const item = document.createElement('div');
+        item.className = 'photo-item';
+        item.innerHTML = `
+          <img src="${url}" alt="${filename}" loading="lazy"
+               onerror="this.closest('.photo-item').style.display='none'">
+          <div class="photo-overlay">${filename}</div>
+        `;
+        item.addEventListener('click', () => openLightbox(url, filename));
+        grid.appendChild(item);
+      });
     }
 
+    /* ── SHOW IMAGES PAGE ── */
+    function showImages(btn) {
+      show('collection', btn);
+      fetchUploadedImages();
+    }
+
+    /* ── LIGHTBOX ── */
+    function openLightbox(src, name) {
+      document.getElementById('lightbox-img').src  = src;
+      document.getElementById('lightbox-name').textContent = name;
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox(e) {
+      if (!e || e.target === document.getElementById('lightbox') || e.target.classList.contains('lightbox-close')) {
+        document.getElementById('lightbox').classList.remove('open');
+        document.getElementById('lightbox-img').src = '';
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox') });
+    });
+
+    /* ── PLAYER ── */
     const tracks = [
       { name: 'Midnight Sessions', artist: 'The Velvet Ensemble' },
-      { name: 'Golden Hour', artist: 'Luna Park' },
-      { name: 'Neon Dreams', artist: 'Axiom' },
-      { name: 'The Weight of Rain', artist: 'Oceanic' },
-      { name: 'Cerulean Skies', artist: 'Wren' },
-      { name: 'Echo Chamber', artist: 'The Marquis' },
+      { name: 'Golden Hour',       artist: 'Luna Park' },
+      { name: 'Neon Dreams',       artist: 'Axiom' },
+      { name: 'The Weight of Rain',artist: 'Oceanic' },
+      { name: 'Cerulean Skies',    artist: 'Wren' },
+      { name: 'Echo Chamber',      artist: 'The Marquis' },
     ];
 
     let cur = 0, playing = false, prog = 0, timer = null;
 
     function updatePlayer() {
-      document.getElementById('track-name').textContent = tracks[cur].name;
+      document.getElementById('track-name').textContent   = tracks[cur].name;
       document.getElementById('track-artist').textContent = tracks[cur].artist + ' · 2024';
       document.querySelectorAll('.track').forEach((t, i) => t.classList.toggle('current', i === cur));
     }
@@ -500,23 +624,39 @@
           prog = Math.min(prog + 0.3, 100);
           document.getElementById('progress').style.width = prog + '%';
           const s = Math.floor(prog * 0.332);
-          document.getElementById('cur-time').textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+          document.getElementById('cur-time').textContent =
+            Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
           if (prog >= 100) nextTrack();
         }, 200);
-      } else { clearInterval(timer); }
+      } else {
+        clearInterval(timer);
+      }
     }
 
     function playTrack(i) {
-      prog = 0; document.getElementById('progress').style.width = '0%';
-      document.getElementById('cur-time').textContent = '0:00';
-      cur = i; updatePlayer();
+      prog = 0;
+      document.getElementById('progress').style.width = '0%';
+      document.getElementById('cur-time').textContent  = '0:00';
+      cur = i;
+      updatePlayer();
       if (playing) { clearInterval(timer); playing = false; }
       togglePlay();
     }
 
-    function nextTrack() { prog = 0; cur = (cur + 1) % tracks.length; updatePlayer(); if (playing) { clearInterval(timer); playing = false; togglePlay(); } }
-    function prevTrack() { prog = 0; cur = (cur - 1 + tracks.length) % tracks.length; updatePlayer(); if (playing) { clearInterval(timer); playing = false; togglePlay(); } }
-    function seek(e) { prog = (e.offsetX / e.currentTarget.offsetWidth) * 100; document.getElementById('progress').style.width = prog + '%'; }
+    function nextTrack() {
+      prog = 0; cur = (cur + 1) % tracks.length; updatePlayer();
+      if (playing) { clearInterval(timer); playing = false; togglePlay(); }
+    }
+
+    function prevTrack() {
+      prog = 0; cur = (cur - 1 + tracks.length) % tracks.length; updatePlayer();
+      if (playing) { clearInterval(timer); playing = false; togglePlay(); }
+    }
+
+    function seek(e) {
+      prog = (e.offsetX / e.currentTarget.offsetWidth) * 100;
+      document.getElementById('progress').style.width = prog + '%';
+    }
   </script>
 </body>
 </html>
