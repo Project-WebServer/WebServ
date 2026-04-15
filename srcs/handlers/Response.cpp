@@ -212,7 +212,6 @@ bool	Response::isMethodAllowed(int Method)
 {
 	std::vector<httpMethod> methods = this->_Location->getAllowed_methods();
 
-	std::cout << realPath << std::endl;
 	if (methods.size() == 0)
 	{
 		std::cout << "Error: method not allowed.\n";
@@ -588,9 +587,6 @@ static std::string decodeUri(std::string& path)
 }
 void Response::handleDELETErequest(HTTPrequests &request)
 {
-
-	std::cout << "trying delete " + realPath << std::endl;
-	std::cout << "Uri request " + request.getPath() << std::endl;
 	if (!isMethodAllowed((int)request.getMethods()))
 		return handleHttpError(405);
 	struct stat fileStat;
