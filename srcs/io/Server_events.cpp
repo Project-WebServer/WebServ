@@ -18,7 +18,9 @@ void Server::_handleClientReadable(size_t indx)
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
-			    c.out_buf = "HTTP/1.1 413 Payload Too Large\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+				c.request.statusCode(feedReturn::MAX_BODY_SIZE);
+			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+				c.out_buf = handlerResult.response;
 			    c.state = CLOSING;
 			    _pfds[indx].events = POLLOUT;
 			    return;

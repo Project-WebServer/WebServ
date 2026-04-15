@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   statusCode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.codam.nl>         +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/03/19 17:24:53 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/15 13:14:48 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ void HTTPrequests::statusCode(feedReturn type)
 		_statusCode = 400;
 	else if (type == feedReturn::ERROR)
 		_statusCode = 405;
+	else if (type == feedReturn::MAX_BODY_SIZE)
+		_statusCode = 413;
 	else 
 		_statusCode = 200;
 }
