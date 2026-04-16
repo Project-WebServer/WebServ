@@ -3,8 +3,8 @@
 int Server::start(const WebservConf &conf)
 {
 	_conf = conf;
-	_pfds.clear();
-	_conns.clear();
+	// _pfds.clear();
+	// _conns.clear();
 
 	const std::vector<ENDPOINT> &endpoints = conf.getAvailableEndPoints();
 
@@ -59,7 +59,7 @@ int Server::_createListenSocket(uint32_t ip, int port)
 		return (-1);
 	}
 	//to make listen socket non-blocking
-	int flags = fcntl(fd, F_GETFL, 0);
+	int flags = fcntl(fd, F_GETFL, 0);////!!!!!!!!!!!
 	if(flags < 0)
 	{
 		std::cerr << "fcntl(F_GETFL) failed: " << std::strerror(errno) << std::endl;

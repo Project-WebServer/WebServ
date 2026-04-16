@@ -9,7 +9,7 @@ BOLD    = \033[1m
 
 CPPFLAGS := -Wall -Wextra -Werror -MMD -MP -g
 CPPFLAGS += -std=c++20
-LDFLAGS  := -fsanitize=address
+#LDFLAGS  := -fsanitize=address
 
 SRCDIR		:=	srcs
 SRCS		:=	$(shell find $(SRCDIR) -iname "*.cpp")

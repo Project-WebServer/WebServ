@@ -112,3 +112,5 @@ int main(int argc, char **argv)
 
 //DELETE
 // curl -v -X DELETE http://localhost:8080/upload/hostname
+
+//siege -c1 -t1M http://localhost:8080/cgi-bin/hello.py

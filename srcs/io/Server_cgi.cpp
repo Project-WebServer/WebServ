@@ -97,7 +97,7 @@ void Server::_launchCgi(size_t indx)
 	_pipe_to_client[pipe_out[0]] = fd;//map client socket iin poll pool with actuall end of pipe with cgi info
 }
 
-void Server::_handleCgiReadable(size_t indx)
+bool Server::_handleCgiReadable(size_t indx)
 {
 	int pipe_fd = _pfds[indx].fd;
 	int client_fd = _pipe_to_client[pipe_fd];
@@ -108,6 +108,7 @@ void Server::_handleCgiReadable(size_t indx)
 	if (n > 0)
 	{
 		c.cgi.cgi_buf.append(buf, n);
+		return false;
 	}
 	else if (n == 0)
 	{
@@ -116,7 +117,6 @@ void Server::_handleCgiReadable(size_t indx)
 		c.state = SENDING_RESPONSE;
 		_pipe_to_client.erase(pipe_fd);
 		_removeFd(indx);
-
 		for (size_t i = 0; i < _pfds.size(); i++)
 		{
 			if (_pfds[i].fd == client_fd)
@@ -125,6 +125,7 @@ void Server::_handleCgiReadable(size_t indx)
 				break;
 			}
 		}
+		return true;
 	}
 	else
 	{
@@ -141,6 +142,7 @@ void Server::_handleCgiReadable(size_t indx)
 				break;
 			}
 		}
+		return true;
 	}
 }
 

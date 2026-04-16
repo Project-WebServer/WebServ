@@ -1,48 +1,7 @@
 #include "../../include/io/Server.hpp"
 #include <sys/wait.h>
 
-void Server::_acceptClients(int listen_fd)
-{
-	while(true)
-	{
-		int c_fd = accept(listen_fd, NULL, NULL);
-		if(c_fd >= 0)
-		{
-			int flags = fcntl(c_fd, F_GETFL, 0);//file control help change or read fd settings
-			if(flags < 0 || fcntl(c_fd, F_SETFL, flags | O_NONBLOCK) < 0)
-			{
-				std::cerr << "fcntl() failed: " << std::strerror(errno) << std::endl;
-				close(c_fd);
-				continue;
-			}
-			pollfd p;
-			p.fd = c_fd;
-			p.events = POLLIN;
-			p.revents = 0;
-			_pfds.push_back(p);
-			_conns[c_fd] = Connection();
-			_conns[c_fd].request.setMaxBodySize(_fd_to_max_body[listen_fd]);
-			_conns[c_fd].last_activity = time(NULL);
-			std::cout << "accepted client fd"<< c_fd << std::endl;
-			continue;
-		}
-		else if(errno == EAGAIN || errno == EWOULDBLOCK)
-		{
-			std::cout << "no more pending connections" << std::endl;
-			break;
-		}
-		else if(errno == EINTR)//repeat accept; was interupted y signal try ones more
-		{
-			continue;
-		}
-		else if (errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
-		{
-			continue;
-		}
-		std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
-		break;
-	}
-}
+
 
 void Server::_removeFd(size_t indx)
 {
@@ -80,8 +39,11 @@ void Server::_checkTimeout()
     		    std::cout << "CGI timeout: killing pid " << c.cgi.pid << std::endl;
     		    kill(c.cgi.pid, SIGKILL);
     		    waitpid(c.cgi.pid, NULL, 0);
-    		    c.out_buf = "HTTP/1.1 504 Gateway Timeout\r\nContent-Length: 0\r\n\r\n";
-				std::cerr << "[TIMEOUT] out_buf size=" << c.out_buf.size() << std::endl;
+				c.request.statusCode(feedReturn::ERROR);
+				HandlerResult result = responseHandler(c.request, _conf);
+				c.out_buf = result.response;
+    		    //c.out_buf = "HTTP/1.1 504 Gateway Timeout\r\nContent-Length: 0\r\n\r\n";
+				//std::cerr << "[TIMEOUT] out_buf size=" << c.out_buf.size() << std::endl;
     		    c.state = SENDING_RESPONSE;
     		    _pipe_to_client.erase(_pfds[i].fd);
     		    _removeFd(i);
@@ -99,8 +61,6 @@ void Server::_checkTimeout()
     		}
     		i++;
     		continue;
-			// i++;
-			// continue;
 		}
 		Connection &c = _conns[_pfds[i].fd];
 		if (now - c.last_activity > 30) // 30 секунд без активності
@@ -121,4 +81,18 @@ bool Server::_isListenFd(int fd) const
             return true;
     }
     return false;
+}
+
+void Server::_cleanupServer()
+{
+	for (size_t i = 0; i < _pfds.size(); i++)
+	    close(_pfds[i].fd);
+	_pfds.clear();
+	for (std::map<int, Connection>::iterator it = _conns.begin(); it != _conns.end(); it++)
+		if(it->second.cgi.pid > 0)
+		{
+			kill(it->second.cgi.pid, SIGKILL);
+			waitpid(it->second.cgi.pid, NULL, 0);
+		}
+	_conns.clear();
 }

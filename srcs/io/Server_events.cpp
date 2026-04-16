@@ -2,7 +2,7 @@
 #include "../../include/http/request.hpp"
 #include "../../include/handlers/Response.hpp"
 
-void Server::_handleClientReadable(size_t indx)
+bool Server::_handleClientReadable(size_t indx)
 {
 	int fd = _pfds[indx].fd;
 	Connection &c = _conns[fd];
@@ -12,9 +12,7 @@ void Server::_handleClientReadable(size_t indx)
 		ssize_t n = recv(fd, buf, sizeof(buf), 0);
 		if(n > 0)
 		{
-			//_conns[fd].in_buf.append(buf, n);
 			c.last_activity = time(NULL);
-			_logRecv(fd, n);
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
@@ -23,11 +21,8 @@ void Server::_handleClientReadable(size_t indx)
 				c.out_buf = handlerResult.response;
 			    c.state = CLOSING;
 			    _pfds[indx].events = POLLOUT;
-			    return;
+			    return false;
 			}
-			// std::cout << "parser buffer size = " << c.request.bufferSize() << std::end;
-			//this is the place to call http parser which read from in_buf <===============
-			//c.in_buf.erase(0, consumed);// delete consumed by parser bytes
 			if (parseResult == feedReturn::COMPLETE)
             {
 				//chekc for the limits
@@ -45,7 +40,7 @@ void Server::_handleClientReadable(size_t indx)
 					c.state = SENDING_RESPONSE;
 					_pfds[indx].events = POLLOUT;
 				}
-				return;
+				return false;
 			}
 			if(parseResult == feedReturn::INCOMPLETE)
 				continue;
@@ -55,25 +50,23 @@ void Server::_handleClientReadable(size_t indx)
 				c.out_buf = handlerResult.response;
 				c.state = CLOSING;
 				_pfds[indx].events = POLLOUT;
-				return;
+				return false;
 			}
 		}
 		else if(n == 0)
 		{
-			std::cout << "fd " << fd << " closed by client" << std::endl;
 			_removeFd(indx);
-			return;
+			return true;
 		}
 		else if(n < 0)
 		{
-			std::cerr << "recv() error on fd " << fd << std::endl;
 			// _removeFd(indx);
-			return;
+			return false;
 		}
 	}
 }
 
-void Server::_handleClientWritable(size_t indx)
+bool Server::_handleClientWritable(size_t indx)
 {
 	int fd = _pfds[indx].fd;
 	Connection &c = _conns[fd];
@@ -83,22 +76,17 @@ void Server::_handleClientWritable(size_t indx)
 		if(c.state == CLOSING)
 		{
 			_removeFd(indx);
-			return;
+			return true;
 		}
 		_resetConnection(c);
 		_pfds[indx].events = POLLIN;
-		return;
+		return false;
 	}
 	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);//bytes
-	if(n < 0)
+	if(n <= 0)
 	{
 		_removeFd(indx);
-		return;
-	}
-	if(n == 0)
-	{
-		_removeFd(indx);
-		return;
+		return true;
 	}
 	c.out_buf.erase(0, n);
 	if (c.out_buf.empty())
@@ -106,19 +94,63 @@ void Server::_handleClientWritable(size_t indx)
 		if(c.state == CLOSING || !c.keep_alive)
 		{
 			_removeFd(indx);
-			return;
+			return true;
 		}
 		_resetConnection(c);
 		_pfds[indx].events = POLLIN;
 	}
+	return false;
 }
 
-void Server::_handleListenReadable(int listen_fd)
+// void Server::_handleListenReadable(int listen_fd)
+// {
+// 	_acceptClients(listen_fd);
+// }
+
+void Server::_acceptClients(int listen_fd)
 {
-	_acceptClients(listen_fd);
+	while(true)
+	{
+		int c_fd = accept(listen_fd, NULL, NULL);
+		if(c_fd >= 0)
+		{
+			int flags = fcntl(c_fd, F_GETFL, 0);//file control help change or read fd settings
+			if(flags < 0 || fcntl(c_fd, F_SETFL, flags | O_NONBLOCK) < 0)
+			{
+				std::cerr << "fcntl() failed: " << std::strerror(errno) << std::endl;
+				close(c_fd);
+				continue;
+			}
+			pollfd p;
+			p.fd = c_fd;
+			p.events = POLLIN;
+			p.revents = 0;
+			_pfds.push_back(p);
+			_conns[c_fd] = Connection();
+			_conns[c_fd].request.setMaxBodySize(_fd_to_max_body[listen_fd]);
+			_conns[c_fd].last_activity = time(NULL);
+			continue;
+		}
+		else if(errno == EAGAIN || errno == EWOULDBLOCK)
+		{
+			// std::cout << "no more pending connections" << std::endl;
+			break;
+		}
+		else if(errno == EINTR)//repeat accept; was interupted y signal try ones more
+		{
+			continue;
+		}
+		else if (errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
+		{
+			continue;
+		}
+		std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
+		break;
+	}
 }
 
-void Server::_handleClientError(size_t indx)
+bool Server::_handleClientError(size_t indx)
 {
 	_removeFd(indx);
+	return true;
 }

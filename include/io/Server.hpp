@@ -17,7 +17,8 @@
 #include <csignal>
 
 # include "Connection.hpp"
- #include "../config/WebservConf.hpp"
+#include "../config/WebservConf.hpp"
+#include "../../include/handlers/Response.hpp"
 
 extern volatile sig_atomic_t g_running;
 void	setupSignals();
@@ -34,7 +35,6 @@ class Server
 		std::map<int, size_t>		_fd_to_max_body;
 
 		void _addListenFd(int fd);
-		void _acceptClients(int listen_fd);
 		void _removeFd(size_t indx);//should recieve some index from array
 		bool _isListenFd(int fd) const;
 		void _checkTimeout();
@@ -42,15 +42,16 @@ class Server
 
 		int _createListenSocket(uint32_t ip, int port);
 
-		void _logRecv(int fd, ssize_t n) const;// debbug
-		void _buildResponse(size_t indx);// debbug
+		// void _logRecv(int fd, ssize_t n) const;// debbug
+		// void _buildResponse(size_t indx);// debbug
 
-		void _handleListenReadable(int listen_fd);
-		void _handleClientReadable(size_t indx);
-		void _handleClientWritable(size_t indx);
-		void _handleClientError(size_t indx);
+		void _acceptClients(int listen_fd);
+		bool _handleClientReadable(size_t indx);
+		bool _handleClientWritable(size_t indx);
+		bool _handleClientError(size_t indx);
 		void _launchCgi(size_t indx);
-		void _handleCgiReadable(size_t indx);
+		bool _handleCgiReadable(size_t indx);
+		void _cleanupServer();
 		
 
 	public:

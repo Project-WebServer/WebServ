@@ -4,11 +4,7 @@
 
 Server::Server() {}
 
-Server::~Server()
-{
-	for (size_t i = 0; i < _listen_fds.size(); i++)
-		close(_listen_fds[i]);
-}
+Server::~Server() {}
 
 void Server::_addListenFd(int fd)
 {
@@ -38,6 +34,7 @@ void Server::run ()
 				continue;// for signal interaption - keep waiting, not break the loop;
 			}
 			std::cerr << "poll() failed: " << std::strerror(errno) << std::endl;
+			_cleanupServer();
 			return;
 		}
 		_checkTimeout();
@@ -45,85 +42,57 @@ void Server::run ()
 			continue;
 		for (size_t i = 0; i < _pfds.size(); )
 		{
+			bool removed = false;
 			if (_pfds[i].revents & (POLLERR | POLLHUP | POLLNVAL)) //checking error flags
 			{
 				if(_isListenFd(_pfds[i].fd))
-					return;// have to stop poll cos it will always return an error for this fd
-				if(_pipe_to_client.count(_pfds[i].fd))
 				{
-					_handleCgiReadable(i);
-					continue;
+					_cleanupServer();
+					return;// if error happened on listen fd have to stop poll cos it will always return an error for this fd, its imposible to recover an listen fd
 				}
-				_handleClientError(i);
-				continue;
+				if(_pipe_to_client.count(_pfds[i].fd))
+					removed = _handleCgiReadable(i);
+				else
+					removed = _handleClientError(i);
 			}	
-			if (_pfds[i].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
+			else if (_pfds[i].revents & POLLIN)// i POLLIN included to the list of event that alredy happened
 			{
 				if (_isListenFd(_pfds[i].fd))
-					_handleListenReadable(_pfds[i].fd);
-				else if (_pipe_to_client.count(_pfds[i].fd))
 				{
-					_handleCgiReadable(i);
+					_acceptClients(_pfds[i].fd);
+					break;
 				}
+				else if (_pipe_to_client.count(_pfds[i].fd))
+					removed = _handleCgiReadable(i);
 				else
-					_handleClientReadable(i);
-				i++;
-				continue;
+				{
+					Connection &c = _conns[_pfds[i].fd];
+					if(c.state != CGI_READING)
+						removed = _handleClientReadable(i);
+				}
 			}	
-			if(_pfds[i].revents & POLLOUT)
-			{
-				_handleClientWritable(i);
-				continue;
-			}
-			i++;
+			else if(_pfds[i].revents & POLLOUT)
+				removed = _handleClientWritable(i);
+			if(!removed)
+				i++;
 		}
 	}
-
+	std::cout << std::endl;
 	std::cout << "server shutting down..." << std::endl;
-	for (size_t i = 0; i < _pfds.size(); i++)
-	    close(_pfds[i].fd);
-	_pfds.clear();
-	_conns.clear();
-	//managr cgi fds somewhere here in run
+	_cleanupServer();
 }
 
 
 //---------------------temporary-----------------------//
 
-void Server::_logRecv(int fd, ssize_t n) const
-{
-	std::cout << "---- fd " << fd 
-			<< " | received " << n << " bytes"
-			// << " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
-			<< " ----" << std::endl;
-}
+// void Server::_logRecv(int fd, ssize_t n) const
+// {
+// 	std::cout << "---- fd " << fd 
+// 			<< " | received " << n << " bytes"
+// 			// << " | total in buffer " << _conns.at(fd).bytesReceived() << " bytes"
+// 			<< " ----" << std::endl;
+// }
 
-void Server::_buildResponse(size_t indx)
-{
-	int fd = _pfds[indx].fd;
-    Connection &c = _conns[fd];
-
-    if (c.state != READING_REQUEST)
-		return;
-	
-	std::string body = "path: " + c.request.getPath();
-    // if (c.in_buf.find("\r\n\r\n") == std::string::npos)
-    //     return;
-
-    // std::string body = "received " + c.in_buf;
-
-    std::ostringstream oss;
-    oss << "HTTP/1.1 200 OK\r\n"
-        << "Content-Type: text/plain\r\n"
-        << "Content-Length: " << body.size() << "\r\n"
-        << "Connection: close\r\n"
-        << "\r\n"
-        << body;
-
-    c.out_buf = oss.str();
-    c.state = SENDING_RESPONSE;
-    _pfds[indx].events = POLLOUT;
-}
 
 //---------------------temporary-----------------------//
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/15 13:13:40 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/15 15:18:06 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ enum class feedReturn
 	COMPLETE,
 	ERROR,
 	NO_HOST_ERROR,
-	MAX_BODY_SIZE // if we recieve bigger file then limits in config
+	MAX_BODY_SIZE, // if we recieve bigger file then limits in config
+	
 };
 
 enum class ProtocolV
