@@ -36,7 +36,7 @@ On a complete request, `responseHandler()` takes over: it matches the request to
 | **Connection timeout** | Inactive connections are closed after a configurable timeout |
 | **Config file** | nginx-style `.conf` with support for multiple server and location blocks |
 
-### **usage**
+### **Usage**
 
 **Requirements**
 
