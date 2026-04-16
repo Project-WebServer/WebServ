@@ -152,3 +152,4 @@ srcs/
   config/    # Configuration parsing and models
   routing/   # Route matching and dispatch logic
   handlers/  # Request handlers (static, upload, CGI, delete)
+
