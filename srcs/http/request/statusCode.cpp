@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   statusCode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/15 13:14:48 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/17 16:59:01 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 //parseRL  - INCOMPLETE
 //         - feedReturn::ERROR then either 405 method not allowed or 505 http version unsupported
 
-void HTTPrequests::statusCode(feedReturn type)
+void HTTPrequests::setStatusCode(feedReturn type)
 {
 	if (type == feedReturn::NO_HOST_ERROR)
 		_statusCode = 400;
@@ -25,7 +25,9 @@ void HTTPrequests::statusCode(feedReturn type)
 		_statusCode = 405;
 	else if (type == feedReturn::MAX_BODY_SIZE)
 		_statusCode = 413;
-	else 
+	else if (type == feedReturn::EXPECT_FAILED)
+		_statusCode = 417;
+	else
 		_statusCode = 200;
 }
 

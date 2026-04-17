@@ -100,6 +100,7 @@ std::string Response::getHttpCode(int code)
 		case 409: return " Conflict";              // Request conflicts with current resource state
 		case 413: return " Payload Too Large";     // Body exceeds client_max_body_size
 		case 415: return " Unsupported Media Type"; // Content-Type not supported
+		case 417: return " Expectation Failed";     // Expect header value not supported
 		case 500: return " Internal Server Error"; // Unexpected server-side failure
 		case 502: return " Bad Gateway";           // CGI returned an invalid response
 		case 504: return " Gateway Timeout";       // CGI took too long to respond
@@ -262,12 +263,13 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 {
 	if (request.getStatusCode() != 200)
 		return request.getStatusCode();
+	
 	std::string host = request.getHeader().getValue("host");
 	uint32_t ip;
 	int port;
 	if (convert_host(host, ip, port) == -1)
 		return 500;
-	
+
 	const std::vector<ServerConf> *virtualServers= servConf.matchServer(ip, port);
 	if (virtualServers == nullptr)
         return 500;
@@ -326,6 +328,7 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 		result.response = response.getResponse();
 		return result;
 	}
+
 	if(response.hasCGI())
 	{
 		result.is_cgi = true;
@@ -356,6 +359,8 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 void Response::handleGETrequest(HTTPrequests& request)
 {
 	struct stat fileStat;
+	if (!isMethodAllowed((int)request.getMethods()))
+		return handleHttpError(405);
 
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);
@@ -437,7 +442,7 @@ static std::string getContent(const std::string& body, const std::string& bounda
 		return "";
 	pos = std::string::npos;
 	return body.substr(start, end - start);
-	
+
 }
 
 static int uploadFile(std::string& fileContent,std::string& uploadPath)

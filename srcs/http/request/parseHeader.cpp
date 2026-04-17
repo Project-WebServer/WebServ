@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseHeader.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/08 19:35:45 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/17 18:25:50 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ feedReturn Headers::parseMap(std::string rawHeaderString)
 			it++;
 		}
 		if (it == rawHeaderString.end() || name.empty())
-			break;
+			return feedReturn::NO_HOST_ERROR;
 		while (it != rawHeaderString.end() && (*it == ' ' || *it == ':'))
 			it++;
 		while (it != rawHeaderString.end() && *it != '\r' && *it != '\n')
@@ -70,13 +70,21 @@ feedReturn Headers::parseMap(std::string rawHeaderString)
 			value += *it;
 			it++;
 		}
-		_headerMap[toLower(name)] = value;
+		_headerMap.insert(std::make_pair(toLower(name), value));
 
 		//std::cout << "[DEBUG] Found Key: '" << name << "' | Found Value: '" << value << "'" << std::endl;
 	}
 	return feedReturn::COMPLETE;
 }
-
+bool isDigits(std::string str)
+{
+	for (size_t i = 0; i < str.length(); i++)
+	{
+		if (!isdigit(str[i]))
+			return false;
+	}
+	return true;
+}
 std::string Headers::getValue(std::string key)
 {
 	auto it = _headerMap.find(key);
@@ -85,28 +93,50 @@ std::string Headers::getValue(std::string key)
 	return ("");
 }
 
-bool	HTTPrequests::isHostValid()
+int Headers::countValues(std::string key)
 {
-	if (getHeader().getValue("host") != "")
-		return true;
-	return false;
+	return (_headerMap.count(key));
 }
 
 feedReturn HTTPrequests::parseHeader(std::string header)
 {
 	if (_header.parseMap(header) != feedReturn::COMPLETE)
-		_statusCode = 400; // only 400 or others too?
-	if (_header.getValue("host").empty())
-	{
-		//_statusCode = 400;
+		return feedReturn::NO_HOST_ERROR; // only 400 or others too?
+
+	std::string contLen     = _header.getValue("content-length");
+	if (!contLen.empty() && !isDigits(contLen))
 		return feedReturn::NO_HOST_ERROR;
+	std::string transfEncod = _header.getValue("transfer-encoding");
+	_contType               = _header.getValue("content-type");
+	std::string expect = _header.getValue("expect");
+	if (!contLen.empty())
+	{
+		std::stringstream stream(contLen);
+		if (!(stream >> _contLen) || _contLen < 0)
+		{
+			_statusCode = 400;
+			return feedReturn::ERROR;
+		}
 	}
-	// content length tells you how much body to read
-	std::string contLen = _header.getValue("content-length");
-	_contType = _header.getValue("content-type");
-	std::stringstream stream(contLen);
-	stream >> _contLen;
-	// if no error
-	//_statusCode = 200;
-	return feedReturn::COMPLETE; // for now, later add other error cases
+	else
+		_contLen = 0;
+	return isHostValid(contLen, transfEncod, expect);
+}
+// request has both Content-Length and Transfer-Encoding: chunked together,
+
+feedReturn HTTPrequests::isHostValid(std::string contLen, std::string transfEncod, std::string expect)
+{
+	if ((_protocolv == ProtocolV::HTTP_1_0) && _header.countValues("host")!= 1)
+   		return feedReturn::NO_HOST_ERROR;
+	if (_header.countValues("content-length") > 1 || _header.countValues("transfer-encoding") > 1)
+		return feedReturn::NO_HOST_ERROR;
+	if (!contLen.empty() && !transfEncod.empty())
+    	return feedReturn::NO_HOST_ERROR;
+	if (!transfEncod.empty() && transfEncod != "chunked")
+   		return feedReturn::ERROR;
+	if (transfEncod == "chunked")
+		_chunked = true;
+	if (!expect.empty())
+		return feedReturn::EXPECT_FAILED;
+	return feedReturn::COMPLETE;
 }

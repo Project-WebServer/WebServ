@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 12:15:10 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/17 18:25:24 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ enum class feedReturn
 	ERROR,
 	NO_HOST_ERROR,
 	MAX_BODY_SIZE, // if we recieve bigger file then limits in config
-
+	EXPECT_FAILED // if we recieve Expect header with value other than 100-continue
 };
 
 enum class ProtocolV
@@ -47,18 +47,21 @@ class Headers
 {
 // takes in everything until \r\n -> double crlf
 	private:
-		std::map<std::string, std::string> _headerMap; // or maybe call it a map
+	//multimap allows duplicate keys
+		std::multimap<std::string, std::string> _headerMap; // or maybe call it a map
 	public:
 		feedReturn	parseMap(std::string rawHeaderString);
 		//std::string	getKeys();
 		std::string	getValue(std::string key);
 		void 		printHeader();
+		int			countValues(std::string key);
 };
 
 enum class COMPONENTS
 {
 	REQUEST,
 	HEADERS,
+	CHUNK_BODY,
 	BODY,
 	COMPLETED
 };
@@ -107,9 +110,9 @@ class HTTPrequests
 		std::string				getMethodStr();
 
 		void	setConectionInfo(uint32_t ClientIP);
-		void	statusCode(feedReturn type);
+		void	setStatusCode(feedReturn type);
 		void	setMaxBodySize(size_t limit);
-		bool	isHostValid();
+		feedReturn isHostValid(std::string contLen, std::string transfEncod, std::string expect);
 
 
 	private:
@@ -126,11 +129,12 @@ class HTTPrequests
 		int			_statusCode;
 		uint32_t	_clientIP;
 		std::string _contType;
+		bool		_chunked;	
 
 		// Request line parser
 		// header parser
 		// body parser
 };
 
-
+bool 		isDigits(std::string str);
 #endif

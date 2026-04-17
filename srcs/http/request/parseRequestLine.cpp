@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseRequestLine.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/08 20:12:52 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/17 18:56:12 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 HTTPrequests::METHODS HTTPrequests::findMethods(std::string first)
 {
-	_statusCode = 200;
 	if (first == "GET")
 		_methods = METHODS::GET;
 	else if (first == "POST")
@@ -22,10 +21,7 @@ HTTPrequests::METHODS HTTPrequests::findMethods(std::string first)
 	else if (first == "DELETE")
 		_methods = METHODS::DELETE;
 	else
-	{
-		_statusCode = 405;
 		_methods = METHODS::ERR;
-	}
 	return (_methods);
 }
 
@@ -44,8 +40,7 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 	size_t space2 = request.find(" ", space1 + 1);
 
 	if (space1 == std::string::npos || space2 == std::string::npos)
-		return feedReturn::INCOMPLETE; //error code for wrong
-
+		return feedReturn::NO_HOST_ERROR; //shouldn't be incomplete, but when else would be incomplete then?
 	std::string first = request.substr(0, space1);
 	_methods = findMethods(first);
 	//printMethod();
@@ -54,7 +49,8 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 
 	_path = request.substr(space1 + 1, space2 - space1 - 1);
 	// what if the path is invalid? handle here or later
-
+	if (_path.find("http://") == 0)
+		return feedReturn::NO_HOST_ERROR;
 	std::string version = request.substr(space2 + 1, request.length() - 2);
 
 	_protocolv = findVersion(version);

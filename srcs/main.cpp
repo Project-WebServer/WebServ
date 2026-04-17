@@ -5,14 +5,14 @@
 
 int testREQ(HTTPrequests& req)
 {
-	
+
 	std::string raw = "DELETE /upload/test HTTP/1.1\r\n"
     "Host: localhost:8082\r\n"
     "Connection: keep-alive\r\n"
     "Content-Length: 0\r\n"
 	"\r\n";
 
-	
+
     // std::string body =  "Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4\r\n"
     // "------WebKitFormBoundaryoJIXq9bnpRUnLLP4\r\n"
     // "Content-Disposition: form-data; name=\"image\"; filename=\"test\"\r\n"
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 	// ptr = Webserv.matchServer(0, 8080);
 	// if (ptr != nullptr)
 	// {
-	// 	std::cout << ptr->size() << "\n"; 
+	// 	std::cout << ptr->size() << "\n";
 	// 	ptr->front().print();
 	// }
 

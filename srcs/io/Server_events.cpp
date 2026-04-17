@@ -16,7 +16,7 @@ bool Server::_handleClientReadable(size_t indx)
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
-				c.request.statusCode(feedReturn::MAX_BODY_SIZE);
+				c.request.setStatusCode(feedReturn::MAX_BODY_SIZE);
 			    HandlerResult handlerResult = responseHandler(c.request, _conf);
 				c.out_buf = handlerResult.response;
 			    c.state = CLOSING;
@@ -30,6 +30,15 @@ bool Server::_handleClientReadable(size_t indx)
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
 				std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
     			std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
+
+				//std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
+				//std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
+				//std::cerr << "[DEBUG] body: '" << c.request.getBody() << "'" << std::endl;
+				//std::cerr << "[DEBUG] content-length: " << c.request.getContLen() << std::endl;
+				//HandlerResult handlerResult = responseHandler(c.request, _conf);
+				//std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
+				//std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
+				//std::cerr << "[DEBUG] response: " << handlerResult.response.substr(0, 200) << std::endl;
 				if(handlerResult.is_cgi)
 				{
 					c.cgi.cgi_path = handlerResult.cgi_path;
@@ -49,7 +58,7 @@ bool Server::_handleClientReadable(size_t indx)
 				continue;
 			if(parseResult == feedReturn::NO_HOST_ERROR)
 			{
-				c.request.statusCode(feedReturn::NO_HOST_ERROR);
+				c.request.setStatusCode(feedReturn::NO_HOST_ERROR);
 			    HandlerResult handlerResult = responseHandler(c.request, _conf);
 				c.out_buf = handlerResult.response;
 			    c.state = CLOSING;

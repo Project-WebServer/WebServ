@@ -39,7 +39,7 @@ void Server::_checkTimeout()
     		    std::cout << "CGI timeout: killing pid " << c.cgi.pid << std::endl;
     		    kill(c.cgi.pid, SIGKILL);
     		    waitpid(c.cgi.pid, NULL, 0);
-				c.request.statusCode(feedReturn::ERROR);
+				c.request.setStatusCode(feedReturn::ERROR);
 				HandlerResult result = responseHandler(c.request, _conf);
 				c.out_buf = result.response;
     		    //c.out_buf = "HTTP/1.1 504 Gateway Timeout\r\nContent-Length: 0\r\n\r\n";

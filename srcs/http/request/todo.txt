@@ -13,3 +13,20 @@ Trailer & Expires???
 https://42seoul.gitbook.io/webserv/or-17
 
 test edge cases for request to throw errors
+
+
+
+printf $'POST / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n0\r\n\r\n' | nc localhost 8080
+(buffer not free after reaching the end)
+
+printf $'AAAAAAAAAAAAAAAA\r\n\r\n' | nc localhost 8080
+printf $'\r\n\r\n' | nc localhost 8080
+ => hangs
+
+printf $'DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n' | nc localhost 8080
+=> should give 405 as method not allowed on /
+
+(printf $'POST / HTTP/1.1\r\nHost: localhost\r\nExpect: 100-continue\r\nContent-Length: 5\r\n\r\n'; \
+ sleep 1; \
+ printf $'Hello') | nc localhost 8080
+=> doesn't give 417
