@@ -68,6 +68,7 @@ void Server::_launchCgi(size_t indx)
 			(char *)script_name.c_str(),
 			NULL
 		};
+		
 		char *env[] = { NULL };
 		if(execve(argv[0], argv, env) == -1)
 		{

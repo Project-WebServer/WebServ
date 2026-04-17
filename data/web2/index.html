@@ -1,93 +1,596 @@
-<!-- ── METHOD TESTER ── -->
-<div style="max-width:760px;margin:0 auto;width:100%;padding:2rem 0 0;">
-  <div class="section-title">http method tester</div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Method Tester — webserv</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;" id="method-btns">
-    <button class="method mbtn-get active" data-method="GET">GET</button>
-    <button class="method mbtn-post" data-method="POST">POST</button>
-    <button class="method mbtn-delete" data-method="DELETE">DELETE</button>
-    <button class="method mbtn-put" data-method="PUT">PUT</button>
-    <button class="method mbtn-patch" data-method="PATCH">PATCH</button>
-    <button class="method mbtn-head" data-method="HEAD">HEAD</button>
-    <button class="method mbtn-options" data-method="OPTIONS">OPTIONS</button>
-    <button class="method mbtn-trace" data-method="TRACE">TRACE</button>
-    <button class="method mbtn-custom" data-method="CUSTOM">CUSTOM ✎</button>
+    :root {
+      --bg: #0b0e14;
+      --surface: #13161f;
+      --surface2: #1a1e2a;
+      --border: #ffffff18;
+      --border2: #ffffff28;
+      --text: #e8eaf0;
+      --muted: #6b7280;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --accent: #00e5a0;
+      --accent2: #4dabf7;
+      --warn: #ffd43b;
+      --danger: #ff6b6b;
+      --danger2: #ff3030;
+      --radius: 6px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .logo span { color: var(--muted); }
+    .server-badge {
+      font-size: 10px;
+      padding: .15rem .5rem;
+      border-radius: 3px;
+      background: #00e5a010;
+      border: 1px solid #00e5a030;
+      color: var(--accent);
+      letter-spacing: .06em;
+    }
+
+    /* ── LAYOUT ── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 0;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      background: var(--surface);
+    }
+    .sidebar-section-label {
+      font-size: 9px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+    .method-grid {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+    }
+    .mbtn {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .08em;
+      padding: .4rem .75rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: 1px solid;
+      text-transform: uppercase;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      transition: opacity .1s, box-shadow .1s;
+      background: transparent;
+    }
+    .mbtn:hover { opacity: .85; }
+    .mbtn.active { box-shadow: 0 0 0 1.5px currentColor; }
+    .mbtn .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .mbtn-get    { color: #00e5a0; border-color: #00e5a030; }
+    .mbtn-get .dot { background: #00e5a0; }
+    .mbtn-post   { color: #4dabf7; border-color: #4dabf730; }
+    .mbtn-post .dot { background: #4dabf7; }
+    .mbtn-delete { color: #ff6b6b; border-color: #ff6b6b30; }
+    .mbtn-delete .dot { background: #ff6b6b; }
+    .mbtn-put    { color: #ffd43b; border-color: #ffd43b30; }
+    .mbtn-put .dot { background: #ffd43b; }
+    .mbtn-patch  { color: #ff922b; border-color: #ff922b30; }
+    .mbtn-patch .dot { background: #ff922b; }
+    .mbtn-options{ color: #f783ac; border-color: #f783ac30; }
+    .mbtn-options .dot { background: #f783ac; }
+    .mbtn-custom { color: #a0a8b8; border-color: #ffffff20; }
+    .mbtn-custom .dot { background: #a0a8b8; }
+
+    .custom-input-wrap { display: none; margin-top: .4rem; }
+    .custom-input {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: .4rem .7rem;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      text-transform: uppercase;
+    }
+    .custom-input:focus { border-color: #ffffff40; }
+
+    /* ── REQUEST CONFIG ── */
+    .sidebar-path {
+      display: flex;
+      gap: .4rem;
+      flex-direction: column;
+    }
+    .path-field {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: .45rem .75rem;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      width: 100%;
+    }
+    .path-field:focus { border-color: #ffffff40; }
+
+    .send-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .55rem 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      border: none;
+      background: var(--accent);
+      color: #0a0f14;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      transition: opacity .1s;
+    }
+    .send-btn:hover { opacity: .9; }
+    .send-btn:active { opacity: .8; transform: scale(.99); }
+
+    /* ── HISTORY ── */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .history-item {
+      font-size: 10px;
+      padding: .3rem .6rem;
+      border-radius: 4px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      transition: border-color .1s;
+    }
+    .history-item:hover { border-color: var(--border2); }
+    .history-item .hm { font-weight: 500; min-width: 48px; }
+    .history-item .hp { color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-item .hc { font-weight: 500; }
+    .history-empty { font-size: 10px; color: var(--muted); }
+
+    /* ── CONTENT AREA ── */
+    .content {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .status-code {
+      font-size: 2.8rem;
+      font-weight: 500;
+      line-height: 1;
+      letter-spacing: .02em;
+    }
+    .status-info { display: flex; flex-direction: column; gap: .2rem; }
+    .status-desc { font-size: 13px; }
+    .status-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .meta-pill {
+      font-size: 10px;
+      padding: .15rem .6rem;
+      border-radius: 3px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .meta-pill strong { color: var(--text); }
+    .idle-msg {
+      padding: 1.25rem 2rem;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ── TABS ── */
+    .tabs-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .tab {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .6rem 1.2rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .1s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+    .tab-pane { display: none; flex: 1; overflow: hidden; }
+    .tab-pane.active { display: flex; flex-direction: column; flex: 1; }
+
+    /* ── PREVIEW ── */
+    #preview-wrap {
+      flex: 1;
+      overflow: hidden;
+      background: #fff;
+      position: relative;
+    }
+    #preview-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .preview-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      font-size: 11px;
+      background: var(--surface);
+    }
+
+    /* ── RAW BODY ── */
+    #raw-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 1.25rem 2rem;
+    }
+    #raw-body {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* ── HEADERS ── */
+    #headers-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 1.25rem 2rem;
+    }
+    .headers-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .headers-table tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+    .headers-table td { padding: .45rem .5rem; font-size: 11px; vertical-align: top; }
+    .headers-table .hk { color: var(--muted); width: 40%; }
+    .headers-table .hv { color: var(--text); word-break: break-all; }
+
+    /* ── TAG ── */
+    .sc-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: .06em;
+      padding: .15rem .5rem;
+      border-radius: 3px;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SOUNDWAVE <span>/</span> http tester</div>
+  <div class="server-badge">webserv</div>
+</header>
+
+<main>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-section-label">Método</div>
+      <div class="method-grid" id="method-grid">
+        <button class="mbtn mbtn-get active" data-m="GET"><span class="dot"></span>GET</button>
+        <button class="mbtn mbtn-post" data-m="POST"><span class="dot"></span>POST</button>
+        <button class="mbtn mbtn-delete" data-m="DELETE"><span class="dot"></span>DELETE</button>
+        <button class="mbtn mbtn-put" data-m="PUT"><span class="dot"></span>PUT</button>
+        <button class="mbtn mbtn-patch" data-m="PATCH"><span class="dot"></span>PATCH</button>
+        <button class="mbtn mbtn-options" data-m="OPTIONS"><span class="dot"></span>OPTIONS</button>
+        <button class="mbtn mbtn-custom" data-m="CUSTOM"><span class="dot"></span>CUSTOM ✎</button>
+      </div>
+      <div class="custom-input-wrap" id="custom-wrap">
+        <input class="custom-input" id="custom-method" placeholder="FOOBAR" maxlength="32" />
+      </div>
+    </div>
+
+    <div class="sidebar-path">
+      <div class="sidebar-section-label">Path</div>
+      <input class="path-field" id="path" value="/" placeholder="/caminho" />
+      <button class="send-btn" id="send-btn">▶ SEND</button>
+    </div>
+
+    <div>
+      <div class="sidebar-section-label">Histórico</div>
+      <div class="history-list" id="history-list">
+        <div class="history-empty" id="history-empty">Nenhuma requisição ainda.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div id="idle-area" class="idle-msg">Selecione um método e pressione SEND.</div>
+    <div id="result-area" style="display:none;flex:1;display:none;flex-direction:column;overflow:hidden;">
+      <div class="status-bar" id="status-bar"></div>
+      <div class="tabs-bar">
+        <button class="tab active" data-tab="preview">Página</button>
+        <button class="tab" data-tab="raw">Raw</button>
+        <button class="tab" data-tab="headers">Headers</button>
+      </div>
+      <div class="tab-pane active" id="tab-preview">
+        <div id="preview-wrap">
+          <div class="preview-placeholder" id="preview-placeholder">Sem conteúdo HTML para exibir.</div>
+          <iframe id="preview-frame" style="display:none;" sandbox="allow-same-origin allow-scripts"></iframe>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab-raw">
+        <div id="raw-wrap"><pre id="raw-body"></pre></div>
+      </div>
+      <div class="tab-pane" id="tab-headers">
+        <div id="headers-wrap">
+          <table class="headers-table" id="headers-table"></table>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div id="custom-row" style="display:none;margin-bottom:0.8rem;">
-    <input id="custom-method" placeholder="FOOBAR"
-      style="background:var(--surface);border:1px solid var(--border);color:#fff;
-             font-family:var(--mono);font-size:0.8rem;padding:0.3rem 0.7rem;
-             border-radius:2px;text-transform:uppercase;outline:none;width:140px;" />
-  </div>
-
-  <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
-    <input id="tester-path" value="/"
-      style="flex:1;background:var(--surface);border:1px solid var(--border);color:#fff;
-             font-family:var(--mono);font-size:0.8rem;padding:0.3rem 0.8rem;
-             border-radius:2px;outline:none;" />
-    <button id="tester-send"
-      style="font-family:var(--mono);font-size:0.75rem;letter-spacing:0.1em;
-             background:var(--accent);color:#0b0e14;border:none;padding:0.35rem 1rem;
-             border-radius:2px;cursor:pointer;font-weight:500;text-transform:uppercase;">
-      ▶ SEND
-    </button>
-  </div>
-
-  <div class="terminal" style="margin-top:0.8rem;">
-    <div class="terminal-bar" id="tester-bar">RESPONSE</div>
-    <pre id="tester-out"><span style="color:var(--muted)">pressione SEND para disparar</span></pre>
-  </div>
-</div>
-
-<style>
-  .method {
-    font-family:var(--mono);font-size:0.65rem;letter-spacing:0.1em;font-weight:500;
-    padding:0.25rem 0.6rem;border-radius:2px;cursor:pointer;border:1px solid;
-    text-transform:uppercase;
-  }
-  .mbtn-get    {background:#00e5a022;color:var(--accent);border-color:#00e5a044;}
-  .mbtn-post   {background:#0088ff22;color:var(--accent2);border-color:#0088ff44;}
-  .mbtn-delete {background:#ff444422;color:#ff6666;border-color:#ff444444;}
-  .mbtn-put    {background:#ffcc0022;color:var(--warn);border-color:#ffcc0044;}
-  .mbtn-patch  {background:#ff880022;color:#ff9944;border-color:#ff880044;}
-  .mbtn-head   {background:#aa44ff22;color:#cc77ff;border-color:#aa44ff44;}
-  .mbtn-options{background:#ff44aa22;color:#ff77cc;border-color:#ff44aa44;}
-  .mbtn-trace  {background:#44aaff22;color:#77ccff;border-color:#44aaff44;}
-  .mbtn-custom {background:#ffffff11;color:#fff;border-color:#ffffff33;}
-  .method.active{box-shadow:0 0 0 1px currentColor;}
-</style>
+</main>
 
 <script>
 (function(){
+  const STATUS_TEXT = {
+    100:'Continue',101:'Switching Protocols',200:'OK',201:'Created',202:'Accepted',
+    204:'No Content',206:'Partial Content',301:'Moved Permanently',302:'Found',
+    304:'Not Modified',400:'Bad Request',401:'Unauthorized',403:'Forbidden',
+    404:'Not Found',405:'Method Not Allowed',408:'Request Timeout',409:'Conflict',
+    410:'Gone',413:'Payload Too Large',414:'URI Too Long',415:'Unsupported Media Type',
+    429:'Too Many Requests',500:'Internal Server Error',501:'Not Implemented',
+    502:'Bad Gateway',503:'Service Unavailable',504:'Gateway Timeout'
+  };
+
+  function statusColor(c){
+    if(c<200) return '#74c0fc';
+    if(c<300) return '#00e5a0';
+    if(c<400) return '#ffd43b';
+    if(c<500) return '#ff6b6b';
+    return '#ff3030';
+  }
+  function statusBg(c){
+    if(c<200) return {bg:'#74c0fc15',col:'#74c0fc'};
+    if(c<300) return {bg:'#00e5a015',col:'#00e5a0'};
+    if(c<400) return {bg:'#ffd43b15',col:'#ffd43b'};
+    if(c<500) return {bg:'#ff6b6b15',col:'#ff6b6b'};
+    return {bg:'#ff303015',col:'#ff3030'};
+  }
+  function statusCat(c){
+    return ['','1xx Informacional','2xx Sucesso','3xx Redirecionamento','4xx Erro do Cliente','5xx Erro do Servidor'][Math.floor(c/100)]||'Desconhecido';
+  }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   let sel = 'GET';
-  document.querySelectorAll('[data-method]').forEach(b=>{
+  const history = [];
+
+  // method buttons
+  document.querySelectorAll('[data-m]').forEach(b=>{
     b.addEventListener('click',()=>{
-      document.querySelectorAll('[data-method]').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active'); sel=b.dataset.method;
-      document.getElementById('custom-row').style.display=sel==='CUSTOM'?'block':'none';
+      document.querySelectorAll('[data-m]').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      sel = b.dataset.m;
+      document.getElementById('custom-wrap').style.display = sel==='CUSTOM'?'block':'none';
     });
   });
-  document.getElementById('tester-send').addEventListener('click', async()=>{
-    let m=sel==='CUSTOM'?document.getElementById('custom-method').value.trim().toUpperCase():sel;
-    if(!m)return;
-    const path=document.getElementById('tester-path').value||'/';
-    const out=document.getElementById('tester-out');
-    const bar=document.getElementById('tester-bar');
-    out.innerHTML='<span style="color:var(--muted)">aguardando...</span>';
-    const t0=Date.now();
-    try{
-      const r=await fetch(path,{method:m,headers:{'X-Test-Tool':'webserv-tester'}});
-      const ms=Date.now()-t0;
-      const body=await r.text().catch(()=>'');
-      const sc=r.status<300?'var(--accent)':r.status<500?'var(--warn)':'#ff6666';
-      bar.textContent=m+' '+path+' → '+r.status+' ('+ms+'ms)';
-      out.innerHTML=`<span style="color:${sc}">${r.status} ${r.statusText}</span>  <span style="color:var(--muted)">${ms}ms</span>\n\n`
-        +`<span style="color:var(--muted)">body (${body.length}b):\n${body.slice(0,400).replace(/</g,'&lt;')}</span>`;
-    }catch(e){
-      bar.textContent=m+' '+path+' → ERRO';
-      out.innerHTML=`<span style="color:#ff6666">${e.message}</span>`;
+
+  // tabs
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+    });
+  });
+
+  // history click
+  function addHistory(method, path, code){
+    history.unshift({method, path, code});
+    if(history.length > 20) history.pop();
+    renderHistory();
+  }
+  function renderHistory(){
+    const list = document.getElementById('history-list');
+    const empty = document.getElementById('history-empty');
+    if(!history.length){ empty.style.display='block'; return; }
+    empty.style.display='none';
+    const items = history.map((h,i)=>{
+      const col = statusColor(h.code);
+      return `<div class="history-item" data-i="${i}">
+        <span class="hm" style="color:${col};">${esc(h.method)}</span>
+        <span class="hp">${esc(h.path)}</span>
+        <span class="hc" style="color:${col};">${h.code}</span>
+      </div>`;
+    }).join('');
+    list.innerHTML = items + `<div class="history-empty" id="history-empty" style="display:none;"></div>`;
+    list.querySelectorAll('.history-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const h = history[+el.dataset.i];
+        document.getElementById('path').value = h.path;
+        const btn = document.querySelector(`[data-m="${h.method}"]`);
+        if(btn){ btn.click(); }
+      });
+    });
+  }
+
+  // SEND
+  document.getElementById('send-btn').addEventListener('click', async()=>{
+    let method = sel==='CUSTOM'
+      ? document.getElementById('custom-method').value.trim().toUpperCase()
+      : sel;
+    if(!method) return;
+    const path = document.getElementById('path').value || '/';
+
+    const idle   = document.getElementById('idle-area');
+    const result = document.getElementById('result-area');
+    const sbar   = document.getElementById('status-bar');
+    const frame  = document.getElementById('preview-frame');
+    const placeholder = document.getElementById('preview-placeholder');
+
+    idle.style.display = 'none';
+    result.style.display = 'flex';
+    sbar.innerHTML = `<span style="color:var(--muted);font-size:12px;">Aguardando ${method} ${esc(path)}…</span>`;
+
+    const t0 = Date.now();
+    try {
+      const r = await fetch(path, {method, headers:{'X-Test-Tool':'webserv-tester'}});
+      const ms = Date.now()-t0;
+      const code = r.status;
+      const col = statusColor(code);
+      const {bg, col:tagCol} = statusBg(code);
+      const desc = STATUS_TEXT[code] || r.statusText || '';
+
+      sbar.innerHTML = `
+        <div class="status-code" style="color:${col};">${code}</div>
+        <div class="status-info">
+          <div class="status-desc" style="color:${col};">${esc(desc)}</div>
+          <div class="status-meta">
+            <span class="meta-pill">${esc(statusCat(code))}</span>
+            <span class="meta-pill">Latência: <strong>${ms}ms</strong></span>
+            <span class="meta-pill">Método: <strong>${esc(method)}</strong></span>
+            <span class="meta-pill">Path: <strong>${esc(path)}</strong></span>
+          </div>
+        </div>`;
+
+      // headers
+      const hdrs = [...r.headers.entries()];
+      document.getElementById('headers-table').innerHTML =
+        hdrs.map(([k,v])=>`<tr><td class="hk">${esc(k)}</td><td class="hv">${esc(v)}</td></tr>`).join('') ||
+        '<tr><td class="hk" colspan="2" style="color:var(--muted);">Sem headers.</td></tr>';
+
+      // body
+      const raw = await r.text().catch(()=>'');
+      document.getElementById('raw-body').textContent = raw || '(corpo vazio)';
+
+        const ct = r.headers.get('content-type')||'';
+        const isHtml = ct.includes('html') || raw.trim().startsWith('<');
+
+        if(raw && isHtml){
+          placeholder.style.display='none';
+          frame.style.display='block';
+          const blob = new Blob([raw],{type:'text/html'});
+          const url  = URL.createObjectURL(blob);
+          frame.onload = ()=>{
+            try{
+              const h = frame.contentDocument.documentElement.scrollHeight;
+              frame.style.height = Math.max(h, 100)+'px';
+            }catch(e){ frame.style.height='400px'; }
+          };
+          frame.src = url;
+          frame.style.height = '400px';
+        } else {
+          frame.style.display='none';
+          placeholder.style.display='flex';
+          placeholder.textContent = raw ? 'Resposta não-HTML — veja a aba Raw.' : 'Sem corpo na resposta.';
+        }
+
+      addHistory(method, path, code);
+
+    } catch(e) {
+      const ms = Date.now()-t0;
+      sbar.innerHTML = `
+        <div class="status-code" style="color:var(--danger);">ERR</div>
+        <div class="status-info">
+          <div class="status-desc" style="color:var(--danger);">${esc(e.message)}</div>
+          <div class="status-meta">
+            <span class="meta-pill">Latência: <strong>${ms}ms</strong></span>
+            <span class="meta-pill">Método: <strong>${esc(method)}</strong></span>
+            <span class="meta-pill">Path: <strong>${esc(path)}</strong></span>
+          </div>
+        </div>`;
+      document.getElementById('raw-body').textContent = e.stack||e.message;
+      frame.style.display='none';
+      placeholder.style.display='flex';
+      placeholder.textContent='Falha na requisição.';
+      document.getElementById('headers-table').innerHTML='';
+      addHistory(method, path, 0);
     }
+  });
+
+  // enter key on path
+  document.getElementById('path').addEventListener('keydown',e=>{
+    if(e.key==='Enter') document.getElementById('send-btn').click();
   });
 })();
 </script>
+</body>
+</html>
