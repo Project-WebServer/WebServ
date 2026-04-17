@@ -25,8 +25,11 @@ bool Server::_handleClientReadable(size_t indx)
 			}
 			if (parseResult == feedReturn::COMPLETE)
             {
-				//chekc for the limits
+				std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
+    			std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
+				std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
+    			std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
 				if(handlerResult.is_cgi)
 				{
 					c.cgi.cgi_path = handlerResult.cgi_path;
@@ -44,6 +47,15 @@ bool Server::_handleClientReadable(size_t indx)
 			}
 			if(parseResult == feedReturn::INCOMPLETE)
 				continue;
+			if(parseResult == feedReturn::NO_HOST_ERROR)
+			{
+				c.request.statusCode(feedReturn::NO_HOST_ERROR);
+			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+				c.out_buf = handlerResult.response;
+			    c.state = CLOSING;
+			    _pfds[indx].events = POLLOUT;
+			    return false;
+			}
 			if(parseResult == feedReturn::ERROR)
 			{
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
