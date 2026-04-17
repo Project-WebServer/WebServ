@@ -156,8 +156,8 @@ bool	ServerConf::isServValid() const
 {
 	if (getLocation().size() == 0)
 		return false;
-	// if (getLocation().front().getRoot() == "")
-	// 	return false;
+	if (getLocation().front().getRoot() == "")
+		return false;
 	return true;
 }
 void ServerConf::print() const

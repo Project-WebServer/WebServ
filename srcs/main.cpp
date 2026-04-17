@@ -116,3 +116,6 @@ int main(int argc, char **argv)
 //siege -c1 -t1M http://localhost:8080/cgi-bin/hello.py
 
 //curl -X POST http://localhost:8080/upload -H "Content-Type:text/plain" \-d "agjahgsdjhagsdjasgdkjagsdgsahjgdahjgdshjagsd"
+
+//test CGI POST
+//curl -X POST http://localhost:8080/cgi-bin/upload.py -H "Content-Type:text/plain" \-d "megamega"

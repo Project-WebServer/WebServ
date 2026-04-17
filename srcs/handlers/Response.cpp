@@ -314,15 +314,18 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 		uri = response.getLocation()->getUploadPath();
 	if (uri == "")
 		uri = request.getPath();
-	{
 	if (int status = response.resolvePath(uri); status != 200)
-		{
-			response.handleHttpError(status);
-			result.response = response.getResponse();
-			return result;
-		}
+	{
+		response.handleHttpError(status);
+		result.response = response.getResponse();
+		return result;
 	}
-	
+	if (!response.isMethodAllowed((int)request.getMethods()))
+	{
+		response.handleHttpError(405);
+		result.response = response.getResponse();
+		return result;
+	}
 	if(response.hasCGI())
 	{
 		result.is_cgi = true;
@@ -353,9 +356,7 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 void Response::handleGETrequest(HTTPrequests& request)
 {
 	struct stat fileStat;
-	if (!isMethodAllowed((int)request.getMethods()))
-		return handleHttpError(405);
-	
+
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);
 	if (S_ISDIR(fileStat.st_mode))
@@ -450,8 +451,6 @@ static int uploadFile(std::string& fileContent,std::string& uploadPath)
 }
 void Response::handlePOSTrequest(HTTPrequests &request)
 {
-	if (!isMethodAllowed((int)request.getMethods()))
-		return handleHttpError(405);
 	std::string	boundary = getBoundary(request.getContType());
 	if (boundary == "")
 	{
@@ -587,9 +586,8 @@ static std::string decodeUri(std::string& path)
 }
 void Response::handleDELETErequest(HTTPrequests &request)
 {
-	if (!isMethodAllowed((int)request.getMethods()))
-		return handleHttpError(405);
 	struct stat fileStat;
+	(void)request;
 	realPath = decodeUri(realPath);
 	if (stat(realPath.c_str(), &fileStat) == -1)
 		return handleHttpError(404);
