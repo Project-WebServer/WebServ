@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 16:28:26 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/07 20:24:30 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/17 12:14:37 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,30 @@
 HTTPrequests::METHODS HTTPrequests::getMethods() const
 {
 	return (_methods);
+}
+
+std::string HTTPrequests::getMethodStr()
+{
+	if (_methods == METHODS::GET)
+		return ("GET");
+	else if (_methods == METHODS::POST)
+		return ("POST");
+	else if (_methods == METHODS::DELETE)
+		return ("DELETE");
+	else
+		return ("ERR");
+}
+
+std::string HTTPrequests::getVersionStr()
+{
+	if (_protocolv == ProtocolV::HTTP_1_0)
+		return ("HTTP/1.0");
+	else if (_protocolv == ProtocolV::HTTP_1_1)
+		return ("HTTP/1.1");
+	else if (_protocolv == ProtocolV::HTTP_2_0)
+		return ("HTTP/2.0");
+	else
+		return ("ERR");
 }
 
 std::string HTTPrequests::getPath() const
