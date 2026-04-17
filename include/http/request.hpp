@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/15 15:18:06 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/17 12:15:10 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ enum class feedReturn
 	ERROR,
 	NO_HOST_ERROR,
 	MAX_BODY_SIZE, // if we recieve bigger file then limits in config
-	
+
 };
 
 enum class ProtocolV
@@ -103,6 +103,8 @@ class HTTPrequests
 		size_t					getStatusCode() const;
 		u_int32_t				getClientIP() const;
 		std::string				getContType() const;
+		std::string				getVersionStr();
+		std::string				getMethodStr();
 
 		void	setConectionInfo(uint32_t ClientIP);
 		void	statusCode(feedReturn type);
