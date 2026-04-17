@@ -68,8 +68,10 @@ void Server::_launchCgi(size_t indx)
 			(char *)script_name.c_str(),
 			NULL
 		};
-		
-		char *env[] = { NULL };
+		std::string contentLenght = "CONTENT_LENGTH=" + std::to_string(c.request.getBody().size());
+		std::string contentLenght = "REQUEST_METHOD=" + c.request.getMethods;
+		std::string contentLenght = "CONTENT_TYPE=" + c.request.getBody().size();
+		char *env[] = { (char*)contentLenght.c_str(), NULL };
 		if(execve(argv[0], argv, env) == -1)
 		{
 			exit(1);
