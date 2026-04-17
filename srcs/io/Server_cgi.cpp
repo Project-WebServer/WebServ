@@ -69,9 +69,16 @@ void Server::_launchCgi(size_t indx)
 			NULL
 		};
 		std::string contentLenght = "CONTENT_LENGTH=" + std::to_string(c.request.getBody().size());
-		std::string contentLenght = "REQUEST_METHOD=" + c.request.getMethods;
-		std::string contentLenght = "CONTENT_TYPE=" + c.request.getBody().size();
-		char *env[] = { (char*)contentLenght.c_str(), NULL };
+		std::string requestMethod = "REQUEST_METHOD=" + c.request.getMethodStr();
+		std::string contentType = "CONTENT_TYPE=" + c.request.getContType();
+		std::string servProtocol = "SERVER_PROTOCOL=" + c.request.getVersionStr();
+
+		char *env[] = { 
+			(char*)contentLenght.c_str(),
+			(char*)requestMethod.c_str(),
+			(char*)contentType.c_str(),
+			(char*)servProtocol.c_str(),
+			NULL };
 		if(execve(argv[0], argv, env) == -1)
 		{
 			exit(1);
