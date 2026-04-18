@@ -42,14 +42,12 @@ class Server
 
 		int _createListenSocket(uint32_t ip, int port);
 
-		// void _logRecv(int fd, ssize_t n) const;// debbug
-		// void _buildResponse(size_t indx);// debbug
-
 		void _acceptClients(int listen_fd);
 		bool _handleClientReadable(size_t indx);
 		bool _handleClientWritable(size_t indx);
 		bool _handleClientError(size_t indx);
 		void _launchCgi(size_t indx);
+		bool _finishCgi(size_t indx, int client_fd, const std::string &response);
 		bool _handleCgiReadable(size_t indx);
 		void _cleanupServer();
 		

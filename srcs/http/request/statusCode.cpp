@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   statusCode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 16:59:01 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 13:37:43 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ void HTTPrequests::setStatusCode(feedReturn type)
 		_statusCode = 413;
 	else if (type == feedReturn::EXPECT_FAILED)
 		_statusCode = 417;
+	else if (type == feedReturn::CGI_ERROR)
+		_statusCode = 502;
 	else
 		_statusCode = 200;
 }

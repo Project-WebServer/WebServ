@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 18:25:24 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 13:37:50 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,8 @@ enum class feedReturn
 	ERROR,
 	NO_HOST_ERROR,
 	MAX_BODY_SIZE, // if we recieve bigger file then limits in config
-	EXPECT_FAILED // if we recieve Expect header with value other than 100-continue
+	EXPECT_FAILED, // if we recieve Expect header with value other than 100-continue
+	CGI_ERROR
 };
 
 enum class ProtocolV
