@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>505</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#f9f9f8;color:#1a1a1a;font-family:'Inter',sans-serif}
+body{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:52px;background:#fff;border-bottom:1px solid #e8e8e5}
+.bar-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:#aaa;letter-spacing:.08em}
+.bar-tag{font-size:11px;color:#bbb;letter-spacing:.06em}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#1A6FB5;margin-right:8px}
+.main{display:flex;align-items:center;justify-content:center;padding:60px 40px}
+.card{max-width:480px;width:100%}
+.num{font-family:'JetBrains Mono',monospace;font-size:80px;font-weight:500;line-height:1;color:#1A6FB5;letter-spacing:-0.03em;margin-bottom:4px}
+.rule{width:32px;height:2px;background:#1A6FB5;margin:18px 0}
+.lbl{font-size:11px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:#999;margin-bottom:14px}
+.ttl{font-size:20px;font-weight:400;color:#111;line-height:1.4;margin-bottom:12px}
+.dsc{font-size:13px;color:#777;line-height:1.75}
+.foot{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-top:1px solid #e8e8e5;background:#fff}
+.foot span{font-size:11px;color:#ccc;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<header class="bar">
+  <span class="bar-id">webserv</span>
+  <span class="bar-tag"><span class="dot"></span>default error</span>
+</header>
+<main class="main">
+  <div class="card">
+    <div class="num">505</div>
+    <div class="rule"></div>
+    <div class="lbl">505 HTTP Version Not Supported</div>
+    <h1 class="ttl">This server does not support the requested HTTP protocol version.</h1>
+    <p class="dsc">The request was made using a version of HTTP that this server does not handle. Only HTTP/1.1 is supported.</p>
+  </div>
+</main>
+<footer class="foot">
+  <span>HTTP/1.1</span>
+  <span>webserv</span>
+</footer>
+</body>
+</html>
