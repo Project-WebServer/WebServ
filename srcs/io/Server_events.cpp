@@ -16,7 +16,7 @@ bool Server::_handleClientReadable(size_t indx)
 		{
 			c.last_activity = time(NULL);
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
-			printf("[DEBUG] feed return: %d\n", parseResult);
+			std::cerr << "[READ] n =" << n << " parseResult=" << (int)parseResult << std::endl;
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
 				c.request.setStatusCode(feedReturn::MAX_BODY_SIZE);
@@ -28,20 +28,8 @@ bool Server::_handleClientReadable(size_t indx)
 			}
 			if (parseResult == feedReturn::COMPLETE)
             {
-				// std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
-    			// std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
+				
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
-				// std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
-    			// std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
-
-				//std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
-				//std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
-				//std::cerr << "[DEBUG] body: '" << c.request.getBody() << "'" << std::endl;
-				//std::cerr << "[DEBUG] content-length: " << c.request.getContLen() << std::endl;
-				//HandlerResult handlerResult = responseHandler(c.request, _conf);
-				//std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
-				//std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
-				//std::cerr << "[DEBUG] response: " << handlerResult.response.substr(0, 200) << std::endl;
 				if(handlerResult.is_cgi)
 				{
 					c.cgi.cgi_path = handlerResult.cgi_path;
@@ -68,6 +56,24 @@ bool Server::_handleClientReadable(size_t indx)
 			    _pfds[indx].events = POLLOUT;
 			    return false;
 			}
+			if (parseResult == feedReturn::UNSUPPORTED_HTTP)
+			{
+			    c.request.setStatusCode(feedReturn::UNSUPPORTED_HTTP);
+			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+			    c.out_buf = handlerResult.response;
+			    c.state = CLOSING;
+			    _pfds[indx].events = POLLOUT;
+			    return false;
+			}
+			if (parseResult == feedReturn::EXPECT_FAILED)
+			{
+			    c.request.setStatusCode(feedReturn::EXPECT_FAILED);
+			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+			    c.out_buf = handlerResult.response;
+			    c.state = CLOSING;
+			    _pfds[indx].events = POLLOUT;
+			    return false;
+			}
 			if(parseResult == feedReturn::ERROR)
 			{
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
@@ -79,6 +85,15 @@ bool Server::_handleClientReadable(size_t indx)
 		}
 		else if(n == 0)
 		{
+			if(c.state == READING_REQUEST && !c.request.getBody().empty())
+			{
+				c.request.setStatusCode(feedReturn::REQUEST_TIMEOUT);
+			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+			    c.out_buf = handlerResult.response;
+			    c.state = CLOSING;
+			    _pfds[indx].events = POLLOUT;
+			    return false;
+			}
 			_removeFd(indx);
 			return true;
 		}
@@ -94,7 +109,6 @@ bool Server::_handleClientWritable(size_t indx)
 {
 	int fd = _pfds[indx].fd;
 	Connection &c = _conns[fd];
-
 	if(c.out_buf.empty())
 	{
 		if(c.state == CLOSING)
@@ -102,6 +116,7 @@ bool Server::_handleClientWritable(size_t indx)
 			_removeFd(indx);
 			return true;
 		}
+		
 		_resetConnection(c);
 		_pfds[indx].events = POLLIN;
 		return false;
@@ -125,11 +140,6 @@ bool Server::_handleClientWritable(size_t indx)
 	}
 	return false;
 }
-
-// void Server::_handleListenReadable(int listen_fd)
-// {
-// 	_acceptClients(listen_fd);
-// }
 
 void Server::_acceptClients(int listen_fd)
 {

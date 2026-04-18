@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 15:03:04 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 16:03:07 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,8 @@ enum class feedReturn
 	CGI_ERROR,
 	UNSUPPORTED_HTTP,
 	CGI_TIMEOUT,
-	INTERNAL_ERROR
+	INTERNAL_ERROR,
+	REQUEST_TIMEOUT
 };
 
 enum class ProtocolV

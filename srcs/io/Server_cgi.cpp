@@ -2,10 +2,6 @@
 #include <sys/wait.h>
 #include <sys/resource.h>
 
-// обмежуємо CPU час для CGI процесу
-
-
-static std::string buildCgiResponse(const std::string &cgi_buf);
 static std::string normalizeCgiOutput(const std::string &raw);
 
 void Server::_launchCgi(size_t indx)
@@ -50,15 +46,13 @@ void Server::_launchCgi(size_t indx)
 			close(pipe_out[1]);
 			exit(1);
 		}
-		// for (int i = 3; i < 1024; i++)
-        // 	close(i);
 		close(pipe_in[0]);
 		close(pipe_in[1]);
 		close(pipe_out[0]);
 		close(pipe_out[1]);
 
 		struct rlimit rl;
-		rl.rlim_cur = 10; // 10 секунд CPU
+		rl.rlim_cur = 10;
 		rl.rlim_max = 10;
 		setrlimit(RLIMIT_CPU, &rl);
 
@@ -130,7 +124,7 @@ bool Server::_handleCgiReadable(size_t indx)
 	else if (n == 0)
 	{
 
-		return _finishCgi(indx, client_fd, buildCgiResponse(c.cgi.cgi_buf));
+		return _finishCgi(indx, client_fd, _buildCgiResponse(c.cgi.cgi_buf, c));
 	}
 	else
 	{
@@ -173,13 +167,17 @@ static std::string normalizeCgiOutput(const std::string &raw)
 	return result;
 }
 
-static std::string buildCgiResponse(const std::string &cgi_buf)
+std::string  Server::_buildCgiResponse(const std::string &cgi_buf, Connection &c)
 {
     std::string normalized = normalizeCgiOutput(cgi_buf);
 
     size_t separator = normalized.find("\r\n\r\n");
     if (separator == std::string::npos)
-        return "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n";
+	{
+		c.request.setStatusCode(feedReturn::CGI_ERROR);
+		HandlerResult result = responseHandler(c.request, _conf);
+		return result.response;
+	}
 
     std::string cgi_headers = normalized.substr(0, separator);
     std::string body = normalized.substr(separator + 4);

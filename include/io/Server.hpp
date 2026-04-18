@@ -48,6 +48,7 @@ class Server
 		bool _handleClientError(size_t indx);
 		void _launchCgi(size_t indx);
 		bool _finishCgi(size_t indx, int client_fd, const std::string &response);
+		std::string _buildCgiResponse(const std::string &cgi_buf, Connection &c);
 		bool _handleCgiReadable(size_t indx);
 		void _cleanupServer();
 		
