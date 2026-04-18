@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:45:40 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/18 15:03:04 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ enum class feedReturn
 	MAX_BODY_SIZE, // if we recieve bigger file then limits in config
 	EXPECT_FAILED, // if we recieve Expect header with value other than 100-continue
 	CGI_ERROR,
+	UNSUPPORTED_HTTP,
 	CGI_TIMEOUT,
 	INTERNAL_ERROR
 };
@@ -116,7 +117,7 @@ class HTTPrequests
 		void	setStatusCode(feedReturn type);
 		void	setMaxBodySize(size_t limit);
 		feedReturn isHostValid(std::string contLen, std::string transfEncod, std::string expect);
-
+		feedReturn handleChunkedBody();
 
 	private:
 		size_t		_maxBodySize;
@@ -132,7 +133,7 @@ class HTTPrequests
 		int			_statusCode;
 		uint32_t	_clientIP;
 		std::string _contType;
-		bool		_chunked;	
+		bool		_chunked;
 
 		// Request line parser
 		// header parser

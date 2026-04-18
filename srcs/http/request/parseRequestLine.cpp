@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 18:56:12 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 14:06:29 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,8 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 		return feedReturn::ERROR;//error code for not found issue
 
 	_path = request.substr(space1 + 1, space2 - space1 - 1);
+	if (_path.empty())
+		return feedReturn::NO_HOST_ERROR;
 	// what if the path is invalid? handle here or later
 	if (_path.find("http://") == 0)
 		return feedReturn::NO_HOST_ERROR;
@@ -55,15 +57,8 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 
 	_protocolv = findVersion(version);
 	if (_protocolv == ProtocolV::ERR)
-		return feedReturn::ERROR;
+		return feedReturn::UNSUPPORTED_HTTP;
 	//printVersion();
 	// in case protocol v not found -> it will just return the Error
 	return feedReturn::COMPLETE;
 }
-
-//later change to this version to handle the extra spaces
-//size_t version_end = request.find_first_of(" \t\r\n", version_start);
-
-//std::string version = request.substr(version_start, version_end - version_start);
-
-// _protocolv = findVersion(version);

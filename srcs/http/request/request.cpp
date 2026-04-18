@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 18:53:22 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 14:52:34 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,30 @@ HTTPrequests::HTTPrequests() : _maxBodySize(0), _buffer(""),
 
 HTTPrequests::~HTTPrequests()
 {
+}
+
+feedReturn HTTPrequests::handleChunkedBody()
+{
+	while (true)
+	{
+		size_t marker1 = _buffer.find("\r\n");
+		size_t marker2 = _buffer.find("\r\n", marker1 + 2);
+		if (marker1 == std::string::npos || marker2 == std::string::npos)
+			return feedReturn::NO_HOST_ERROR;
+		std::string size = _buffer.substr(0, marker1);
+		size_t chunkSize = std::stoul(size, nullptr, 16);
+		if (chunkSize == 0)
+		{
+			_buffer.erase(0, marker2 + 2);
+			return feedReturn::COMPLETE;
+		}
+		std::string tempBody = _buffer.substr(marker1 + 2, chunkSize);
+		if (tempBody.length() != chunkSize)
+			return feedReturn::NO_HOST_ERROR;
+		_body += tempBody;
+		_buffer.erase(0, marker2 + 2);
+	}
+	return feedReturn::COMPLETE;
 }
 
 feedReturn HTTPrequests::feed(std::string newChunk)
@@ -70,35 +94,22 @@ feedReturn HTTPrequests::feed(std::string newChunk)
     }
 	if (_components == COMPONENTS::CHUNK_BODY)
 	{
-		while (true)
-		{
-			size_t size_end = _buffer.find("\r\n");
-			if (size_end == std::string::npos)
-				return feedReturn::INCOMPLETE;
-
-			std::string sizeChunk = _buffer.substr(0, size_end);
-			size_t chunkSize = std::stoul(_buffer.substr(0, size_end), nullptr, 16);
-
-			if (chunkSize == 0)
-			{
-				_buffer.erase(0, size_end + 4); // consumes "0\r\n"
-				_components = COMPONENTS::COMPLETED;
-				break;
-			}
-			_body +=  _buffer.substr(size_end + 2, chunkSize);
-			_buffer.erase(0, size_end + 2 + chunkSize + 2);
-		}
+		status = handleChunkedBody();
+		setStatusCode(status);
+		if (status != feedReturn::COMPLETE)
+			return status;
+		_components = COMPONENTS::COMPLETED;
 	}
     if (_components == COMPONENTS::BODY)
     {
         if (_buffer.length() < _contLen)
-			return feedReturn::INCOMPLETE;
+			return feedReturn::NO_HOST_ERROR;
         _body = _buffer.substr(0, _contLen);
         _buffer.erase(0, _contLen);
         _components = COMPONENTS::COMPLETED;
     }
     if (!_buffer.empty())
-        std::cout << "Buffer not empty though reached the end :(" << std::endl;
+       return feedReturn::NO_HOST_ERROR;
     return feedReturn::COMPLETE;
 }
 

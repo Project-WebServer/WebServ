@@ -30,7 +30,7 @@ void Server::_launchCgi(size_t indx)
 		return;
 	}
 	pid_t pid = fork();
-	
+
 	if(pid == -1)
 	{
 		c.request.setStatusCode(feedReturn::INTERNAL_ERROR);
@@ -80,7 +80,7 @@ void Server::_launchCgi(size_t indx)
 		std::string contentType = "CONTENT_TYPE=" + c.request.getContType();
 		std::string servProtocol = "SERVER_PROTOCOL=" + c.request.getVersionStr();
 
-		char *env[] = { 
+		char *env[] = {
 			(char*)contentLenght.c_str(),
 			(char*)requestMethod.c_str(),
 			(char*)contentType.c_str(),
@@ -129,7 +129,7 @@ bool Server::_handleCgiReadable(size_t indx)
 	}
 	else if (n == 0)
 	{
-		
+
 		return _finishCgi(indx, client_fd, buildCgiResponse(c.cgi.cgi_buf));
 	}
 	else
@@ -144,7 +144,7 @@ bool Server::_finishCgi(size_t indx, int client_fd, const std::string &response)
 {
     int pipe_fd = _pfds[indx].fd;
     Connection &c = _conns[client_fd];
-    
+
     waitpid(c.cgi.pid, NULL, 0);
     c.out_buf = response;
     c.state = SENDING_RESPONSE;
@@ -176,25 +176,25 @@ static std::string normalizeCgiOutput(const std::string &raw)
 static std::string buildCgiResponse(const std::string &cgi_buf)
 {
     std::string normalized = normalizeCgiOutput(cgi_buf);
-    
+
     size_t separator = normalized.find("\r\n\r\n");
     if (separator == std::string::npos)
         return "HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n";
-    
+
     std::string cgi_headers = normalized.substr(0, separator);
     std::string body = normalized.substr(separator + 4);
-    
+
     std::string status_line = "200 OK";
     std::string status_prefix = "Status: ";
     size_t status_pos = cgi_headers.find(status_prefix);
     if (status_pos != std::string::npos)
     {
         size_t status_end = cgi_headers.find("\r\n", status_pos);
-        status_line = cgi_headers.substr(status_pos + status_prefix.size(), 
+        status_line = cgi_headers.substr(status_pos + status_prefix.size(),
                                          status_end - status_pos - status_prefix.size());
         cgi_headers.erase(status_pos, status_end - status_pos + 2);
     }
-    
+
     return "HTTP/1.1 " + status_line + "\r\n"
         + cgi_headers + "\r\n"
         + "Content-Length: " + std::to_string(body.size()) + "\r\n"

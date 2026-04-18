@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 18:25:50 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 14:03:05 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,6 +128,8 @@ feedReturn HTTPrequests::isHostValid(std::string contLen, std::string transfEnco
 {
 	if ((_protocolv == ProtocolV::HTTP_1_0) && _header.countValues("host")!= 1)
    		return feedReturn::NO_HOST_ERROR;
+	if (_header.getValue("host").empty())
+		return feedReturn::NO_HOST_ERROR;
 	if (_header.countValues("content-length") > 1 || _header.countValues("transfer-encoding") > 1)
 		return feedReturn::NO_HOST_ERROR;
 	if (!contLen.empty() && !transfEncod.empty())

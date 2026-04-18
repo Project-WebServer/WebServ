@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   statusCode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:46:06 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/18 15:03:09 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void HTTPrequests::setStatusCode(feedReturn type)
    		_statusCode = 504;
 	else if (type == feedReturn::INTERNAL_ERROR)
 		_statusCode = 500;
+	else if (type == feedReturn::UNSUPPORTED_HTTP)
+		_statusCode = 505;
 	else
 		_statusCode = 200;
 }
