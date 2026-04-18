@@ -1,6 +1,8 @@
 #include "../../include/io/Server.hpp"
 #include "../../include/http/request.hpp"
 #include "../../include/handlers/Response.hpp"
+#include <sys/wait.h>
+#include <sys/resource.h>
 
 bool Server::_handleClientReadable(size_t indx)
 {
@@ -25,11 +27,11 @@ bool Server::_handleClientReadable(size_t indx)
 			}
 			if (parseResult == feedReturn::COMPLETE)
             {
-				std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
-    			std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
+				// std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
+    			// std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
-				std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
-    			std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
+				// std::cerr << "[DEBUG] is_cgi: " << handlerResult.is_cgi << std::endl;
+    			// std::cerr << "[DEBUG] response size: " << handlerResult.response.size() << std::endl;
 
 				//std::cerr << "[DEBUG] path: " << c.request.getPath() << std::endl;
 				//std::cerr << "[DEBUG] method: " << c.request.getMethodStr() << std::endl;
@@ -172,6 +174,23 @@ void Server::_acceptClients(int listen_fd)
 
 bool Server::_handleClientError(size_t indx)
 {
-	_removeFd(indx);
-	return true;
+	int fd = _pfds[indx].fd;
+    Connection &c = _conns[fd];
+    
+    if (c.cgi.pid > 0)
+    {
+        kill(c.cgi.pid, SIGKILL);
+        waitpid(c.cgi.pid, NULL, 0);
+        for (size_t i = 0; i < _pfds.size(); i++)
+        {
+            if (_pipe_to_client.count(_pfds[i].fd) && _pipe_to_client[_pfds[i].fd] == fd)
+            {
+                _pipe_to_client.erase(_pfds[i].fd);
+                _removeFd(i);
+                break;
+            }
+        }
+    }
+    _removeFd(indx);
+    return true;
 }

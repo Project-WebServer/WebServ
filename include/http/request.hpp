@@ -6,7 +6,7 @@
 /*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:04:18 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/18 14:45:40 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ enum class feedReturn
 	MAX_BODY_SIZE, // if we recieve bigger file then limits in config
 	EXPECT_FAILED, // if we recieve Expect header with value other than 100-continue
 	CGI_ERROR,
+	CGI_TIMEOUT,
 	INTERNAL_ERROR
 };
 

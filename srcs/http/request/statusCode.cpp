@@ -6,7 +6,7 @@
 /*   By: kzinchuk <kzinchuk@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:04:46 by kzinchuk         ###   ########.fr       */
+/*   Updated: 2026/04/18 14:46:06 by kzinchuk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ void HTTPrequests::setStatusCode(feedReturn type)
 		_statusCode = 417;
 	else if (type == feedReturn::CGI_ERROR)
 		_statusCode = 502;
+	else if (type == feedReturn::CGI_TIMEOUT)
+   		_statusCode = 504;
 	else if (type == feedReturn::INTERNAL_ERROR)
 		_statusCode = 500;
 	else

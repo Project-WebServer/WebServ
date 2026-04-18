@@ -33,26 +33,30 @@ void Server::_checkTimeout()
 		if (_pipe_to_client.count(_pfds[i].fd))
 		{
 			int client_fd = _pipe_to_client[_pfds[i].fd];
+			if (_conns.find(client_fd) == _conns.end())
+				{
+					_pipe_to_client.erase(_pfds[i].fd);
+					_removeFd(i);
+					continue;
+				}
+
     		Connection &c = _conns[client_fd];
+			c.last_activity = time(NULL);
     		if (now - c.cgi.started_at > 30)
     		{
     		    std::cout << "CGI timeout: killing pid " << c.cgi.pid << std::endl;
     		    kill(c.cgi.pid, SIGKILL);
     		    waitpid(c.cgi.pid, NULL, 0);
-				c.request.setStatusCode(feedReturn::ERROR);
+				c.request.setStatusCode(feedReturn::CGI_TIMEOUT);
 				HandlerResult result = responseHandler(c.request, _conf);
 				c.out_buf = result.response;
-    		    //c.out_buf = "HTTP/1.1 504 Gateway Timeout\r\nContent-Length: 0\r\n\r\n";
-				//std::cerr << "[TIMEOUT] out_buf size=" << c.out_buf.size() << std::endl;
-    		    c.state = SENDING_RESPONSE;
+    		    c.state = CLOSING;
     		    _pipe_to_client.erase(_pfds[i].fd);
     		    _removeFd(i);
     		    for (size_t j = 0; j < _pfds.size(); j++)
     		    {
-					std::cerr << "[TIMEOUT] _pfds[" << j << "].fd=" << _pfds[j].fd << std::endl;
     		        if (_pfds[j].fd == client_fd)
     		        {
-						std::cerr << "[TIMEOUT] found! setting POLLOUT" << std::endl;
     		            _pfds[j].events = POLLOUT;
     		            break;
     		        }
@@ -63,7 +67,7 @@ void Server::_checkTimeout()
     		continue;
 		}
 		Connection &c = _conns[_pfds[i].fd];
-		if (now - c.last_activity > 30) // 30 секунд без активності
+		if (now - c.last_activity > 30)
 		{
 			std::cout << "timeout: closing fd " << _pfds[i].fd << std::endl;
 			_removeFd(i);

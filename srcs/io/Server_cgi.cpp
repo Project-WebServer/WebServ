@@ -10,9 +10,8 @@ static std::string normalizeCgiOutput(const std::string &raw);
 
 void Server::_launchCgi(size_t indx)
 {
-
-	
 	int fd = _pfds[indx].fd;
+	
 	Connection &c = _conns[fd];
 	std::string script = c.cgi.cgi_script;
 
