@@ -23,6 +23,7 @@ ServerConf::ServerConf(): listen("0.0.0.0", 8080),
 	error_pages_default[415] = "./error_pages/415.html";
 	error_pages_default[417] = "./error_pages/417.html";
 	error_pages_default[500] = "./error_pages/500.html";
+	error_pages_default[501] = "./error_pages/501.html";
 	error_pages_default[502] = "./error_pages/502.html";
 	error_pages_default[504] = "./error_pages/504.html";
 	error_pages_default[505] = "./error_pages/505.html";

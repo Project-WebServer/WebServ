@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseRequestLine.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:06:29 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 17:37:25 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 	_methods = findMethods(first);
 	//printMethod();
 	if (_methods == METHODS::ERR)
-		return feedReturn::ERROR;//error code for not found issue
+		return feedReturn::METHOD_ERROR;//error code for not found issue
 
 	_path = request.substr(space1 + 1, space2 - space1 - 1);
 	if (_path.empty())
