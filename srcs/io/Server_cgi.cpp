@@ -10,16 +10,22 @@ static std::string normalizeCgiOutput(const std::string &raw);
 
 void Server::_launchCgi(size_t indx)
 {
+
+	
 	int fd = _pfds[indx].fd;
 	Connection &c = _conns[fd];
-	std::string script = "./data" + c.request.getPath();//patch
+	std::string script = c.cgi.cgi_script;
 
 	int pipe_in[2];
 	int pipe_out[2];
 
 	if(pipe(pipe_in) == -1 || pipe(pipe_out) == -1)
 	{
-		c.out_buf = "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
+		close(pipe_in[0]);
+		close(pipe_out[1]);
+		c.request.setStatusCode(feedReturn::INTERNAL_ERROR);
+		HandlerResult result = responseHandler(c.request, _conf);
+		c.out_buf = result.response;
 		c.state = SENDING_RESPONSE;
 		_pfds[indx].events = POLLOUT;
 		return;
@@ -28,7 +34,9 @@ void Server::_launchCgi(size_t indx)
 	
 	if(pid == -1)
 	{
-		c.out_buf = "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
+		c.request.setStatusCode(feedReturn::INTERNAL_ERROR);
+		HandlerResult result = responseHandler(c.request, _conf);
+		c.out_buf = result.response;
 		c.state = SENDING_RESPONSE;
 		_pfds[indx].events = POLLOUT;
 		return;
@@ -100,7 +108,7 @@ void Server::_launchCgi(size_t indx)
 
 	pollfd pfd;
 	pfd.events = POLLIN;
-	pfd.fd = pipe_out[0];;
+	pfd.fd = pipe_out[0];
 	pfd.revents = 0;
 
 	_pfds.push_back(pfd);
@@ -127,7 +135,7 @@ bool Server::_handleCgiReadable(size_t indx)
 	}
 	else
 	{
-		c.request.statusCode(feedReturn::CGI_ERROR);
+		c.request.setStatusCode(feedReturn::CGI_ERROR);
         HandlerResult result = responseHandler(c.request, _conf);
         return _finishCgi(indx, client_fd, result.response);
 	}
