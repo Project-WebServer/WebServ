@@ -65,9 +65,9 @@ bool Server::_handleClientReadable(size_t indx)
 			    _pfds[indx].events = POLLOUT;
 			    return false;
 			}
-			if (parseResult == feedReturn::EXPECT_FAILED)
+			if (parseResult == feedReturn::EXPECT_FAILED || parseResult == feedReturn::METHOD_ERROR)
 			{
-			    c.request.setStatusCode(feedReturn::EXPECT_FAILED);
+			    c.request.setStatusCode(parseResult);
 			    HandlerResult handlerResult = responseHandler(c.request, _conf);
 			    c.out_buf = handlerResult.response;
 			    c.state = CLOSING;

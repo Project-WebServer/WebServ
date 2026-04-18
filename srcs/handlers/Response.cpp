@@ -102,6 +102,7 @@ std::string Response::getHttpCode(int code)
 		case 415: return " Unsupported Media Type"; // Content-Type not supported
 		case 417: return " Expectation Failed";     // Expect header value not supported
 		case 500: return " Internal Server Error"; // Unexpected server-side failure
+		case 501: return " Not Implemented"; 		// Method not implemented
 		case 502: return " Bad Gateway";           // CGI returned an invalid response
 		case 504: return " Gateway Timeout";       // CGI took too long to respond
 		case 505: return " HTTP Version Not Supported"; // HTTP version not supported
@@ -352,7 +353,7 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 		response.handleDELETErequest(request);
 		break;
 	default:
-		response.handleHttpError(405);
+		response.handleHttpError(501);
 		break;
 	}
 	result.response = response.getResponse();
@@ -462,7 +463,7 @@ void Response::handlePOSTrequest(HTTPrequests &request)
 	std::string	boundary = getBoundary(request.getContType());
 	if (boundary == "")
 	{
-		if (request.getContType().find("muiltpart/forma-data") == std::string::npos)
+		if (request.getContType().find("multipart/form-data") == std::string::npos)
 			return handleHttpError(415);
 		return handleHttpError(400);
 	}

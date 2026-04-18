@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 19:06:40 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 19:11:11 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ feedReturn HTTPrequests::feed(std::string newChunk)
 		if (request.empty())
 			return feedReturn::NO_HOST_ERROR;
         status = parseRequest(request);
-		//setStatusCode(status);
+		// setStatusCode(status);
         if (status != feedReturn::COMPLETE)
             return (status);
         _buffer.erase(0, end + 2);
