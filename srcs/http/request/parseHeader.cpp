@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:03:05 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 19:07:13 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ bool isDigits(std::string str)
 }
 std::string Headers::getValue(std::string key)
 {
-	auto it = _headerMap.find(key);
+	auto it = _headerMap.find(toLower(key));
 	if (it != _headerMap.end())
 		return it->second;
 	return ("");
@@ -102,11 +102,13 @@ feedReturn HTTPrequests::parseHeader(std::string header)
 {
 	if (_header.parseMap(header) != feedReturn::COMPLETE)
 		return feedReturn::NO_HOST_ERROR; // only 400 or others too?
-
+	//printHeader();
 	std::string contLen     = _header.getValue("content-length");
+	//printf("Content-Length header value: '%s'\n", contLen.c_str());
 	if (!contLen.empty() && !isDigits(contLen))
 		return feedReturn::NO_HOST_ERROR;
 	std::string transfEncod = _header.getValue("transfer-encoding");
+	//printf("Transfer-Encoding header value: '%s'\n", transfEncod.c_str());
 	_contType               = _header.getValue("content-type");
 	std::string expect = _header.getValue("expect");
 	if (!contLen.empty())
@@ -126,7 +128,7 @@ feedReturn HTTPrequests::parseHeader(std::string header)
 
 feedReturn HTTPrequests::isHostValid(std::string contLen, std::string transfEncod, std::string expect)
 {
-	if ((_protocolv == ProtocolV::HTTP_1_0) && _header.countValues("host")!= 1)
+	if (_header.countValues("host")!= 1)
    		return feedReturn::NO_HOST_ERROR;
 	if (_header.getValue("host").empty())
 		return feedReturn::NO_HOST_ERROR;

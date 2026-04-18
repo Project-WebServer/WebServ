@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 14:52:34 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/18 19:06:40 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ HTTPrequests::HTTPrequests() : _maxBodySize(0), _buffer(""),
 	_methods(METHODS::ERR), _path(""),
 	_protocolv(ProtocolV::ERR),
 	_body(""), _contLen(0),
-	_statusCode(0),
+	_statusCode(200),
 	_contType(""), _chunked(false)
 {
 }
@@ -34,8 +34,16 @@ feedReturn HTTPrequests::handleChunkedBody()
 		size_t marker2 = _buffer.find("\r\n", marker1 + 2);
 		if (marker1 == std::string::npos || marker2 == std::string::npos)
 			return feedReturn::NO_HOST_ERROR;
+		size_t chunkSize;
 		std::string size = _buffer.substr(0, marker1);
-		size_t chunkSize = std::stoul(size, nullptr, 16);
+		try
+		{
+			chunkSize = std::stoul(size, nullptr, 16);
+		}
+		catch(const std::exception& e)
+		{
+			return feedReturn::NO_HOST_ERROR;
+		}
 		if (chunkSize == 0)
 		{
 			_buffer.erase(0, marker2 + 2);
@@ -64,7 +72,7 @@ feedReturn HTTPrequests::feed(std::string newChunk)
 		if (request.empty())
 			return feedReturn::NO_HOST_ERROR;
         status = parseRequest(request);
-		setStatusCode(status);
+		//setStatusCode(status);
         if (status != feedReturn::COMPLETE)
             return (status);
         _buffer.erase(0, end + 2);
@@ -79,10 +87,12 @@ feedReturn HTTPrequests::feed(std::string newChunk)
 			return feedReturn::NO_HOST_ERROR;
         std::string header = _buffer.substr(0, end + 4);
         status = parseHeader(header);
-		setStatusCode(status);
+		//setStatusCode(status);
         if (status != feedReturn::COMPLETE)
             return (status);
         _buffer.erase(0, end + 4);
+		//printf("Buffer after parsing headers: '%s'\n", _buffer.c_str());
+		//printf("Content-Length: %zu\n", _contLen);
 		if (_maxBodySize > 0 && _contLen > _maxBodySize)
 			return feedReturn::MAX_BODY_SIZE;
 		if (_chunked)
@@ -95,7 +105,7 @@ feedReturn HTTPrequests::feed(std::string newChunk)
 	if (_components == COMPONENTS::CHUNK_BODY)
 	{
 		status = handleChunkedBody();
-		setStatusCode(status);
+		//setStatusCode(status);
 		if (status != feedReturn::COMPLETE)
 			return status;
 		_components = COMPONENTS::COMPLETED;
@@ -103,7 +113,10 @@ feedReturn HTTPrequests::feed(std::string newChunk)
     if (_components == COMPONENTS::BODY)
     {
         if (_buffer.length() < _contLen)
-			return feedReturn::NO_HOST_ERROR;
+		{
+			printf("Buffer length: %zu, Content-Length: %zu\n", _buffer.length(), _contLen);
+			return feedReturn::INCOMPLETE;
+		}
         _body = _buffer.substr(0, _contLen);
         _buffer.erase(0, _contLen);
         _components = COMPONENTS::COMPLETED;

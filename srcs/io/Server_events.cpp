@@ -16,7 +16,7 @@ bool Server::_handleClientReadable(size_t indx)
 		{
 			c.last_activity = time(NULL);
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
-			std::cerr << "[READ] n =" << n << " parseResult=" << (int)parseResult << std::endl;
+			//printf("[DEBUG] feed return: %d\n", parseResult);
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
 				c.request.setStatusCode(feedReturn::MAX_BODY_SIZE);
@@ -28,7 +28,7 @@ bool Server::_handleClientReadable(size_t indx)
 			}
 			if (parseResult == feedReturn::COMPLETE)
             {
-				
+
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
 				if(handlerResult.is_cgi)
 				{
@@ -116,7 +116,7 @@ bool Server::_handleClientWritable(size_t indx)
 			_removeFd(indx);
 			return true;
 		}
-		
+
 		_resetConnection(c);
 		_pfds[indx].events = POLLIN;
 		return false;
@@ -187,7 +187,7 @@ bool Server::_handleClientError(size_t indx)
 {
 	int fd = _pfds[indx].fd;
     Connection &c = _conns[fd];
-    
+
     if (c.cgi.pid > 0)
     {
         kill(c.cgi.pid, SIGKILL);

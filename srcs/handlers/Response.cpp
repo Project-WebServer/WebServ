@@ -264,7 +264,7 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 {
 	if (request.getStatusCode() != 200)
 		return request.getStatusCode();
-	
+
 	if (request.getPath().front() != '/')
 		return 400;
 	std::string host = request.getHeader().getValue("host");
