@@ -104,6 +104,7 @@ std::string Response::getHttpCode(int code)
 		case 500: return " Internal Server Error"; // Unexpected server-side failure
 		case 502: return " Bad Gateway";           // CGI returned an invalid response
 		case 504: return " Gateway Timeout";       // CGI took too long to respond
+		case 505: return " HTTP Version Not Supported"; // HTTP version not supported
 	}
 	return "";
 }
@@ -253,7 +254,7 @@ static int convert_host(std::string& ip, uint32_t& ipv4, int& port)
 	}
 	catch (std::exception &e)
 	{
-		return -1;
+		port = 8080;
 	}
 	if (!convert_ipv4(host, ipv4))
 		return -1;
@@ -264,6 +265,8 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 	if (request.getStatusCode() != 200)
 		return request.getStatusCode();
 	
+	if (request.getPath().front() != '/')
+		return 400;
 	std::string host = request.getHeader().getValue("host");
 	uint32_t ip;
 	int port;
