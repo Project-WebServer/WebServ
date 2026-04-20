@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseRequestLine.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/13 16:54:22 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 17:37:25 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/20 11:44:54 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 	size_t space2 = request.find(" ", space1 + 1);
 
 	if (space1 == std::string::npos || space2 == std::string::npos)
-		return feedReturn::NO_HOST_ERROR; //shouldn't be incomplete, but when else would be incomplete then?
+		return feedReturn::NO_HOST_ERROR;
 	std::string first = request.substr(0, space1);
 	_methods = findMethods(first);
 	//printMethod();
@@ -50,15 +50,12 @@ feedReturn HTTPrequests::parseRequest(std::string request)
 	_path = request.substr(space1 + 1, space2 - space1 - 1);
 	if (_path.empty())
 		return feedReturn::NO_HOST_ERROR;
-	// what if the path is invalid? handle here or later
-	if (_path.find("http://") == 0)
+	if (_path.find("http://") == 0) //if full address, either extract or reject
 		return feedReturn::NO_HOST_ERROR;
 	std::string version = request.substr(space2 + 1, request.length() - 2);
 
 	_protocolv = findVersion(version);
 	if (_protocolv == ProtocolV::ERR)
 		return feedReturn::UNSUPPORTED_HTTP;
-	//printVersion();
-	// in case protocol v not found -> it will just return the Error
 	return feedReturn::COMPLETE;
 }
