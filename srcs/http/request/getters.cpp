@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   getters.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
+/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/03/06 16:28:26 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/17 12:53:08 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/20 12:47:56 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,10 @@ Headers	HTTPrequests::getHeader() const
 std::string HTTPrequests::getBody() const
 {
 	return (_body);
+}
+std::string HTTPrequests::getBuffer() const
+{
+	return (_buffer);
 }
 
 size_t	HTTPrequests::getContLen() const

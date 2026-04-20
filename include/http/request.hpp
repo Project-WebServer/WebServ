@@ -6,7 +6,7 @@
 /*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 17:37:39 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/20 12:47:34 by flima            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ class HTTPrequests
 		ProtocolV				getProtocol() const;
 		Headers					getHeader() const;
 		std::string				getBody() const;
+		std::string				getBuffer() const;
 		size_t					getContLen() const;
 		size_t					getStatusCode() const;
 		u_int32_t				getClientIP() const;

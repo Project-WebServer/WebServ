@@ -83,9 +83,9 @@ bool Server::_handleClientReadable(size_t indx)
 				return false;
 			}
 		}
-		else if(n == 0)
+		else if(n <= 0)
 		{
-			if(c.state == READING_REQUEST && !c.request.getBody().empty())
+			if(c.state == READING_REQUEST && !c.request.getBuffer().empty())
 			{
 				c.request.setStatusCode(feedReturn::REQUEST_TIMEOUT);
 			    HandlerResult handlerResult = responseHandler(c.request, _conf);
@@ -97,11 +97,10 @@ bool Server::_handleClientReadable(size_t indx)
 			_removeFd(indx);
 			return true;
 		}
-		else if(n < 0)
-		{
-			// _removeFd(indx);
-			return false;
-		}
+		// else if(n < 0)
+		// {
+		// 	return false;
+		// }
 	}
 }
 
