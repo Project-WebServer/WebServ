@@ -289,6 +289,18 @@ static int		select_serv_n_location(HTTPrequests& request, WebservConf& servConf,
 	return 0;
 }
 
+static int	checkCGIpath(const std::string& _realPath)
+{
+	struct stat fileStat;
+	if (stat(_realPath.c_str(), &fileStat) == -1)
+		return 404;
+	else if (S_ISDIR(fileStat.st_mode))
+		return 403;
+	else if (access(_realPath.c_str(), R_OK) == -1)
+		return 403;
+	return 200;
+	
+}
 //update also an error conde int request??
 HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //main function to handle respponse
 {
@@ -335,6 +347,12 @@ HandlerResult	responseHandler(HTTPrequests& request, WebservConf& servConf) //ma
 
 	if(response.hasCGI())
 	{
+		if (int status = checkCGIpath(response.getRealPath()); status != 200)
+		{
+			response.handleHttpError(status);
+			result.response = response.getResponse();
+			return result;
+		}
 		result.is_cgi = true;
         result.cgi_path = response.getCgiInterpreter();
         result.cgi_script = response.getRealPath();

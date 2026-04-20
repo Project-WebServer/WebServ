@@ -97,10 +97,6 @@ bool Server::_handleClientReadable(size_t indx)
 			_removeFd(indx);
 			return true;
 		}
-		// else if(n < 0)
-		// {
-		// 	return false;
-		// }
 	}
 }
 
