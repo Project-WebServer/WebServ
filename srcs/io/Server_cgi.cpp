@@ -105,7 +105,7 @@ void Server::_launchCgi(size_t indx)
 	pfd.revents = 0;
 
 	_pfds.push_back(pfd);
-	_pipe_to_client[pipe_out[0]] = fd;//map client socket iin poll pool with actuall end of pipe with cgi info
+	_pipe_to_client[pipe_out[0]] = fd;
 }
 
 bool Server::_handleCgiReadable(size_t indx)

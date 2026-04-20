@@ -28,16 +28,17 @@ class Server
 	private:
 
 		std::vector<int>			_listen_fds;
-		std::vector<pollfd>			_pfds; //listen fd
-		std::map<int, Connection>	_conns; //key = client fd
+		std::vector<pollfd>			_pfds;
+		std::map<int, Connection>	_conns;
 		WebservConf					_conf;
 		std::map<int, int>			_pipe_to_client;
 		std::map<int, size_t>		_fd_to_max_body;
 
 		void _addListenFd(int fd);
-		void _removeFd(size_t indx);//should recieve some index from array
+		void _removeFd(size_t indx);
 		bool _isListenFd(int fd) const;
 		void _checkTimeout();
+		bool _CGITimeout(size_t i, time_t now);
 		void _resetConnection(Connection &c);
 
 		int _createListenSocket(uint32_t ip, int port);
@@ -52,7 +53,7 @@ class Server
 		bool _handleCgiReadable(size_t indx);
 		void _cleanupServer();
 		
-
+		bool _clientTimeout(size_t i, time_t now);
 	public:
 		Server();
 		~Server();

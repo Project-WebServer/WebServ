@@ -3,9 +3,6 @@
 int Server::start(const WebservConf &conf)
 {
 	_conf = conf;
-	// _pfds.clear();
-	// _conns.clear();
-
 	const std::vector<ENDPOINT> &endpoints = conf.getAvailableEndPoints();
 
 	for (size_t i = 0; i < endpoints.size(); i++)
@@ -25,11 +22,10 @@ int Server::start(const WebservConf &conf)
 int Server::_createListenSocket(uint32_t ip, int port)
 {
 	int yes = 1;
-	int fd = socket(AF_INET, SOCK_STREAM, 0);//kernel socket object. make struct for args, to make it more universal
-	//add flag NONBLOCKING through fcntl??
+	int fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(fd < 0)
 	{
-		std::cerr << "socket() failed: " << std::strerror(errno) << std::endl;//write handle error func
+		std::cerr << "socket() failed: " << std::strerror(errno) << std::endl;
 		return (-1);
 	}
 	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
@@ -44,22 +40,19 @@ int Server::_createListenSocket(uint32_t ip, int port)
 	addr.sin_addr.s_addr = htonl(ip);
 	addr.sin_port = htons(port);
 
-	//connect socket to IP:PORT
 	if(bind(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0)
 	{
 		std::cerr << "bind() failed: " << std::strerror(errno) << std::endl;
 		close(fd);
 		return (-1);
 	}
-	//this sfd can listen up to 128 client and put them in a queue before accept() and said that its a server not client
-	if(listen(fd, 128) < 0)// 128 - backlog
+	if(listen(fd, 128) < 0)
 	{
 		std::cerr << "listen() failed: " << std::strerror(errno) << std::endl;
 		close(fd);
 		return (-1);
 	}
-	//to make listen socket non-blocking
-	int flags = fcntl(fd, F_GETFL, 0);////!!!!!!!!!!!
+	int flags = fcntl(fd, F_GETFL, 0);
 	if(flags < 0)
 	{
 		std::cerr << "fcntl(F_GETFL) failed: " << std::strerror(errno) << std::endl;
@@ -72,6 +65,6 @@ int Server::_createListenSocket(uint32_t ip, int port)
 		close(fd);
 		return -1;
 	}
-	std::cout << "listening to fd = " << fd << std::endl;
+	std::cout << "Server listening on " << inet_ntoa(addr.sin_addr) << ":" << port << " (fd=" << fd << ")" << std::endl;
 	return (fd);
 }

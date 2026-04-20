@@ -16,8 +16,6 @@ bool Server::_handleClientReadable(size_t indx)
 		{
 			c.last_activity = time(NULL);
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
-			//printf("[DEBUG] Received %zd bytes from client %d\n", n, fd);
-			//printf("[DEBUG] feed return: %d\n", parseResult);
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
 				c.request.setStatusCode(feedReturn::MAX_BODY_SIZE);
@@ -84,7 +82,7 @@ bool Server::_handleClientReadable(size_t indx)
 				return false;
 			}
 		}
-		else if(n <= 0)
+		else if(n == 0)
 		{
 			if(c.state == READING_REQUEST && !c.request.getBuffer().empty())
 			{
@@ -98,6 +96,8 @@ bool Server::_handleClientReadable(size_t indx)
 			_removeFd(indx);
 			return true;
 		}
+		else if(n < 0)
+			return false;
 	}
 }
 
@@ -117,7 +117,7 @@ bool Server::_handleClientWritable(size_t indx)
 		_pfds[indx].events = POLLIN;
 		return false;
 	}
-	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);//bytes
+	ssize_t n = send(fd, c.out_buf.data(), c.out_buf.size(), 0);
 	if(n <= 0)
 	{
 		_removeFd(indx);
@@ -144,7 +144,7 @@ void Server::_acceptClients(int listen_fd)
 		int c_fd = accept(listen_fd, NULL, NULL);
 		if(c_fd >= 0)
 		{
-			int flags = fcntl(c_fd, F_GETFL, 0);//file control help change or read fd settings
+			int flags = fcntl(c_fd, F_GETFL, 0);
 			if(flags < 0 || fcntl(c_fd, F_SETFL, flags | O_NONBLOCK) < 0)
 			{
 				std::cerr << "fcntl() failed: " << std::strerror(errno) << std::endl;
@@ -162,18 +162,11 @@ void Server::_acceptClients(int listen_fd)
 			continue;
 		}
 		else if(errno == EAGAIN || errno == EWOULDBLOCK)
-		{
-			// std::cout << "no more pending connections" << std::endl;
 			break;
-		}
-		else if(errno == EINTR)//repeat accept; was interupted y signal try ones more
-		{
+		else if(errno == EINTR)
 			continue;
-		}
-		else if (errno == ECONNABORTED)// clien chanched his mind, ignore and proceed
-		{
+		else if (errno == ECONNABORTED)
 			continue;
-		}
 		std::cerr << "accept() failed: " << std::strerror(errno) << std::endl;
 		break;
 	}
