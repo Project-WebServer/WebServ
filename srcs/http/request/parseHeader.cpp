@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/14 17:59:24 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 19:07:13 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/20 16:14:47 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 //	public:
 //};
 
-static std::string toLower(std::string name)
+std::string toLower(std::string name)
 {
 	std::string lowercased = "";
 	int N = name.length();
@@ -37,10 +37,8 @@ static std::string toLower(std::string name)
 feedReturn Headers::parseMap(std::string rawHeaderString)
 {
 	//until : is the key and from there to \r\n is the value
-	// _headerMap[name] = value;
 
 	std::string::iterator it = rawHeaderString.begin();
-
 	while (it != rawHeaderString.end())
 	{
 		std::string name;
@@ -50,14 +48,10 @@ feedReturn Headers::parseMap(std::string rawHeaderString)
 			it++;
 		if (it == rawHeaderString.end())
 			break;
-			// what happens if I don't clear the name and value here
 		while (it != rawHeaderString.end() && *it != ':')
 		{
 			if (*it == ' ')
-			{
-				//HTTPrequests::_statusCode = 400;
 				return feedReturn::ERROR;
-			}
 			name += *it;
 			it++;
 		}
@@ -71,8 +65,6 @@ feedReturn Headers::parseMap(std::string rawHeaderString)
 			it++;
 		}
 		_headerMap.insert(std::make_pair(toLower(name), value));
-
-		//std::cout << "[DEBUG] Found Key: '" << name << "' | Found Value: '" << value << "'" << std::endl;
 	}
 	return feedReturn::COMPLETE;
 }
@@ -85,6 +77,7 @@ bool isDigits(std::string str)
 	}
 	return true;
 }
+
 std::string Headers::getValue(std::string key)
 {
 	auto it = _headerMap.find(toLower(key));
@@ -101,14 +94,11 @@ int Headers::countValues(std::string key)
 feedReturn HTTPrequests::parseHeader(std::string header)
 {
 	if (_header.parseMap(header) != feedReturn::COMPLETE)
-		return feedReturn::NO_HOST_ERROR; // only 400 or others too?
-	//printHeader();
+		return feedReturn::NO_HOST_ERROR;
 	std::string contLen     = _header.getValue("content-length");
-	//printf("Content-Length header value: '%s'\n", contLen.c_str());
 	if (!contLen.empty() && !isDigits(contLen))
 		return feedReturn::NO_HOST_ERROR;
 	std::string transfEncod = _header.getValue("transfer-encoding");
-	//printf("Transfer-Encoding header value: '%s'\n", transfEncod.c_str());
 	_contType               = _header.getValue("content-type");
 	std::string expect = _header.getValue("expect");
 	if (!contLen.empty())
@@ -124,7 +114,6 @@ feedReturn HTTPrequests::parseHeader(std::string header)
 		_contLen = 0;
 	return isHostValid(contLen, transfEncod, expect);
 }
-// request has both Content-Length and Transfer-Encoding: chunked together,
 
 feedReturn HTTPrequests::isHostValid(std::string contLen, std::string transfEncod, std::string expect)
 {

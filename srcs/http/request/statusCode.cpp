@@ -6,16 +6,11 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/20 12:03:14 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/20 16:15:41 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../../include/http/request.hpp"
-
-//parseHeader - feedReturn::NO_HOST_ERROR then 400
-//            - return feedReturn::COMPLETE; then 200
-//parseRL  - INCOMPLETE
-//         - feedReturn::ERROR then either 405 method not allowed or 505 http version unsupported
 
 void HTTPrequests::setStatusCode(feedReturn type)
 {

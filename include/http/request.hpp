@@ -6,7 +6,7 @@
 /*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/20 14:34:07 by yulpark          ###   ########.fr       */
+/*   Updated: 2026/04/20 16:30:11 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ class Headers
 // takes in everything until \r\n -> double crlf
 	private:
 	//multimap allows duplicate keys
-		std::multimap<std::string, std::string> _headerMap; // or maybe call it a map
+		std::multimap<std::string, std::string> _headerMap;
 	public:
 		feedReturn	parseMap(std::string rawHeaderString);
 		//std::string	getKeys();
@@ -85,9 +85,9 @@ class HTTPrequests
 			ERR
 		};
 
-		feedReturn	feed(std::string newChunk);
+		feedReturn		feed(std::string newChunk);
 		feedReturn		parseRequest(std::string request);
-		feedReturn		parseHeader(std::string header); // calls the Header class's function and validates?
+		feedReturn		parseHeader(std::string header);
 
 		METHODS findMethods(std::string first);
 		ProtocolV findVersion(std::string version);
@@ -112,10 +112,14 @@ class HTTPrequests
 		std::string				getVersionStr();
 		std::string				getMethodStr();
 
-		void	setStatusCode(feedReturn type);
-		void	setMaxBodySize(size_t limit);
-		feedReturn isHostValid(std::string contLen, std::string transfEncod, std::string expect);
-		feedReturn handleChunkedBody();
+
+		void		setStatusCode(feedReturn type);
+		void		setMaxBodySize(size_t limit);
+		feedReturn	isHostValid(std::string contLen, std::string transfEncod, std::string expect);
+		feedReturn	handleChunkedBody();
+		feedReturn	handleHeaders();
+		void		setComponents();
+		feedReturn	setRequestLine();
 
 	private:
 		size_t		_maxBodySize;
@@ -134,5 +138,6 @@ class HTTPrequests
 		bool		_chunked;
 };
 
-bool 		isDigits(std::string str);
+bool		isDigits(std::string str);
+std::string	toLower(std::string name);
 #endif
