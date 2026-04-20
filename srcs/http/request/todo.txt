@@ -22,10 +22,3 @@ printf $'POST / HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\
 printf $'DELETE / HTTP/1.1\r\nHost: localhost\r\n\r\n' | nc localhost 8080
 => should give 405 as method not allowed on /
 
-(printf $'POST / HTTP/1.1\r\nHost: localhost\r\nExpect: 100-continue\r\nContent-Length: 5\r\n\r\n'; \
- sleep 1; \
- printf $'Hello') | nc localhost 8080
-=> doesn't give 417 but 400
-
-
-printf 'GET /index.html HTTP/3.0\r\n\r\n' | nc localhost 8080 			expct = 505 error , return 405 yuleum

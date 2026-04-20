@@ -144,8 +144,7 @@ Each server must listen on a unique port.
 ### HTTP & web servers
 - [What is a web server — MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_web_server)
 - [HTTP documentation — MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP)
-- [HTTP Crash Course — YouTube](https://www.youtube.com/watch?v=UMwQjFzTQXw)
-- [HTTP Deep Dive — YouTube](https://youtu.be/AlkDbnbv7dk)
+- [HTTP guide](https://feel5ny.github.io/2019/08/03/HTTP_001/)
 
 ### Configuration parsing
 - [Writing a config parser — YouTube](https://www.youtube.com/watch?v=0c8b7YfsBKs)
@@ -172,4 +171,4 @@ Each server must listen on a unique port.
 
 ### AI usage
 
-[Claude](https://claude.ai) and [ChatGPT](https://chatgpt.com) were used as debugging and design-review tools throughout the project. Their primary use was in Part 3 (config parsing, request routing, CGI integration, static file serving, and error handling) — specifically for reasoning through edge cases, reviewing logic, and identifying bugs from raw logs and code snippets. All code was written, understood, and validated by the team.
+[Claude](https://claude.ai) and [ChatGPT](https://chatgpt.com) were used as debugging and design-review tools throughout the project. Their primary use was in Part 3 (config parsing, request routing, CGI integration, static file serving, and error handling), specifically for reasoning through edge cases, reviewing logic, and identifying bugs from raw logs and code snippets. All code was written, understood, and validated by the team.

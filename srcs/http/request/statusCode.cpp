@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   statusCode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/21 17:33:38 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/18 17:38:07 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/20 12:03:14 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void HTTPrequests::setStatusCode(feedReturn type)
 	else if (type == feedReturn::CGI_ERROR)
 		_statusCode = 502;
 	else if (type == feedReturn::CGI_TIMEOUT)
-   		_statusCode = 504;
+		_statusCode = 504;
 	else if (type == feedReturn::INTERNAL_ERROR)
 		_statusCode = 500;
 	else if (type == feedReturn::METHOD_ERROR)

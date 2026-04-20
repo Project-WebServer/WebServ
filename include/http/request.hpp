@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/01 20:33:58 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/20 12:47:34 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/20 14:34:07 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@
 //also more memory & speed efficient
 //by using enum class, the names don't crash with other libraries because you must type METHOD::DELETE
 
-// to be changed
 enum class feedReturn
 {
 	INCOMPLETE,
@@ -72,9 +71,6 @@ enum class COMPONENTS
 	COMPLETED
 };
 
-
-//optional body?
-
 class HTTPrequests
 {
 	public:
@@ -116,7 +112,6 @@ class HTTPrequests
 		std::string				getVersionStr();
 		std::string				getMethodStr();
 
-		void	setConectionInfo(uint32_t ClientIP);
 		void	setStatusCode(feedReturn type);
 		void	setMaxBodySize(size_t limit);
 		feedReturn isHostValid(std::string contLen, std::string transfEncod, std::string expect);
@@ -137,10 +132,6 @@ class HTTPrequests
 		uint32_t	_clientIP;
 		std::string _contType;
 		bool		_chunked;
-
-		// Request line parser
-		// header parser
-		// body parser
 };
 
 bool 		isDigits(std::string str);

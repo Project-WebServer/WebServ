@@ -16,6 +16,7 @@ bool Server::_handleClientReadable(size_t indx)
 		{
 			c.last_activity = time(NULL);
 			feedReturn parseResult = c.request.feed(std::string(buf, n));
+			//printf("[DEBUG] Received %zd bytes from client %d\n", n, fd);
 			//printf("[DEBUG] feed return: %d\n", parseResult);
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: flima <flima@student.42.fr>                +#+  +:+       +#+        */
+/*   By: yulpark <yulpark@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/06 18:51:55 by yulpark           #+#    #+#             */
-/*   Updated: 2026/04/20 14:42:06 by flima            ###   ########.fr       */
+/*   Updated: 2026/04/20 15:00:41 by yulpark          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,14 @@ feedReturn HTTPrequests::handleChunkedBody()
 {
 	while (true)
 	{
+		if (_buffer.substr(0, 5) == "0\r\n\r\n")
+		{
+			_buffer.erase(0, 5);
+			return feedReturn::COMPLETE;
+		}
 		size_t marker1 = _buffer.find("\r\n");
-		size_t marker2 = _buffer.find("\r\n", marker1 + 2);
-		if (marker1 == std::string::npos || marker2 == std::string::npos)
-			return feedReturn::NO_HOST_ERROR;
+		if (marker1 == std::string::npos)
+			return feedReturn::INCOMPLETE;
 		size_t chunkSize;
 		std::string size = _buffer.substr(0, marker1);
 		try
@@ -46,14 +50,13 @@ feedReturn HTTPrequests::handleChunkedBody()
 		}
 		if (chunkSize == 0)
 		{
-			_buffer.erase(0, marker2 + 2);
+			_buffer.erase(0, marker1+ 4);  //4 being 0\r\n\r\n
 			return feedReturn::COMPLETE;
 		}
-		std::string tempBody = _buffer.substr(marker1 + 2, chunkSize);
-		if (tempBody.length() != chunkSize)
-			return feedReturn::NO_HOST_ERROR;
-		_body += tempBody;
-		_buffer.erase(0, marker2 + 2);
+		if (_buffer.size() < marker1 + 2 + chunkSize + 2)
+        	return feedReturn::INCOMPLETE;
+		_body += _buffer.substr(marker1 + 2, chunkSize);
+		_buffer.erase(0, chunkSize + marker1 + 4);
 	}
 	return feedReturn::COMPLETE;
 }
@@ -114,7 +117,6 @@ feedReturn HTTPrequests::feed(std::string newChunk)
     {
         if (_buffer.length() < _contLen)
 		{
-			printf("Buffer length: %zu, Content-Length: %zu\n", _buffer.length(), _contLen);
 			return feedReturn::INCOMPLETE;
 		}
         _body = _buffer.substr(0, _contLen);
