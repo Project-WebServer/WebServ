@@ -119,3 +119,6 @@ int main(int argc, char **argv)
 
 //test CGI POST
 //curl -X POST http://localhost:8080/cgi-bin/upload.py -H "Content-Type:text/plain" \-d "megamega"
+
+
+//printf 'POST /upload HTTP/1.1\r\nHost: 127.0.0.1:8080\r\nContent-Length: 9999\r\n\r\nshort' | nc -q 0 localhost 8080

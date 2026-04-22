@@ -19,15 +19,14 @@ bool Server::_handleClientReadable(size_t indx)
 			if (parseResult == feedReturn::MAX_BODY_SIZE)
 			{
 				c.request.setStatusCode(feedReturn::MAX_BODY_SIZE);
-			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
 				c.out_buf = handlerResult.response;
-			    c.state = CLOSING;
-			    _pfds[indx].events = POLLOUT;
-			    return false;
+				c.state = CLOSING;
+				_pfds[indx].events = POLLOUT;
+				return false;
 			}
 			if (parseResult == feedReturn::COMPLETE)
-            {
-
+			{
 				HandlerResult handlerResult = responseHandler(c.request, _conf);
 				if(handlerResult.is_cgi)
 				{
@@ -49,29 +48,29 @@ bool Server::_handleClientReadable(size_t indx)
 			if(parseResult == feedReturn::NO_HOST_ERROR)
 			{
 				c.request.setStatusCode(feedReturn::NO_HOST_ERROR);
-			    HandlerResult handlerResult = responseHandler(c.request, _conf);
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
 				c.out_buf = handlerResult.response;
-			    c.state = CLOSING;
-			    _pfds[indx].events = POLLOUT;
-			    return false;
+				c.state = CLOSING;
+				_pfds[indx].events = POLLOUT;
+				return false;
 			}
 			if (parseResult == feedReturn::UNSUPPORTED_HTTP)
 			{
-			    c.request.setStatusCode(feedReturn::UNSUPPORTED_HTTP);
-			    HandlerResult handlerResult = responseHandler(c.request, _conf);
-			    c.out_buf = handlerResult.response;
-			    c.state = CLOSING;
-			    _pfds[indx].events = POLLOUT;
-			    return false;
+				c.request.setStatusCode(feedReturn::UNSUPPORTED_HTTP);
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
+				c.out_buf = handlerResult.response;
+				c.state = CLOSING;
+				_pfds[indx].events = POLLOUT;
+				return false;
 			}
 			if (parseResult == feedReturn::EXPECT_FAILED || parseResult == feedReturn::METHOD_ERROR)
 			{
-			    c.request.setStatusCode(parseResult);
-			    HandlerResult handlerResult = responseHandler(c.request, _conf);
-			    c.out_buf = handlerResult.response;
-			    c.state = CLOSING;
-			    _pfds[indx].events = POLLOUT;
-			    return false;
+				c.request.setStatusCode(parseResult);
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
+				c.out_buf = handlerResult.response;
+				c.state = CLOSING;
+				_pfds[indx].events = POLLOUT;
+				return false;
 			}
 			if(parseResult == feedReturn::ERROR)
 			{
@@ -87,11 +86,11 @@ bool Server::_handleClientReadable(size_t indx)
 			if(c.state == READING_REQUEST && !c.request.getBuffer().empty())
 			{
 				c.request.setStatusCode(feedReturn::REQUEST_TIMEOUT);
-			    HandlerResult handlerResult = responseHandler(c.request, _conf);
-			    c.out_buf = handlerResult.response;
-			    c.state = CLOSING;
-			    _pfds[indx].events = POLLOUT;
-			    return false;
+				HandlerResult handlerResult = responseHandler(c.request, _conf);
+				c.out_buf = handlerResult.response;
+				c.state = CLOSING;
+				_pfds[indx].events = POLLOUT;
+				return false;
 			}
 			_removeFd(indx);
 			return true;

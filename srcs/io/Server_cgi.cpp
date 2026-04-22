@@ -123,36 +123,35 @@ bool Server::_handleCgiReadable(size_t indx)
 	}
 	else if (n == 0)
 	{
-
 		return _finishCgi(indx, client_fd, _buildCgiResponse(c.cgi.cgi_buf, c));
 	}
 	else
 	{
 		c.request.setStatusCode(feedReturn::CGI_ERROR);
-        HandlerResult result = responseHandler(c.request, _conf);
-        return _finishCgi(indx, client_fd, result.response);
+		HandlerResult result = responseHandler(c.request, _conf);
+		return _finishCgi(indx, client_fd, result.response);
 	}
 }
 
 bool Server::_finishCgi(size_t indx, int client_fd, const std::string &response)
 {
-    int pipe_fd = _pfds[indx].fd;
-    Connection &c = _conns[client_fd];
+	int pipe_fd = _pfds[indx].fd;
+	Connection &c = _conns[client_fd];
 
-    waitpid(c.cgi.pid, NULL, 0);
-    c.out_buf = response;
-    c.state = SENDING_RESPONSE;
-    _pipe_to_client.erase(pipe_fd);
-    _removeFd(indx);
-    for (size_t i = 0; i < _pfds.size(); i++)
-    {
-        if (_pfds[i].fd == client_fd)
-        {
-            _pfds[i].events = POLLOUT;
-            break;
-        }
-    }
-    return true;
+	waitpid(c.cgi.pid, NULL, 0);
+	c.out_buf = response;
+	c.state = SENDING_RESPONSE;
+	_pipe_to_client.erase(pipe_fd);
+	_removeFd(indx);
+	for (size_t i = 0; i < _pfds.size(); i++)
+	{
+		if (_pfds[i].fd == client_fd)
+		{
+			_pfds[i].events = POLLOUT;
+			break;
+		}
+	}
+	return true;
 }
 
 static std::string normalizeCgiOutput(const std::string &raw)
@@ -169,33 +168,33 @@ static std::string normalizeCgiOutput(const std::string &raw)
 
 std::string  Server::_buildCgiResponse(const std::string &cgi_buf, Connection &c)
 {
-    std::string normalized = normalizeCgiOutput(cgi_buf);
+	std::string normalized = normalizeCgiOutput(cgi_buf);
 
-    size_t separator = normalized.find("\r\n\r\n");
-    if (separator == std::string::npos)
+	size_t separator = normalized.find("\r\n\r\n");
+	if (separator == std::string::npos)
 	{
 		c.request.setStatusCode(feedReturn::CGI_ERROR);
 		HandlerResult result = responseHandler(c.request, _conf);
 		return result.response;
 	}
 
-    std::string cgi_headers = normalized.substr(0, separator);
-    std::string body = normalized.substr(separator + 4);
+	std::string cgi_headers = normalized.substr(0, separator);
+	std::string body = normalized.substr(separator + 4);
 
-    std::string status_line = "200 OK";
-    std::string status_prefix = "Status: ";
-    size_t status_pos = cgi_headers.find(status_prefix);
-    if (status_pos != std::string::npos)
-    {
-        size_t status_end = cgi_headers.find("\r\n", status_pos);
-        status_line = cgi_headers.substr(status_pos + status_prefix.size(),
-                                         status_end - status_pos - status_prefix.size());
-        cgi_headers.erase(status_pos, status_end - status_pos + 2);
-    }
+	std::string status_line = "200 OK";
+	std::string status_prefix = "Status: ";
+	size_t status_pos = cgi_headers.find(status_prefix);
+	if (status_pos != std::string::npos)
+	{
+		size_t status_end = cgi_headers.find("\r\n", status_pos);
+		status_line = cgi_headers.substr(status_pos + status_prefix.size(),
+											status_end - status_pos - status_prefix.size());
+		cgi_headers.erase(status_pos, status_end - status_pos + 2);
+	}
 
-    return "HTTP/1.1 " + status_line + "\r\n"
-        + cgi_headers + "\r\n"
-        + "Content-Length: " + std::to_string(body.size()) + "\r\n"
-        + "\r\n"
-        + body;
+	return "HTTP/1.1 " + status_line + "\r\n"
+		+ cgi_headers + "\r\n"
+		+ "Content-Length: " + std::to_string(body.size()) + "\r\n"
+		+ "\r\n"
+		+ body;
 }
