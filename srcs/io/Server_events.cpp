@@ -96,7 +96,10 @@ bool Server::_handleClientReadable(size_t indx)
 			return true;
 		}
 		else if(n < 0)
-			return false;
+		{
+			_removeFd(indx);
+			return true;
+		}
 	}
 }
 
@@ -111,7 +114,6 @@ bool Server::_handleClientWritable(size_t indx)
 			_removeFd(indx);
 			return true;
 		}
-
 		_resetConnection(c);
 		_pfds[indx].events = POLLIN;
 		return false;

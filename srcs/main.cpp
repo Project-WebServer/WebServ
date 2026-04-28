@@ -12,31 +12,11 @@ int testREQ(HTTPrequests& req)
     "Content-Length: 0\r\n"
 	"\r\n";
 
-
-    // std::string body =  "Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryoJIXq9bnpRUnLLP4\r\n"
-    // "------WebKitFormBoundaryoJIXq9bnpRUnLLP4\r\n"
-    // "Content-Disposition: form-data; name=\"image\"; filename=\"test\"\r\n"
-    // "Content-Type: image/jpeg\r\n"
-    // "\r\n"
-    // "fake image content\r\n"
-    // "------WebKitFormBoundaryoJIXq9bnpRUnLLP4--";
-	// raw += body;
-
 	feedReturn state;
 
 	state = req.feed(raw);
-	// std::string body = req.getBody();
-	// std::cout << body << std::endl;
 	if (state != feedReturn::COMPLETE)
 		std::cout << "ERROR" << std::endl;
-	// else
-	// {
-	// 	req.printRequest();
-	// 	std::cout << std::endl;
-	// 	req.printHeader();
-	// 	std::cout << std::endl;
-	// 	req.printBody();
-	// }
 	return 0;
 }
 
@@ -70,28 +50,6 @@ int main(int argc, char **argv)
 		std::cout << status.error_msg + "\n";
 		return 1;
 	}
-	// Webserv.print();
-	// const std::vector<ServerConf>* ptr = nullptr;
-	// ptr = Webserv.matchServer(0, 8080);
-	// if (ptr != nullptr)
-	// {
-	// 	std::cout << ptr->size() << "\n";
-	// 	ptr->front().print();
-	// }
-
-	// std::string uri = "/";
-	// HTTPrequests testRequest;
-	// testREQ(testRequest);
-	// std::string response;
-	// responseHandler(testRequest, Webserv, response);
-	// std::cout << response << std::endl;
-
-//---------------------------------------------------------------------//
-// 	const std::vector<ENDPOINT> &endpoints = Webserv.getAvailableEndPoints();
-//     std::cout << "endpoints count: " << endpoints.size() << std::endl;
-//     for (size_t i = 0; i < endpoints.size(); i++)
-// 		std::cout << "  ip=" << endpoints[i].ip << " port=" << endpoints[i].port << std::endl;
-// //---------------------------------------------------------------------//
 
 	Server s;
 
@@ -106,19 +64,12 @@ int main(int argc, char **argv)
 
 //GET
 // curl -v http://localhost:8080/
-
 //POST
 // curl -v -X POST http://localhost:8080/upload -F "file=@/etc/hostname"
-
 //DELETE
 // curl -v -X DELETE http://localhost:8080/upload/hostname
-
 //siege -c1 -t1M http://localhost:8080/cgi-bin/hello.py
-
 //curl -X POST http://localhost:8080/upload -H "Content-Type:text/plain" \-d "agjahgsdjhagsdjasgdkjagsdgsahjgdahjgdshjagsd"
-
 //test CGI POST
 //curl -X POST http://localhost:8080/cgi-bin/upload.py -H "Content-Type:text/plain" \-d "megamega"
-
-
 //printf 'POST /upload HTTP/1.1\r\nHost: 127.0.0.1:8080\r\nContent-Length: 9999\r\n\r\nshort' | nc -q 0 localhost 8080
